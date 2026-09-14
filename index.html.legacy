@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="es-MX">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Residencial Los Laureles | Estrena tu casa propia con tu crédito Infonavit</title>
+  <!-- Google Fonts & Tailwind CDN -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              50: '#f0fdf4',
+              100: '#dcfce7',
+              600: '#16a34a',
+              700: '#15803d',
+              800: '#166534',
+              900: '#14532d',
+            },
+            accent: {
+              500: '#f59e0b',
+              600: '#d97706',
+              700: '#b45309',
+            },
+            slateCustom: {
+              900: '#0f172a',
+              800: '#1e293b',
+              50: '#f8fafc'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    html {
+      scroll-behavior: smooth;
+    }
+  </style>
+</head>
+<body class="bg-slateCustom-50 text-slate-800 font-sans antialiased selection:bg-brand-100 selection:text-brand-900">
+
+  <!-- TOP BAR: Urgencia y contacto inmediato -->
+  <header class="bg-slateCustom-900 text-white text-xs md:text-sm py-2 px-4 sticky top-0 z-50 border-b border-slate-700">
+    <div class="max-w-6xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-2">
+      <div class="flex items-center gap-2 font-medium">
+        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-accent-500 text-slate-900">¡ÚLTIMAS CASAS!</span>
+        <span>Etapa 2 con bono especial de escrituración de hasta $35,000 MXN</span>
+      </div>
+      <div class="flex items-center gap-4">
+        <a href="https://wa.me/5215500000000?text=Hola,%20quiero%20informes%20de%20las%20casas" target="_blank" class="text-green-400 hover:text-green-300 font-semibold flex items-center gap-1.5 transition">
+          <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981z"/></svg>
+          WhatsApp Asesor Directo
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- NAVBAR -->
+  <nav class="bg-white/95 backdrop-blur-md shadow-sm border-b border-slate-100">
+    <div class="max-w-6xl mx-auto px-4 py-3.5 flex justify-between items-center">
+      <div class="flex items-center gap-2">
+        <div class="w-9 h-9 rounded-lg bg-brand-700 flex items-center justify-center text-white font-black text-xl shadow-md">
+          L
+        </div>
+        <div>
+          <span class="text-lg font-bold tracking-tight text-slate-900 block leading-tight">Residencial Los Laureles</span>
+          <span class="text-xs text-slate-500 font-medium">Casas en Fraccionamiento Privado</span>
+        </div>
+      </div>
+      <div class="hidden md:flex items-center gap-6 text-sm font-semibold text-slate-600">
+        <a href="#fraccionamiento" class="hover:text-brand-700 transition">El Fraccionamiento</a>
+        <a href="#ubicacion" class="hover:text-brand-700 transition">Ubicación</a>
+        <a href="#precalificacion" class="hover:text-brand-700 transition">Precalificación</a>
+        <a href="#agendar" class="bg-brand-700 text-white px-4 py-2 rounded-lg hover:bg-brand-800 transition shadow-sm font-semibold">
+          Precalificar y Agendar
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- HERO SECTION -->
+  <section class="relative bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 text-white pt-12 pb-20 px-4 overflow-hidden">
+    <div class="absolute inset-0 opacity-20 bg-[radial-gradient(#16a34a_1px,transparent_1px)] [background-size:16px_16px]"></div>
+    
+    <div class="max-w-6xl mx-auto relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+      <!-- Columna izquierda: Propuesta de valor & Título Persuasivo -->
+      <div class="lg:col-span-7 space-y-6 text-left">
+        <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-brand-600/30 border border-brand-500/40 text-brand-300 text-xs md:text-sm font-semibold">
+          <span class="w-2 h-2 rounded-full bg-brand-400 animate-ping"></span>
+          ¡Oportunidad para derechohabientes!
+        </div>
+
+        <h1 class="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight leading-tight">
+          ¡Deja de tirar tu lana en rentas! <br class="hidden sm:inline">
+          <span class="text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-300">
+            Estrena tu casa propia y dale a tu familia la tranquilidad que se merece.
+          </span>
+        </h1>
+
+        <p class="text-slate-300 text-base sm:text-lg font-normal leading-relaxed">
+          Haz valer tus puntos <strong>Infonavit o Fovissste</strong> sin rodeos ni vueltas. En <em>Residencial Los Laureles</em> vives a todo dar: coto privado con alberca, seguridad 24/7 y a solo 15 minutos de tu trabajo.
+        </p>
+
+        <!-- Highlights Rápidos -->
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 pt-2">
+          <div class="bg-slate-800/80 border border-slate-700 p-3 rounded-xl">
+            <p class="text-xs text-slate-400">Casas desde</p>
+            <p class="text-lg font-bold text-white">$1,150,000 <span class="text-xs font-normal text-slate-300">MXN</span></p>
+          </div>
+          <div class="bg-slate-800/80 border border-slate-700 p-3 rounded-xl">
+            <p class="text-xs text-slate-400">Distribución</p>
+            <p class="text-lg font-bold text-white">3 Recs. + 2 Baños</p>
+          </div>
+          <div class="bg-slate-800/80 border border-slate-700 p-3 rounded-xl col-span-2 sm:col-span-1">
+            <p class="text-xs text-slate-400">Precalificación</p>
+            <p class="text-lg font-bold text-brand-400">En 3 Minutos</p>
+          </div>
+        </div>
+
+        <!-- Social Proof / Confianza -->
+        <div class="flex items-center gap-3 pt-2 text-xs text-slate-400">
+          <div class="flex -space-x-2">
+            <span class="inline-block h-8 w-8 rounded-full ring-2 ring-slate-800 bg-emerald-600 text-white text-center leading-8 font-bold text-xs">MA</span>
+            <span class="inline-block h-8 w-8 rounded-full ring-2 ring-slate-800 bg-blue-600 text-white text-center leading-8 font-bold text-xs">CR</span>
+            <span class="inline-block h-8 w-8 rounded-full ring-2 ring-slate-800 bg-amber-600 text-white text-center leading-8 font-bold text-xs">JL</span>
+          </div>
+          <p>Más de <strong>180 familias</strong> ya estrenaron su cantón este año con nosotros.</p>
+        </div>
+      </div>
+
+      <!-- Columna derecha: Tarjeta Hero de enganche al Formulario -->
+      <div class="lg:col-span-5">
+        <div class="bg-white rounded-2xl p-6 sm:p-8 text-slate-900 shadow-2xl border border-slate-100 relative">
+          <div class="absolute -top-3.5 right-6 bg-accent-500 text-slate-900 text-xs font-black uppercase tracking-wider py-1 px-3 rounded-full shadow">
+            Precalificación Express
+          </div>
+          <h3 class="text-xl font-bold text-slate-900 leading-snug">
+            ¿Quieres saber cuánto te presta el Infonavit?
+          </h3>
+          <p class="text-xs sm:text-sm text-slate-600 mt-1 mb-5">
+            Checamos tus puntos <strong>en caliente</strong> y sin costo para decirte exactamente para qué modelo te alcanza y apartar tu recorrido guiado.
+          </p>
+
+          <a href="#agendar" class="block w-full text-center bg-brand-700 hover:bg-brand-800 text-white font-bold py-3.5 px-6 rounded-xl transition duration-200 shadow-lg shadow-brand-700/30 text-base">
+            Validar mi Crédito y Agendar Cita &rarr;
+          </a>
+
+          <div class="mt-4 pt-4 border-t border-slate-100 flex items-center justify-around text-xs text-slate-500 font-medium">
+            <span class="flex items-center gap-1">
+              <svg class="w-4 h-4 text-brand-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+              Sin costo
+            </span>
+            <span class="flex items-center gap-1">
+              <svg class="w-4 h-4 text-brand-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+              Sin compromiso
+            </span>
+            <span class="flex items-center gap-1">
+              <svg class="w-4 h-4 text-brand-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+              100% Confidencial
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECCIÓN BREVE: CARACTERÍSTICAS CLAVE Y UBICACIÓN -->
+  <section id="fraccionamiento" class="py-16 px-4 bg-white border-b border-slate-200">
+    <div class="max-w-6xl mx-auto space-y-12">
+      <div class="text-center max-w-2xl mx-auto space-y-2">
+        <h2 class="text-xs font-bold tracking-widest text-brand-700 uppercase">La vida que soñaste para los tuyos</h2>
+        <p class="text-2xl sm:text-3xl font-extrabold text-slate-900">
+          Un fraccionamiento pensado para vivir a gusto, seguro y con todo a la mano
+        </p>
+        <p class="text-slate-600 text-sm sm:text-base">
+          Nada de sorpresas ni fraccionamientos lejanos sin servicios. Aquí tu patrimonio gana plusvalía desde el primer día.
+        </p>
+      </div>
+
+      <!-- Grid de Características / Amenidades Clave -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- Tarjeta 1 -->
+        <div class="bg-slate-50 border border-slate-200/80 rounded-2xl p-6 hover:shadow-lg transition duration-200">
+          <div class="w-12 h-12 rounded-xl bg-brand-100 text-brand-800 flex items-center justify-center font-bold text-xl mb-4">
+            🛡️
+          </div>
+          <h3 class="text-lg font-bold text-slate-900 mb-2">Tranquilidad 24/7 para tu familia</h3>
+          <p class="text-sm text-slate-600 leading-relaxed">
+            Acceso controlado con caseta de vigilancia, plumas automáticas, circuito cerrado y barda perimetral electrificada. Duerme sabiendo que los tuyos están seguros.
+          </p>
+        </div>
+
+        <!-- Tarjeta 2 -->
+        <div class="bg-slate-50 border border-slate-200/80 rounded-2xl p-6 hover:shadow-lg transition duration-200">
+          <div class="w-12 h-12 rounded-xl bg-brand-100 text-brand-800 flex items-center justify-center font-bold text-xl mb-4">
+            🏊‍♂️
+          </div>
+          <h3 class="text-lg font-bold text-slate-900 mb-2">Casa Club con Alberca y Asadores</h3>
+          <p class="text-sm text-slate-600 leading-relaxed">
+            Los fines de semana se disfrutan en casa: palapa para eventos, alberca templada con chapoteadero, juegos infantiles y parque para pasear a tus mascotas sin salir del coto.
+          </p>
+        </div>
+
+        <!-- Tarjeta 3 -->
+        <div class="bg-slate-50 border border-slate-200/80 rounded-2xl p-6 hover:shadow-lg transition duration-200">
+          <div class="w-12 h-12 rounded-xl bg-brand-100 text-brand-800 flex items-center justify-center font-bold text-xl mb-4">
+            🏗️
+          </div>
+          <h3 class="text-lg font-bold text-slate-900 mb-2">Construcción Tradicional de Calidad</h3>
+          <p class="text-sm text-slate-600 leading-relaxed">
+            Muros independientes de tabique rojo (nada de panel prefabricado), cimentación de concreto armado y preparación para una segunda planta cuando tu familia crezca.
+          </p>
+        </div>
+      </div>
+
+      <!-- UBICACIÓN ESTRATÉGICA -->
+      <div id="ubicacion" class="bg-gradient-to-r from-slate-900 to-slate-800 text-white rounded-3xl p-6 sm:p-10 shadow-xl">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+          <div class="lg:col-span-7 space-y-4">
+            <span class="inline-block px-3 py-1 rounded bg-brand-600 text-white text-xs font-bold uppercase tracking-wider">
+              Ubicación Privilegiada
+            </span>
+            <h3 class="text-2xl sm:text-3xl font-extrabold text-white">
+              Cerca de tu chamba y de las escuelas de tus hijos
+            </h3>
+            <p class="text-slate-300 text-sm sm:text-base leading-relaxed">
+              Olvídate de pasar 2 horas en el tráfico todos los días. Estamos ubicados a tiro de piedra del libramiento principal y con transporte público directo en la puerta.
+            </p>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 text-sm">
+              <div class="flex items-center gap-2 text-slate-200">
+                <span class="text-brand-400 font-bold">📍 5 min</span> de Bodega Aurrera y Farmacias Guadalajara
+              </div>
+              <div class="flex items-center gap-2 text-slate-200">
+                <span class="text-brand-400 font-bold">📍 7 min</span> de Primarias, Secundarias y guarderías IMSS
+              </div>
+              <div class="flex items-center gap-2 text-slate-200">
+                <span class="text-brand-400 font-bold">📍 12 min</span> del Parque Industrial y zonas de trabajo
+              </div>
+              <div class="flex items-center gap-2 text-slate-200">
+                <span class="text-brand-400 font-bold">📍 15 min</span> del Centro y plazas comerciales
+              </div>
+            </div>
+          </div>
+
+          <div class="lg:col-span-5 bg-slate-800/90 border border-slate-700 p-6 rounded-2xl text-center space-y-3">
+            <div class="text-3xl">🚗💨</div>
+            <h4 class="font-bold text-white text-base">¿Quieres conocer la ubicación exacta en Google Maps?</h4>
+            <p class="text-xs text-slate-300">
+              Al llenar tu formulario te enviamos por WhatsApp la ubicación satelital y el pin directo para que vengas a conocer la casa muestra.
+            </p>
+            <a href="#agendar" class="inline-block bg-white text-slate-900 hover:bg-slate-100 font-bold px-5 py-2.5 rounded-xl text-xs sm:text-sm transition">
+              Quiero mi pin de ubicación
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FORMULARIO DE CONVERSIÓN Y PRECALIFICACIÓN -->
+  <section id="agendar" class="py-16 px-4 bg-slateCustom-50">
+    <div class="max-w-4xl mx-auto">
+      
+      <!-- Encabezado del Formulario -->
+      <div class="text-center max-w-2xl mx-auto mb-8 space-y-2">
+        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-brand-100 text-brand-800">
+          Paso 1 de 2: Validación de Crédito
+        </span>
+        <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900">
+          Precalifícate sin costo y agenda tu recorrido guiado
+        </h2>
+        <p class="text-sm sm:text-base text-slate-600">
+          Para no hacerte perder tiempo ni vueltas innecesarias, necesitamos corroborar tu estatus crediticio para decirte qué modelo se adapta a tu presupuesto antes de tu visita.
+        </p>
+      </div>
+
+      <!-- Tarjeta Formulario -->
+      <div class="bg-white rounded-3xl shadow-xl border border-slate-200 p-6 sm:p-10 relative overflow-hidden">
+        
+        <!-- EXPLICACIÓN CLAVE DEL NSS (Mata objeciones y genera confianza) -->
+        <div id="precalificacion" class="mb-8 p-4 sm:p-5 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 text-xs sm:text-sm flex flex-col sm:flex-row gap-3 items-start">
+          <div class="text-2xl sm:text-3xl flex-shrink-0">🔒</div>
+          <div class="space-y-1">
+            <p class="font-bold text-amber-950 text-sm sm:text-base">
+              ¿Por qué te pedimos tu Número de Seguro Social (NSS)?
+            </p>
+            <p class="text-amber-800 leading-relaxed">
+              Tu NSS y fecha de nacimiento son los datos indispensables que solicita el sistema oficial de <strong>Infonavit / Fovissste</strong> para consultar cuántos puntos tienes y el monto exacto de tu crédito. <strong>Nosotros no te cobramos ni un solo peso por hacer este trámite</strong> y tus datos están protegidos por ley.
+            </p>
+          </div>
+        </div>
+
+        <form id="leadForm" onsubmit="handleSubmit(event)" class="space-y-6">
+          
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            <!-- Nombre Completo -->
+            <div class="space-y-1">
+              <label for="fullName" class="block text-xs sm:text-sm font-bold text-slate-800">
+                Nombre y Apellidos <span class="text-red-500">*</span>
+              </label>
+              <input 
+                type="text" 
+                id="fullName" 
+                required 
+                placeholder="Ej. Juan Carlos Mendoza López" 
+                class="w-full px-4 py-3 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-brand-600 focus:border-brand-600 text-sm transition"
+              >
+            </div>
+
+            <!-- Teléfono / WhatsApp -->
+            <div class="space-y-1">
+              <label for="phone" class="block text-xs sm:text-sm font-bold text-slate-800">
+                Teléfono Celular / WhatsApp <span class="text-red-500">*</span>
+              </label>
+              <input 
+                type="tel" 
+                id="phone" 
+                required 
+                pattern="[0-9]{10}" 
+                placeholder="10 dígitos (Ej. 5512345678)" 
+                title="Ingresa tu número celular a 10 dígitos"
+                class="w-full px-4 py-3 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-brand-600 focus:border-brand-600 text-sm transition"
+              >
+              <p class="text-[11px] text-slate-500">Te mandamos la precalificación y ubicación por WhatsApp.</p>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
+            <!-- NSS Obligatorio -->
+            <div class="space-y-1 sm:col-span-1">
+              <label for="nss" class="block text-xs sm:text-sm font-bold text-slate-800">
+                NSS (Seguro Social) <span class="text-red-500">*</span>
+              </label>
+              <input 
+                type="text" 
+                id="nss" 
+                required 
+                pattern="[0-9]{11}" 
+                maxlength="11" 
+                placeholder="11 dígitos (obligatorio)" 
+                title="El NSS consta exactamente de 11 dígitos numéricos"
+                class="w-full px-4 py-3 rounded-xl border-2 border-brand-600 bg-brand-50/20 font-semibold focus:outline-none focus:ring-2 focus:ring-brand-600 text-sm tracking-wider"
+              >
+              <p class="text-[11px] text-brand-700 font-medium">Requisito para validar tu crédito</p>
+            </div>
+
+            <!-- Fecha de Nacimiento (Necesaria para consultar Infonavit con NSS) -->
+            <div class="space-y-1 sm:col-span-1">
+              <label for="birthDate" class="block text-xs sm:text-sm font-bold text-slate-800">
+                Fecha de Nacimiento <span class="text-red-500">*</span>
+              </label>
+              <input 
+                type="date" 
+                id="birthDate" 
+                required 
+                class="w-full px-4 py-3 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-brand-600 text-sm transition"
+              >
+              <p class="text-[11px] text-slate-500">Requerida por el portal Infonavit</p>
+            </div>
+
+            <!-- Tipo de Crédito -->
+            <div class="space-y-1 sm:col-span-1">
+              <label for="creditType" class="block text-xs sm:text-sm font-bold text-slate-800">
+                Tipo de Crédito <span class="text-red-500">*</span>
+              </label>
+              <select 
+                id="creditType" 
+                required 
+                class="w-full px-4 py-3 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-brand-600 text-sm bg-white"
+              >
+                <option value="">Selecciona una opción</option>
+                <option value="infonavit_individual">Infonavit Individual</option>
+                <option value="infonavit_conyugal">Infonavit Conyugal / Unamos Créditos</option>
+                <option value="fovissste">Fovissste</option>
+                <option value="bancario">Bancario / Cofinavit</option>
+                <option value="contado">Pago de Contado</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- AGENDA DE CITA -->
+          <div class="pt-2 border-t border-slate-100">
+            <h4 class="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-brand-600"></span>
+              ¿Cuándo te gustaría venir a conocer la casa muestra?
+            </h4>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+              <div class="space-y-1">
+                <label for="appointmentDate" class="block text-xs sm:text-sm font-semibold text-slate-700">Día de visita estimado</label>
+                <input 
+                  type="date" 
+                  id="appointmentDate" 
+                  required 
+                  class="w-full px-4 py-3 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-brand-600 text-sm"
+                >
+              </div>
+              <div class="space-y-1">
+                <label for="appointmentSlot" class="block text-xs sm:text-sm font-semibold text-slate-700">Horario de tu preferencia</label>
+                <select id="appointmentSlot" required class="w-full px-4 py-3 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-brand-600 text-sm bg-white">
+                  <option value="">Selecciona horario</option>
+                  <option value="manana">Por la mañana (10:00 AM - 1:00 PM)</option>
+                  <option value="tarde">Por la tarde (2:00 PM - 5:00 PM)</option>
+                  <option value="fin_de_semana">Sábado o Domingo (Fin de semana)</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- AVISO DE PRIVACIDAD Y CONSENTIMIENTO -->
+          <div class="space-y-3 pt-2">
+            <label class="flex items-start gap-2.5 cursor-pointer text-xs text-slate-600">
+              <input type="checkbox" required checked class="mt-0.5 h-4 w-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500">
+              <span>
+                Autorizo a Residencial Los Laureles a consultar mi precalificación de crédito ante los organismos correspondientes y contactarme vía WhatsApp/llamada para darme los resultados y confirmar mi cita. Acepto el <a href="#" class="underline text-brand-700 font-semibold">Aviso de Privacidad</a> conforme a la LFPDPPP.
+              </span>
+            </label>
+          </div>
+
+          <!-- BOTÓN DE ENVÍO -->
+          <button 
+            type="submit" 
+            class="w-full py-4 px-6 rounded-2xl bg-brand-700 hover:bg-brand-800 text-white font-extrabold text-base sm:text-lg shadow-xl shadow-brand-700/30 transition transform hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center gap-2 cursor-pointer"
+          >
+            <span>Ver mi Precalificación y Confirmar Cita</span>
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+          </button>
+
+          <!-- Micro-garantía -->
+          <p class="text-center text-xs text-slate-400">
+            🔒 Tu información está cifrada. No realizamos cobros ocultos ni afectamos tu historial crediticio con esta consulta preventiva.
+          </p>
+        </form>
+
+        <!-- Mensaje de éxito simulado -->
+        <div id="successMessage" class="hidden text-center py-10 space-y-4">
+          <div class="w-16 h-16 bg-green-100 text-green-700 rounded-full flex items-center justify-center mx-auto text-3xl font-bold">
+            ✓
+          </div>
+          <h3 class="text-2xl font-bold text-slate-900">¡Listo, solicitud recibida!</h3>
+          <p class="text-slate-600 max-w-md mx-auto text-sm leading-relaxed">
+            Ya estamos checando tus puntos en el sistema. En menos de <strong>15 minutos</strong> un asesor certificado se pondrá en contacto contigo por WhatsApp para darte tus números exactos y apartar tu recorrido. ¡Gracias por tu confianza!
+          </p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ / PREGUNTAS FRECUENTES (Para eliminar dudas del NSS) -->
+  <section class="py-12 px-4 bg-white border-t border-slate-200">
+    <div class="max-w-4xl mx-auto space-y-6">
+      <h3 class="text-xl font-bold text-slate-900 text-center">Preguntas Frecuentes de nuestros compradores</h3>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+        <div class="p-4 bg-slate-50 rounded-xl border border-slate-200">
+          <p class="font-bold text-slate-900 mb-1">¿Qué pasa si no me sé mi NSS?</p>
+          <p class="text-slate-600 text-xs leading-relaxed">
+            Puedes encontrarlo en tu credencial de elector si está vinculada, en tus recibos de nómina o directamente en la app del IMSS Digital. También te podemos ayudar a rastrearlo por WhatsApp con tu CURP.
+          </p>
+        </div>
+        <div class="p-4 bg-slate-50 rounded-xl border border-slate-200">
+          <p class="font-bold text-slate-900 mb-1">¿Puedo juntar mi crédito con mi pareja o familiar?</p>
+          <p class="text-slate-600 text-xs leading-relaxed">
+            ¡Claro que sí! Con el programa Unamos Créditos de Infonavit puedes juntarlo con tu cónyuge, tus papás, tus hijos o tu pareja en unión libre para alcanzar una casa más grande.
+          </p>
+        </div>
+        <div class="p-4 bg-slate-50 rounded-xl border border-slate-200">
+          <p class="font-bold text-slate-900 mb-1">¿La consulta de crédito me compromete a comprar?</p>
+          <p class="text-slate-600 text-xs leading-relaxed">
+            Para nada. La precalificación es 100% informativa y gratuita para que tomes la mejor decisión sin presiones.
+          </p>
+        </div>
+        <div class="p-4 bg-slate-50 rounded-xl border border-slate-200">
+          <p class="font-bold text-slate-900 mb-1">¿Qué incluye la visita guiada?</p>
+          <p class="text-slate-600 text-xs leading-relaxed">
+            Recorrido por la casa muestra completamente amueblada, paseo por las amenidades (alberca y casa club) y simulación corrida de tus mensualidades con corrida financiera en mano.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="bg-slateCustom-900 text-slate-400 py-10 px-4 text-xs">
+    <div class="max-w-6xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
+      <div>
+        <p class="font-bold text-white text-sm">Residencial Los Laureles S.A. de C.V.</p>
+        <p>Desarrollo habitacional registrado ante PROFECO e INFONAVIT.</p>
+      </div>
+      <div class="flex gap-4">
+        <a href="#" class="hover:text-white">Aviso de Privacidad</a>
+        <a href="#" class="hover:text-white">Términos y Condiciones</a>
+        <a href="#" class="hover:text-white">Contacto</a>
+      </div>
+      <p>&copy; 2026 Todos los derechos reservados.</p>
+    </div>
+  </footer>
+
+  <script>
+    function handleSubmit(e) {
+      e.preventDefault();
+      const nss = document.getElementById('nss').value;
+      if(nss.length !== 11) {
+        alert('Por favor ingresa un Número de Seguro Social (NSS) válido de 11 dígitos.');
+        return;
+      }
+      document.getElementById('leadForm').classList.add('hidden');
+      document.getElementById('successMessage').classList.remove('hidden');
+    }
+  </script>
+</body>
+</html>
