@@ -13,7 +13,7 @@ import { Footer } from '@/components/landing/Footer';
 import { PrivacyModal } from '@/components/landing/PrivacyModal';
 import { PrequalificationForm } from '@/components/prequalification/PrequalificationForm';
 import { Property } from '@/types';
-import { ArrowRight, Calendar } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { WhatsAppFloatingButton } from '@/components/landing/WhatsAppFloatingButton';
 
 export default function Home() {
@@ -38,7 +38,7 @@ export default function Home() {
   }, []);
 
   return (
-    <main className="min-h-screen flex flex-col bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 selection:bg-amber-100 selection:text-amber-950 pb-16 md:pb-0 transition-colors">
+    <main className="min-h-screen flex flex-col pb-16 md:pb-0 transition-colors">
       {/* Barra de navegación superior */}
       <Navbar
         onOpenPrequalification={() => handleOpenPrequalification()}
@@ -66,25 +66,25 @@ export default function Home() {
       <FaqSection />
 
       {/* CTA Final */}
-      <section className="py-14 px-4 bg-[#0d233a] text-white border-t border-slate-800">
-        <div className="max-w-[1220px] mx-auto text-center space-y-5">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-slate-800 text-amber-300 border border-slate-700">
-            <Calendar className="w-3.5 h-3.5 text-amber-400" />
-            <span>Atención personalizada y directa</span>
-          </div>
-          <h2 className="text-2xl sm:text-3xl font-extrabold max-w-2xl mx-auto">
-            ¿Listo para conocer qué opciones se adaptan a tus planes?
+      <section className="py-20 px-4 sm:px-6 bg-[var(--color-navy)] dark:bg-[var(--color-navy-deep)]">
+        <div className="max-w-[1220px] mx-auto text-center space-y-6">
+          <span className="label-caps text-[var(--color-accent)] tracking-[0.18em]">
+            Atención personalizada y directa
+          </span>
+          <h2 className="font-serif text-2xl sm:text-3xl lg:text-4xl font-bold text-[#F0ECE4] max-w-2xl mx-auto leading-tight">
+            ¿Listo para conocer qué opciones se adaptan a{' '}
+            <em className="font-serif italic text-[var(--color-accent)]">tus planes?</em>
           </h2>
-          <p className="text-slate-300 text-sm sm:text-base max-w-xl mx-auto leading-relaxed">
+          <p className="text-[#9CA3AF] text-sm sm:text-base max-w-xl mx-auto leading-relaxed">
             Cuéntanos qué buscas para coordinar tu atención y solicitar una visita a las casas muestra con acompañamiento de tu asesor.
           </p>
           <div className="pt-2">
             <button
               onClick={() => handleOpenPrequalification()}
-              className="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-3.5 px-8 rounded-xl text-base transition shadow-md inline-flex items-center gap-2 cursor-pointer"
+              className="bg-[var(--color-accent)] hover:bg-[var(--color-accent-hover)] text-[var(--color-navy-deep)] font-semibold py-3.5 px-8 rounded text-base transition inline-flex items-center gap-2 cursor-pointer"
             >
               <span>Solicitar una visita</span>
-              <ArrowRight className="w-5 h-5 text-slate-950" />
+              <ArrowRight className="w-5 h-5" />
             </button>
           </div>
         </div>

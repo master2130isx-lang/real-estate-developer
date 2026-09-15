@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { ChevronDown, HelpCircle, ShieldAlert } from 'lucide-react';
+import { ChevronDown, ShieldAlert } from 'lucide-react';
 import { FAQ_ITEMS } from '@/data/mockData';
 
 export function FaqSection() {
@@ -12,62 +12,61 @@ export function FaqSection() {
   };
 
   return (
-    <section id="preguntas" className="py-16 px-4 bg-slate-50 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 transition-colors">
+    <section id="preguntas" className="py-20 px-4 sm:px-6 bg-[var(--color-bg)] border-b border-[var(--color-border)] transition-colors">
       <div className="max-w-4xl mx-auto space-y-10">
-        <div className="text-center max-w-2xl mx-auto space-y-2">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-slate-200/70 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
-            <HelpCircle className="w-3.5 h-3.5 text-slate-600 dark:text-slate-400" />
-            <span>Respuestas claras antes de contactar</span>
-          </div>
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-slate-100">
+        <div className="text-center max-w-2xl mx-auto space-y-3">
+          <span className="label-caps text-[var(--color-accent)]">
+            Respuestas claras antes de contactar
+          </span>
+          <h2 className="font-serif text-2xl sm:text-3xl lg:text-4xl font-bold text-[var(--color-navy)] leading-tight">
             Preguntas Frecuentes
           </h2>
-          <p className="text-slate-600 dark:text-slate-400 text-sm sm:text-base">
+          <p className="text-[var(--color-text-secondary)] text-sm sm:text-base leading-relaxed">
             Resolvemos las dudas principales sobre precios, esquemas de crédito, gastos de escrituración y la solicitud segura del NSS.
           </p>
         </div>
 
-        {/* Alerta destacada sobre el NSS */}
-        <div className="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/50 rounded-2xl p-4 sm:p-5 flex items-start gap-3 text-xs sm:text-sm text-amber-900 dark:text-amber-200">
-          <ShieldAlert className="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
+        {/* Alerta NSS */}
+        <div className="bg-[var(--color-accent-muted)] border border-[var(--color-accent)]/20 rounded-lg p-4 sm:p-5 flex items-start gap-3 text-xs sm:text-sm text-[var(--color-navy)]">
+          <ShieldAlert className="w-5 h-5 text-[var(--color-accent)] flex-shrink-0 mt-0.5" />
           <div className="space-y-1">
-            <p className="font-bold text-amber-950 dark:text-amber-300">
+            <p className="font-semibold text-[var(--color-navy)]">
               Sobre la privacidad de tu Número de Seguridad Social (NSS):
             </p>
-            <p className="text-amber-800 dark:text-amber-200/90 leading-relaxed">
+            <p className="text-[var(--color-text-secondary)] leading-relaxed">
               El NSS únicamente se requiere si vas a comprar mediante crédito <strong>Infonavit</strong> y deseas conocer tu precalificación. Si tu compra es con crédito bancario o de contado, <strong>no lo necesitas proporcionar</strong>. En ningún caso tu NSS se vende ni se comparte con terceros ajenos al trámite.
             </p>
           </div>
         </div>
 
-        {/* Acordeón de preguntas */}
+        {/* Acordeón */}
         <div className="space-y-3">
           {FAQ_ITEMS.map((item, index) => {
             const isOpen = openIndex === index;
             return (
               <div
                 key={index}
-                className="bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-2xl overflow-hidden transition shadow-sm"
+                className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg overflow-hidden transition"
               >
                 <button
                   onClick={() => toggle(index)}
-                  className="w-full text-left px-5 py-4 flex justify-between items-center gap-4 hover:bg-slate-50 dark:hover:bg-slate-800 transition cursor-pointer"
+                  className="w-full text-left px-5 py-4 flex justify-between items-center gap-4 hover:bg-[var(--color-bg)] transition cursor-pointer"
                   aria-expanded={isOpen}
                 >
-                  <span className="font-bold text-slate-900 dark:text-slate-100 text-sm sm:text-base leading-snug">
+                  <span className="font-semibold text-[var(--color-navy)] text-sm sm:text-base leading-snug">
                     {item.question}
                   </span>
                   <div
-                    className={`w-7 h-7 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center flex-shrink-0 transition-transform duration-200 ${
-                      isOpen ? 'rotate-180 bg-slate-200 dark:bg-slate-600' : ''
+                    className={`w-7 h-7 rounded-full bg-[var(--color-bg)] flex items-center justify-center flex-shrink-0 transition-transform duration-200 ${
+                      isOpen ? 'rotate-180' : ''
                     }`}
                   >
-                    <ChevronDown className="w-4 h-4 text-slate-600 dark:text-slate-300" />
+                    <ChevronDown className="w-4 h-4 text-[var(--color-text-muted)]" />
                   </div>
                 </button>
 
                 {isOpen && (
-                  <div className="px-5 pb-5 pt-1 text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed border-t border-slate-100 dark:border-slate-700/60">
+                  <div className="px-5 pb-5 pt-1 text-xs sm:text-sm text-[var(--color-text-secondary)] leading-relaxed border-t border-[var(--color-border)]">
                     {item.answer}
                   </div>
                 )}
