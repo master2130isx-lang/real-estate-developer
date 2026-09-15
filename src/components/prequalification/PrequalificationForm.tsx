@@ -237,7 +237,7 @@ export function PrequalificationForm({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/70 backdrop-blur-sm overflow-y-auto">
       <div
-        className="relative bg-white dark:bg-slate-900 rounded-3xl max-w-xl w-full max-h-[92vh] overflow-y-auto shadow-2xl border border-slate-200 dark:border-slate-800 p-5 sm:p-8 text-slate-900 dark:text-slate-100"
+        className="relative bg-[var(--color-surface)] rounded-xl max-w-xl w-full max-h-[92vh] overflow-y-auto shadow-2xl border border-[var(--color-border)] p-5 sm:p-8 text-[var(--color-text)] transition-colors"
         role="dialog"
         aria-modal="true"
         aria-labelledby="form-modal-title"
@@ -245,7 +245,7 @@ export function PrequalificationForm({
         {/* Botón de cerrar */}
         <button
           onClick={resetFormAndClose}
-          className="absolute top-4 right-4 sm:top-5 sm:right-5 w-9 h-9 rounded-full bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 flex items-center justify-center transition cursor-pointer z-20"
+          className="absolute top-4 right-4 sm:top-5 sm:right-5 w-9 h-9 rounded-full bg-[var(--color-surface-alt)] hover:bg-[var(--color-border)] text-[var(--color-text-secondary)] hover:text-[var(--color-text)] flex items-center justify-center transition cursor-pointer z-20"
           aria-label="Cerrar formulario"
         >
           <X className="w-5 h-5" />
@@ -254,57 +254,57 @@ export function PrequalificationForm({
         {/* PANTALLA DE CONFIRMACIÓN */}
         {isSubmitted && createdLead ? (
           <div className="py-3 text-center space-y-5">
-            <div className="w-16 h-16 bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 rounded-full flex items-center justify-center mx-auto shadow-sm">
-              <CheckCircle2 className="w-10 h-10" />
+            <div className="w-14 h-14 bg-[var(--color-accent)]/15 text-[var(--color-accent)] rounded-full flex items-center justify-center mx-auto border border-[var(--color-accent)]/30">
+              <CheckCircle2 className="w-8 h-8" />
             </div>
 
             <div className="space-y-2">
-              <span className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
+              <span className="label-caps text-[var(--color-text-muted)] text-[11px] tracking-wider block">
                 Folio asignado: {createdLead.folio}
               </span>
-              <h2 id="form-modal-title" className="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white leading-snug">
+              <h2 id="form-modal-title" className="font-serif text-2xl sm:text-3xl font-bold text-[var(--color-navy)] dark:text-[var(--color-text)] leading-snug">
                 Recibimos tu solicitud
               </h2>
               {/* Mensaje de confirmación exacto conforme a la especificación de negocio */}
-              <div className="bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-900/60 rounded-2xl p-4 text-xs sm:text-sm text-blue-950 dark:text-blue-200 text-left space-y-1.5">
-                <p className="font-bold flex items-center gap-1.5 text-blue-900 dark:text-blue-300">
-                  <Info className="w-4 h-4 text-blue-600 dark:text-blue-400 flex-shrink-0" />
+              <div className="bg-[var(--color-surface-alt)] border border-[var(--color-border)] rounded-lg p-4 text-xs sm:text-sm text-[var(--color-text)] text-left space-y-1.5">
+                <p className="font-bold flex items-center gap-1.5 text-[var(--color-navy)] dark:text-[var(--color-accent)]">
+                  <Info className="w-4 h-4 text-[var(--color-accent)] flex-shrink-0" />
                   Atención directa de tu asesor:
                 </p>
-                <p className="leading-relaxed">
-                  Tu asesor revisará la información y te contactará por <strong>WhatsApp</strong> para confirmar la visita.
+                <p className="leading-relaxed text-[var(--color-text-secondary)]">
+                  Tu asesor revisará la información y te contactará por <strong className="text-[var(--color-text)]">WhatsApp</strong> para confirmar la visita.
                 </p>
-                <p className="text-[11px] text-blue-800 dark:text-blue-300 pt-1">
+                <p className="text-[11px] text-[var(--color-text-muted)] pt-1">
                   <em>Nota: La cita queda confirmada una vez que acuerden el horario y punto de acceso.</em>
                 </p>
               </div>
             </div>
 
             {/* Resumen de solicitud registrada */}
-            <div className="bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 text-left text-xs space-y-2">
-              <p className="font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider text-[11px]">
-                Resumen de solicitud:
+            <div className="bg-[var(--color-surface-alt)] border border-[var(--color-border)] rounded-lg p-4 text-left text-xs space-y-2">
+              <p className="label-caps text-[var(--color-text-muted)] text-[10px] tracking-wider">
+                Resumen de solicitud
               </p>
-              <div className="grid grid-cols-2 gap-2 text-slate-600 dark:text-slate-300">
+              <div className="grid grid-cols-2 gap-2 text-[var(--color-text-secondary)]">
                 <div>
-                  <span className="text-slate-400 dark:text-slate-500 block text-[10px]">Interesado:</span>
-                  <span className="font-semibold text-slate-900 dark:text-white">{createdLead.fullName}</span>
+                  <span className="text-[var(--color-text-muted)] block text-[10px]">Interesado:</span>
+                  <span className="font-semibold text-[var(--color-text)]">{createdLead.fullName}</span>
                 </div>
                 <div>
-                  <span className="text-slate-400 dark:text-slate-500 block text-[10px]">Canal de confirmación:</span>
-                  <span className="font-semibold text-slate-900 dark:text-white capitalize">
+                  <span className="text-[var(--color-text-muted)] block text-[10px]">Canal de confirmación:</span>
+                  <span className="font-semibold text-[var(--color-text)] capitalize">
                     {createdLead.preferredChannel} • {createdLead.appointmentRequest?.timeSlot || createdLead.preferredContactTime}
                   </span>
                 </div>
                 <div>
-                  <span className="text-slate-400 dark:text-slate-500 block text-[10px]">Forma de compra:</span>
-                  <span className="font-semibold text-slate-900 dark:text-white capitalize">
+                  <span className="text-[var(--color-text-muted)] block text-[10px]">Forma de compra:</span>
+                  <span className="font-semibold text-[var(--color-text)] capitalize">
                     {createdLead.financingType.replace('_', ' ')}
                   </span>
                 </div>
                 <div>
-                  <span className="text-slate-400 dark:text-slate-500 block text-[10px]">Estado de registro NSS:</span>
-                  <span className="font-semibold text-slate-900 dark:text-white">
+                  <span className="text-[var(--color-text-muted)] block text-[10px]">Estado de registro NSS:</span>
+                  <span className="font-semibold text-[var(--color-text)]">
                     {createdLead.attributionStatus === 'pendiente_inmobiliaria'
                       ? 'NSS recibido en web (Pendiente de registro en inmobiliaria)'
                       : createdLead.attributionStatus === 'pendiente_nss'
@@ -313,9 +313,9 @@ export function PrequalificationForm({
                   </span>
                 </div>
                 {createdLead.appointmentRequest && (
-                  <div className="col-span-2 pt-1.5 border-t border-slate-200 dark:border-slate-700">
-                    <span className="text-slate-400 dark:text-slate-500 block text-[10px]">Visita solicitada:</span>
-                    <span className="font-semibold text-slate-900 dark:text-white">
+                  <div className="col-span-2 pt-1.5 border-t border-[var(--color-border)]">
+                    <span className="text-[var(--color-text-muted)] block text-[10px]">Visita solicitada:</span>
+                    <span className="font-semibold text-[var(--color-text)]">
                       Fecha propuesta: {createdLead.appointmentRequest.preferredDate} ({createdLead.appointmentRequest.timeSlot})
                     </span>
                   </div>
@@ -355,12 +355,12 @@ export function PrequalificationForm({
                     href={directWaUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="w-full bg-[#25D366] hover:bg-[#20bd5a] active:scale-[0.98] text-white font-extrabold py-3.5 px-4 rounded-2xl text-sm sm:text-base transition flex items-center justify-center gap-2.5 shadow-lg shadow-emerald-600/25 cursor-pointer"
+                    className="w-full bg-[#25D366] hover:bg-[#20bd5a] text-white font-semibold py-3 px-4 rounded text-sm sm:text-base transition flex items-center justify-center gap-2.5 shadow cursor-pointer"
                   >
                     <WhatsAppIcon className="w-5 h-5 flex-shrink-0" />
                     <span>Enviar solicitud por WhatsApp a mi asesor</span>
                   </a>
-                  <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                  <p className="text-[11px] text-[var(--color-text-muted)]">
                     Tu mensaje se abrirá con el folio y tus datos para acordar la visita de inmediato.
                   </p>
                 </div>
@@ -368,17 +368,17 @@ export function PrequalificationForm({
             })()}
 
             {/* Enlace al panel y botón de cerrar */}
-            <div className="space-y-2 pt-2 border-t border-slate-100 dark:border-slate-800">
+            <div className="space-y-2 pt-2 border-t border-[var(--color-border)]">
               <a
                 href="/panel"
-                className="w-full bg-[#0d233a] hover:bg-[#163b5c] text-white font-bold py-3 px-4 rounded-xl text-xs transition flex items-center justify-center gap-2 cursor-pointer shadow"
+                className="w-full bg-[var(--color-navy)] hover:bg-[var(--color-navy-light)] text-white font-medium py-2.5 px-4 rounded text-xs transition flex items-center justify-center gap-2 cursor-pointer shadow-sm"
               >
                 <span>Ver seguimiento de atribución en el Panel del Asesor (Demo)</span>
-                <ExternalLink className="w-3.5 h-3.5 text-amber-400" />
+                <ExternalLink className="w-3.5 h-3.5 text-[var(--color-accent)]" />
               </a>
               <button
                 onClick={resetFormAndClose}
-                className="w-full bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-semibold py-2.5 px-4 rounded-xl text-xs transition cursor-pointer"
+                className="w-full bg-[var(--color-surface-alt)] hover:bg-[var(--color-border)] text-[var(--color-text-secondary)] hover:text-[var(--color-text)] font-medium py-2 px-4 rounded text-xs transition cursor-pointer"
               >
                 Cerrar y volver a la página principal
               </button>
@@ -389,15 +389,15 @@ export function PrequalificationForm({
           <div className="space-y-6">
             {/* Header con progreso - pr-12 para evitar cualquier solapamiento con la X */}
             <div className="pr-12">
-              <div className="flex justify-between items-center text-xs font-semibold text-slate-500 dark:text-slate-400 mb-2">
-                <span>
+              <div className="flex justify-between items-center text-xs text-[var(--color-text-muted)] mb-2">
+                <span className="label-caps text-[10px]">
                   Paso {currentStepForProgress} de {totalSteps}
                 </span>
-                <span className="text-amber-600 dark:text-amber-400 font-bold">{progressPercent}%</span>
+                <span className="font-serif font-bold text-[var(--color-accent)] text-sm">{progressPercent}%</span>
               </div>
-              <div className="w-full h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+              <div className="w-full h-1.5 bg-[var(--color-surface-alt)] rounded-full overflow-hidden border border-[var(--color-border-subtle)]">
                 <div
-                  className="h-full bg-[#0d233a] dark:bg-amber-500 transition-all duration-300 rounded-full"
+                  className="h-full bg-[var(--color-accent)] transition-all duration-300 rounded-full"
                   style={{ width: `${progressPercent}%` }}
                 ></div>
               </div>
@@ -407,10 +407,13 @@ export function PrequalificationForm({
             {step === 1 && (
               <div className="space-y-4">
                 <div>
-                  <h2 id="form-modal-title" className="text-xl font-extrabold text-slate-900 dark:text-white">
-                    Paso 1: ¿Qué buscas y cómo planeas comprar?
+                  <span className="label-caps text-[var(--color-accent)] text-[10px] block mb-1">
+                    Preferencia inicial
+                  </span>
+                  <h2 id="form-modal-title" className="font-serif text-xl sm:text-2xl font-bold text-[var(--color-navy)] dark:text-[var(--color-text)] leading-tight">
+                    ¿Qué buscas y cómo planeas comprar?
                   </h2>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                  <p className="text-xs text-[var(--color-text-secondary)] mt-1">
                     Comparte tus preferencias para coordinar opciones acordes a tus planes.
                   </p>
                 </div>
@@ -418,26 +421,26 @@ export function PrequalificationForm({
                 {/* Zona o Propiedad */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div className="space-y-1">
-                    <label className="block text-xs font-bold text-slate-800 dark:text-slate-200">
+                    <label className="label-caps text-[var(--color-text-secondary)] text-[10px] block">
                       Ubicación y Fraccionamiento <span className="text-red-500">*</span>
                     </label>
                     <select
                       value={zone}
                       onChange={(e) => setZone(e.target.value)}
-                      className="w-full px-3 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 text-xs bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-[#0d233a] dark:focus:ring-amber-500 focus:outline-none"
+                      className="w-full px-3 py-2.5 rounded border border-[var(--color-border)] text-xs bg-[var(--color-surface)] text-[var(--color-text)] focus:border-[var(--color-accent)] focus:ring-1 focus:ring-[var(--color-accent)] focus:outline-none"
                     >
                       <option value="Salinas Victoria, N.L. (Valle de los Encinos)">Salinas Victoria, N.L. (Valle de los Encinos)</option>
                     </select>
                   </div>
 
                   <div className="space-y-1">
-                    <label className="block text-xs font-bold text-slate-800 dark:text-slate-200">
+                    <label className="label-caps text-[var(--color-text-secondary)] text-[10px] block">
                       Modelo seleccionado
                     </label>
                     <select
                       value={propertyId}
                       onChange={(e) => setPropertyId(e.target.value)}
-                      className="w-full px-3 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 text-xs bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-[#0d233a] dark:focus:ring-amber-500 focus:outline-none"
+                      className="w-full px-3 py-2.5 rounded border border-[var(--color-border)] text-xs bg-[var(--color-surface)] text-[var(--color-text)] focus:border-[var(--color-accent)] focus:ring-1 focus:ring-[var(--color-accent)] focus:outline-none"
                     >
                       {PROPERTIES_DATA.map((p) => (
                         <option key={p.id} value={p.id}>
@@ -450,7 +453,7 @@ export function PrequalificationForm({
 
                 {/* Forma de compra */}
                 <div className="space-y-1.5">
-                  <label className="block text-xs font-bold text-slate-800 dark:text-slate-200">
+                  <label className="label-caps text-[var(--color-text-secondary)] text-[10px] block">
                     Forma de compra prevista <span className="text-red-500">*</span>
                   </label>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -471,10 +474,10 @@ export function PrequalificationForm({
                             setNeedsOrientation(false);
                           }
                         }}
-                        className={`p-2.5 rounded-xl text-xs font-semibold border text-left transition cursor-pointer ${
+                        className={`p-2.5 rounded text-xs border text-left transition cursor-pointer ${
                           financingType === f.id
-                            ? 'bg-[#0d233a] dark:bg-amber-500 text-white dark:text-slate-950 border-[#0d233a] dark:border-amber-500 font-bold'
-                            : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700'
+                            ? 'bg-[var(--color-surface-alt)] border-[var(--color-navy)] dark:border-[var(--color-accent)] text-[var(--color-navy)] dark:text-[var(--color-accent)] font-bold'
+                            : 'bg-[var(--color-surface)] border-[var(--color-border)] text-[var(--color-text-secondary)] hover:border-[var(--color-border-subtle)]'
                         }`}
                       >
                         {f.label}
@@ -488,7 +491,7 @@ export function PrequalificationForm({
 
                 {/* Presupuesto */}
                 <div className="space-y-1">
-                  <label className="block text-xs font-bold text-slate-800 dark:text-slate-200">
+                  <label className="label-caps text-[var(--color-text-secondary)] text-[10px] block">
                     Rango de presupuesto aproximado
                   </label>
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
@@ -503,10 +506,10 @@ export function PrequalificationForm({
                         key={b.id}
                         type="button"
                         onClick={() => setBudgetRange(b.id as BudgetRange)}
-                        className={`p-2 rounded-xl text-xs font-medium border text-center transition cursor-pointer ${
+                        className={`p-2 rounded text-xs border text-center transition cursor-pointer ${
                           budgetRange === b.id
-                            ? 'bg-amber-500 text-slate-950 font-bold border-amber-500 shadow-xs'
-                            : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700'
+                            ? 'bg-[var(--color-surface-alt)] border-[var(--color-navy)] dark:border-[var(--color-accent)] text-[var(--color-navy)] dark:text-[var(--color-accent)] font-bold'
+                            : 'bg-[var(--color-surface)] border-[var(--color-border)] text-[var(--color-text-secondary)] hover:border-[var(--color-border-subtle)]'
                         }`}
                       >
                         {b.label}
@@ -517,7 +520,7 @@ export function PrequalificationForm({
 
                 {/* Plazo aproximado */}
                 <div className="space-y-1">
-                  <label className="block text-xs font-bold text-slate-800 dark:text-slate-200">
+                  <label className="label-caps text-[var(--color-text-secondary)] text-[10px] block">
                     Plazo aproximado de compra
                   </label>
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
@@ -531,10 +534,10 @@ export function PrequalificationForm({
                         key={t.id}
                         type="button"
                         onClick={() => setPurchaseTimeline(t.id as PurchaseTimeline)}
-                        className={`py-2 px-2 rounded-xl text-xs font-medium border text-center transition cursor-pointer ${
+                        className={`py-2 px-2 rounded text-xs border text-center transition cursor-pointer ${
                           purchaseTimeline === t.id
-                            ? 'bg-slate-800 dark:bg-amber-500 text-white dark:text-slate-950 font-bold border-slate-800 dark:border-amber-500'
-                            : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700'
+                            ? 'bg-[var(--color-surface-alt)] border-[var(--color-navy)] dark:border-[var(--color-accent)] text-[var(--color-navy)] dark:text-[var(--color-accent)] font-bold'
+                            : 'bg-[var(--color-surface)] border-[var(--color-border)] text-[var(--color-text-secondary)] hover:border-[var(--color-border-subtle)]'
                         }`}
                       >
                         {t.label}
@@ -545,21 +548,24 @@ export function PrequalificationForm({
               </div>
             )}
 
-            {/* PASO 2: DATOS DE CONTACTO (Sin pedir horario repetido) */}
+            {/* PASO 2: DATOS DE CONTACTO */}
             {step === 2 && (
               <div className="space-y-4">
                 <div>
-                  <h2 className="text-xl font-extrabold text-slate-900 dark:text-white">
-                    Paso 2: Datos para coordinar tu atención
+                  <span className="label-caps text-[var(--color-accent)] text-[10px] block mb-1">
+                    Contacto directo
+                  </span>
+                  <h2 className="font-serif text-xl sm:text-2xl font-bold text-[var(--color-navy)] dark:text-[var(--color-text)] leading-tight">
+                    Datos para coordinar tu atención
                   </h2>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                  <p className="text-xs text-[var(--color-text-secondary)] mt-1">
                     Utilizaremos estos datos para atender tu solicitud y confirmar tu cita directamente por WhatsApp.
                   </p>
                 </div>
 
                 {/* Nombre */}
                 <div className="space-y-1">
-                  <label className="block text-xs font-bold text-slate-800 dark:text-slate-200">
+                  <label className="label-caps text-[var(--color-text-secondary)] text-[10px] block">
                     Nombre y Apellidos <span className="text-red-500">*</span>
                   </label>
                   <input
@@ -567,8 +573,8 @@ export function PrequalificationForm({
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
                     placeholder="Ej. Alejandro Morales"
-                    className={`w-full px-3.5 py-2.5 rounded-xl border text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-[#0d233a] dark:focus:ring-amber-500 focus:outline-none ${
-                      errors.fullName ? 'border-red-500 bg-red-50 dark:bg-red-950/20' : 'border-slate-300 dark:border-slate-700'
+                    className={`w-full px-3.5 py-2.5 rounded border text-sm bg-[var(--color-surface)] text-[var(--color-text)] focus:border-[var(--color-accent)] focus:ring-1 focus:ring-[var(--color-accent)] focus:outline-none ${
+                      errors.fullName ? 'border-red-500 bg-red-50/10' : 'border-[var(--color-border)]'
                     }`}
                   />
                   {errors.fullName && <p className="text-[11px] text-red-600 dark:text-red-400">{errors.fullName}</p>}
@@ -576,7 +582,7 @@ export function PrequalificationForm({
 
                 {/* Teléfono */}
                 <div className="space-y-1">
-                  <label className="block text-xs font-bold text-slate-800 dark:text-slate-200">
+                  <label className="label-caps text-[var(--color-text-secondary)] text-[10px] block">
                     Teléfono Celular / WhatsApp <span className="text-red-500">*</span>
                   </label>
                   <input
@@ -586,23 +592,23 @@ export function PrequalificationForm({
                     value={phone}
                     onChange={(e) => setPhone(e.target.value.replace(/\D/g, ''))}
                     placeholder="10 dígitos (Ej. 5512345678)"
-                    className={`w-full px-3.5 py-2.5 rounded-xl border text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-[#0d233a] dark:focus:ring-amber-500 focus:outline-none ${
-                      errors.phone ? 'border-red-500 bg-red-50 dark:bg-red-950/20' : 'border-slate-300 dark:border-slate-700'
+                    className={`w-full px-3.5 py-2.5 rounded border text-sm bg-[var(--color-surface)] text-[var(--color-text)] focus:border-[var(--color-accent)] focus:ring-1 focus:ring-[var(--color-accent)] focus:outline-none ${
+                      errors.phone ? 'border-red-500 bg-red-50/10' : 'border-[var(--color-border)]'
                     }`}
                   />
                   {errors.phone && <p className="text-[11px] text-red-600 dark:text-red-400">{errors.phone}</p>}
                 </div>
 
-                {/* Canal de confirmación y Correo en una sola fila limpia */}
+                {/* Canal de confirmación y Correo */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div className="space-y-1">
-                    <label className="block text-xs font-bold text-slate-800 dark:text-slate-200">
+                    <label className="label-caps text-[var(--color-text-secondary)] text-[10px] block">
                       Canal de confirmación
                     </label>
                     <select
                       value={preferredChannel}
                       onChange={(e) => setPreferredChannel(e.target.value as ContactChannel)}
-                      className="w-full px-3 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 text-xs bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-[#0d233a] dark:focus:ring-amber-500 focus:outline-none"
+                      className="w-full px-3 py-2.5 rounded border border-[var(--color-border)] text-xs bg-[var(--color-surface)] text-[var(--color-text)] focus:border-[var(--color-accent)] focus:ring-1 focus:ring-[var(--color-accent)] focus:outline-none"
                     >
                       <option value="whatsapp">Mensaje por WhatsApp (Recomendado)</option>
                       <option value="llamada">Llamada telefónica</option>
@@ -611,34 +617,34 @@ export function PrequalificationForm({
                   </div>
 
                   <div className="space-y-1">
-                    <label className="block text-xs font-bold text-slate-800 dark:text-slate-200">
-                      Correo Electrónico <span className="text-slate-400 font-normal">(Opcional)</span>
+                    <label className="label-caps text-[var(--color-text-secondary)] text-[10px] block">
+                      Correo Electrónico <span className="text-[var(--color-text-muted)] font-normal normal-case">(Opcional)</span>
                     </label>
                     <input
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="tucorreo@ejemplo.com"
-                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 text-xs bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-[#0d233a] dark:focus:ring-amber-500 focus:outline-none"
+                      className="w-full px-3.5 py-2.5 rounded border border-[var(--color-border)] text-xs bg-[var(--color-surface)] text-[var(--color-text)] focus:border-[var(--color-accent)] focus:ring-1 focus:ring-[var(--color-accent)] focus:outline-none"
                     />
                   </div>
                 </div>
 
                 {/* Consentimientos */}
-                <div className="space-y-2 pt-2 border-t border-slate-100 dark:border-slate-800">
-                  <label className="flex items-start gap-2.5 cursor-pointer text-xs text-slate-700 dark:text-slate-300">
+                <div className="space-y-2 pt-2 border-t border-[var(--color-border)]">
+                  <label className="flex items-start gap-2.5 cursor-pointer text-xs text-[var(--color-text)]">
                     <input
                       type="checkbox"
                       checked={privacyConsentAccepted}
                       onChange={(e) => setPrivacyConsentAccepted(e.target.checked)}
-                      className="mt-0.5 h-4 w-4 rounded border-slate-300 text-[#0d233a] focus:ring-[#0d233a]"
+                      className="mt-0.5 h-4 w-4 rounded border-[var(--color-border)] text-[var(--color-navy)] focus:ring-[var(--color-accent)]"
                     />
                     <span>
                       Autorizo el tratamiento de mis datos para atender esta solicitud conforme al{' '}
                       <button
                         type="button"
                         onClick={onOpenPrivacyNotice}
-                        className="underline text-[#0d233a] dark:text-amber-400 font-bold inline hover:text-amber-600"
+                        className="underline text-[var(--color-accent)] font-semibold inline hover:text-[var(--color-accent-hover)] cursor-pointer"
                       >
                         Aviso de Privacidad
                       </button>
@@ -647,12 +653,12 @@ export function PrequalificationForm({
                   </label>
                   {errors.privacy && <p className="text-[11px] text-red-600 dark:text-red-400 pl-6">{errors.privacy}</p>}
 
-                  <label className="flex items-start gap-2.5 cursor-pointer text-xs text-slate-500 dark:text-slate-400">
+                  <label className="flex items-start gap-2.5 cursor-pointer text-xs text-[var(--color-text-muted)]">
                     <input
                       type="checkbox"
                       checked={marketingConsentAccepted}
                       onChange={(e) => setMarketingConsentAccepted(e.target.checked)}
-                      className="mt-0.5 h-4 w-4 rounded border-slate-300 text-[#0d233a] focus:ring-[#0d233a]"
+                      className="mt-0.5 h-4 w-4 rounded border-[var(--color-border)] text-[var(--color-navy)] focus:ring-[var(--color-accent)]"
                     />
                     <span>
                       (Opcional) Acepto recibir novedades sobre nuevos modelos o promociones futuras.
@@ -662,27 +668,27 @@ export function PrequalificationForm({
               </div>
             )}
 
-            {/* PASO 3: REGISTRO INTERNO CON NSS (Regla Centralizada) */}
+            {/* PASO 3: REGISTRO INTERNO CON NSS */}
             {step === 3 && requiresNssStep && (
               <div className="space-y-4">
                 <div>
-                  <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-blue-100 dark:bg-blue-950/60 text-blue-900 dark:text-blue-300 mb-1.5 border border-blue-200 dark:border-blue-900/60">
-                    <Lock className="w-3.5 h-3.5 text-blue-700 dark:text-blue-400" />
+                  <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded text-xs font-medium bg-[var(--color-surface-alt)] text-[var(--color-accent)] mb-1.5 border border-[var(--color-border)]">
+                    <Lock className="w-3.5 h-3.5 text-[var(--color-accent)]" />
                     <span>Registro interno de atención (Infonavit)</span>
                   </div>
-                  <h2 className="text-xl font-extrabold text-slate-900 dark:text-white">
+                  <h2 className="font-serif text-xl sm:text-2xl font-bold text-[var(--color-navy)] dark:text-[var(--color-text)] leading-tight">
                     Registro de atención con tu asesor
                   </h2>
                 </div>
 
                 {/* TEXTO EXACTO PROPUESTO PARA LA FINALIDAD DEL NSS */}
-                <div className="bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 text-xs text-slate-700 dark:text-slate-300 space-y-2">
-                  <p className="leading-relaxed font-medium text-slate-800 dark:text-slate-200">
+                <div className="bg-[var(--color-surface-alt)] border border-[var(--color-border)] rounded-lg p-4 text-xs text-[var(--color-text-secondary)] space-y-2">
+                  <p className="leading-relaxed font-medium text-[var(--color-text)]">
                     Utilizaremos tu NSS para solicitar tu registro en el sistema interno de{' '}
                     <strong>{COMMERCIAL_CONFIG.agencyName}</strong> y asignar a{' '}
                     <strong>{COMMERCIAL_CONFIG.advisorName}</strong> la atribución comercial de tu atención durante 15 días, conforme a sus reglas.
                   </p>
-                  <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
+                  <p className="text-[11px] text-[var(--color-text-muted)] leading-relaxed">
                     Este registro se utiliza para la asignación interna de comisión; <strong>no inicia un trámite ni una consulta de crédito y no te obliga a comprar</strong>.
                   </p>
                 </div>
@@ -690,7 +696,7 @@ export function PrequalificationForm({
                 {!skipNssForOrientation ? (
                   <div className="space-y-3">
                     <div className="space-y-1">
-                      <label className="block text-xs font-bold text-slate-800 dark:text-slate-200">
+                      <label className="label-caps text-[var(--color-text-secondary)] text-[10px] block">
                         Número de Seguridad Social (NSS - 11 dígitos)
                       </label>
                       <input
@@ -700,13 +706,13 @@ export function PrequalificationForm({
                         value={nssInput}
                         onChange={(e) => setNssInput(e.target.value.replace(/\D/g, ''))}
                         placeholder="Ej. 02894711823 (11 dígitos)"
-                        className={`w-full px-4 py-3 rounded-xl border text-base tracking-widest font-mono font-semibold focus:ring-2 focus:ring-[#0d233a] dark:focus:ring-amber-500 focus:outline-none ${
-                          errors.nss ? 'border-red-500 bg-red-50 dark:bg-red-950/20' : 'border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100'
+                        className={`w-full px-4 py-3 rounded border text-base tracking-widest font-mono font-semibold focus:border-[var(--color-accent)] focus:ring-1 focus:ring-[var(--color-accent)] focus:outline-none ${
+                          errors.nss ? 'border-red-500 bg-red-50/10' : 'border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)]'
                         }`}
                       />
-                      <div className="flex justify-between text-[11px] text-slate-500 dark:text-slate-400">
+                      <div className="flex justify-between text-[11px] text-[var(--color-text-muted)]">
                         <span>Conserva ceros iniciales como texto</span>
-                        <span className={nssInput.length === 11 ? 'text-emerald-600 dark:text-emerald-400 font-bold' : ''}>
+                        <span className={nssInput.length === 11 ? 'text-[var(--color-accent)] font-bold' : ''}>
                           {nssInput.length} / 11 dígitos
                         </span>
                       </div>
@@ -714,31 +720,31 @@ export function PrequalificationForm({
                     </div>
 
                     {/* Alternativa visible obligatoria: Orientación previa */}
-                    <div className="pt-2 text-center border-t border-slate-100 dark:border-slate-800">
+                    <div className="pt-2 text-center border-t border-[var(--color-border)]">
                       <button
                         type="button"
                         onClick={() => {
                           setSkipNssForOrientation(true);
                           setErrors({});
                         }}
-                        className="text-xs text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white underline font-medium cursor-pointer"
+                        className="text-xs text-[var(--color-text-secondary)] hover:text-[var(--color-text)] underline font-medium cursor-pointer"
                       >
                         Prefiero recibir orientación antes de registrarme &rarr;
                       </button>
                     </div>
                   </div>
                 ) : (
-                  <div className="bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900/60 rounded-2xl p-4 text-center space-y-2">
-                    <p className="text-xs font-bold text-amber-950 dark:text-amber-200">
+                  <div className="bg-[var(--color-surface-alt)] border border-[var(--color-border)] rounded-lg p-4 text-center space-y-2">
+                    <p className="text-xs font-bold text-[var(--color-text)]">
                       Has elegido recibir orientación antes de registrarte
                     </p>
-                    <p className="text-xs text-amber-800 dark:text-amber-300">
+                    <p className="text-xs text-[var(--color-text-secondary)]">
                       Tu solicitud se registrará como pendiente de orientación. El asesor te contactará para resolver tus dudas sin registrar aún tu NSS en la inmobiliaria.
                     </p>
                     <button
                       type="button"
                       onClick={() => setSkipNssForOrientation(false)}
-                      className="text-xs text-[#0d233a] dark:text-amber-400 font-bold underline cursor-pointer"
+                      className="text-xs text-[var(--color-accent)] font-semibold underline cursor-pointer"
                     >
                       Deseo ingresar mi NSS para el registro de atención
                     </button>
@@ -747,14 +753,17 @@ export function PrequalificationForm({
               </div>
             )}
 
-            {/* PASO 4: PREFERENCIA DE VISITA (Rápido, en pocos clicks) */}
+            {/* PASO 4: PREFERENCIA DE VISITA */}
             {step === 4 && (
               <div className="space-y-4">
                 <div>
-                  <h2 className="text-xl font-extrabold text-slate-900 dark:text-white">
+                  <span className="label-caps text-[var(--color-accent)] text-[10px] block mb-1">
+                    Agenda preliminar
+                  </span>
+                  <h2 className="font-serif text-xl sm:text-2xl font-bold text-[var(--color-navy)] dark:text-[var(--color-text)] leading-tight">
                     Paso {requiresNssStep ? '4' : '3'}: Preferencia de Visita
                   </h2>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                  <p className="text-xs text-[var(--color-text-secondary)] mt-1">
                     El asesor revisará la disponibilidad y te contactará por WhatsApp para confirmar la visita.
                   </p>
                 </div>
@@ -762,15 +771,17 @@ export function PrequalificationForm({
                 <div className="space-y-3">
                   {/* Modalidad */}
                   <div className="space-y-1">
-                    <label className="block text-xs font-bold text-slate-800 dark:text-slate-200">Modalidad de visita</label>
+                    <label className="label-caps text-[var(--color-text-secondary)] text-[10px] block">
+                      Modalidad de visita
+                    </label>
                     <div className="grid grid-cols-2 gap-2">
                       <button
                         type="button"
                         onClick={() => setAppointmentModality('presencial')}
-                        className={`p-3 rounded-xl text-xs font-semibold border text-center transition cursor-pointer ${
+                        className={`p-3 rounded text-xs font-medium border text-center transition cursor-pointer ${
                           appointmentModality === 'presencial'
-                            ? 'bg-[#0d233a] dark:bg-amber-500 text-white dark:text-slate-950 border-[#0d233a] dark:border-amber-500 font-bold'
-                            : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700'
+                            ? 'bg-[var(--color-surface-alt)] border-[var(--color-navy)] dark:border-[var(--color-accent)] text-[var(--color-navy)] dark:text-[var(--color-accent)] font-bold'
+                            : 'bg-[var(--color-surface)] border-[var(--color-border)] text-[var(--color-text-secondary)] hover:border-[var(--color-border-subtle)]'
                         }`}
                       >
                         🏡 Recorrido en Casa Muestra
@@ -778,10 +789,10 @@ export function PrequalificationForm({
                       <button
                         type="button"
                         onClick={() => setAppointmentModality('virtual')}
-                        className={`p-3 rounded-xl text-xs font-semibold border text-center transition cursor-pointer ${
+                        className={`p-3 rounded text-xs font-medium border text-center transition cursor-pointer ${
                           appointmentModality === 'virtual'
-                            ? 'bg-[#0d233a] dark:bg-amber-500 text-white dark:text-slate-950 border-[#0d233a] dark:border-amber-500 font-bold'
-                            : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700'
+                            ? 'bg-[var(--color-surface-alt)] border-[var(--color-navy)] dark:border-[var(--color-accent)] text-[var(--color-navy)] dark:text-[var(--color-accent)] font-bold'
+                            : 'bg-[var(--color-surface)] border-[var(--color-border)] text-[var(--color-text-secondary)] hover:border-[var(--color-border-subtle)]'
                         }`}
                       >
                         💻 Asesoría Virtual por Video
@@ -789,13 +800,13 @@ export function PrequalificationForm({
                     </div>
                   </div>
 
-                  {/* Día preferido con acceso rápido en 1 click */}
+                  {/* Día preferido */}
                   <div className="space-y-1">
                     <div className="flex items-center justify-between">
-                      <label className="block text-xs font-bold text-slate-800 dark:text-slate-200">
+                      <label className="label-caps text-[var(--color-text-secondary)] text-[10px] block">
                         Día tentativo preferido <span className="text-red-500">*</span>
                       </label>
-                      <span className="text-[10px] text-slate-400">Acceso rápido:</span>
+                      <span className="text-[10px] text-[var(--color-text-muted)]">Acceso rápido:</span>
                     </div>
 
                     {/* Chips de 1 solo click */}
@@ -803,10 +814,10 @@ export function PrequalificationForm({
                       <button
                         type="button"
                         onClick={() => setPreferredDate(getTomorrowDateStr())}
-                        className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition cursor-pointer ${
+                        className={`px-3 py-1.5 rounded text-xs font-medium border transition cursor-pointer ${
                           preferredDate === getTomorrowDateStr()
-                            ? 'bg-amber-500 text-slate-950 border-amber-500 font-bold shadow-xs'
-                            : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700'
+                            ? 'bg-[var(--color-accent)] text-[var(--color-navy)] font-semibold border-[var(--color-accent)]'
+                            : 'bg-[var(--color-surface-alt)] text-[var(--color-text-secondary)] border-[var(--color-border)] hover:border-[var(--color-border-subtle)]'
                         }`}
                       >
                         ⚡ Mañana
@@ -817,10 +828,10 @@ export function PrequalificationForm({
                           setPreferredDate(getUpcomingWeekendStr());
                           setTimeSlot('sabado_manana');
                         }}
-                        className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition cursor-pointer ${
+                        className={`px-3 py-1.5 rounded text-xs font-medium border transition cursor-pointer ${
                           preferredDate === getUpcomingWeekendStr()
-                            ? 'bg-amber-500 text-slate-950 border-amber-500 font-bold shadow-xs'
-                            : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700'
+                            ? 'bg-[var(--color-accent)] text-[var(--color-navy)] font-semibold border-[var(--color-accent)]'
+                            : 'bg-[var(--color-surface-alt)] text-[var(--color-text-secondary)] border-[var(--color-border)] hover:border-[var(--color-border-subtle)]'
                         }`}
                       >
                         📅 Próximo Fin de Semana
@@ -832,8 +843,8 @@ export function PrequalificationForm({
                       value={preferredDate}
                       min={new Date().toISOString().split('T')[0]}
                       onChange={(e) => setPreferredDate(e.target.value)}
-                      className={`w-full px-3.5 py-2.5 rounded-xl border text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-[#0d233a] dark:focus:ring-amber-500 focus:outline-none ${
-                        errors.preferredDate ? 'border-red-500 bg-red-50 dark:bg-red-950/20' : 'border-slate-300 dark:border-slate-700'
+                      className={`w-full px-3.5 py-2.5 rounded border text-sm bg-[var(--color-surface)] text-[var(--color-text)] focus:border-[var(--color-accent)] focus:ring-1 focus:ring-[var(--color-accent)] focus:outline-none ${
+                        errors.preferredDate ? 'border-red-500 bg-red-50/10' : 'border-[var(--color-border)]'
                       }`}
                     />
                     {errors.preferredDate && (
@@ -841,15 +852,15 @@ export function PrequalificationForm({
                     )}
                   </div>
 
-                  {/* Franja horaria única y clara */}
+                  {/* Franja horaria */}
                   <div className="space-y-1">
-                    <label className="block text-xs font-bold text-slate-800 dark:text-slate-200">
+                    <label className="label-caps text-[var(--color-text-secondary)] text-[10px] block">
                       Franja horaria estimada
                     </label>
                     <select
                       value={timeSlot}
                       onChange={(e) => setTimeSlot(e.target.value as '10:00 - 13:00' | '14:00 - 17:00' | '17:00 - 19:00' | 'sabado_manana')}
-                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-[#0d233a] dark:focus:ring-amber-500 focus:outline-none"
+                      className="w-full px-3.5 py-2.5 rounded border border-[var(--color-border)] text-xs bg-[var(--color-surface)] text-[var(--color-text)] focus:border-[var(--color-accent)] focus:ring-1 focus:ring-[var(--color-accent)] focus:outline-none"
                     >
                       <option value="10:00 - 13:00">Por la mañana (10:00 AM - 1:00 PM)</option>
                       <option value="14:00 - 17:00">Por la tarde (2:00 PM - 5:00 PM)</option>
@@ -860,33 +871,33 @@ export function PrequalificationForm({
 
                   {/* Comentarios */}
                   <div className="space-y-1">
-                    <label className="block text-xs font-bold text-slate-800 dark:text-slate-200">
-                      Comentarios adicionales (Opcional)
+                    <label className="label-caps text-[var(--color-text-secondary)] text-[10px] block">
+                      Comentarios adicionales <span className="text-[var(--color-text-muted)] font-normal normal-case">(Opcional)</span>
                     </label>
                     <textarea
                       rows={2}
                       value={appointmentNotes}
                       onChange={(e) => setAppointmentNotes(e.target.value)}
                       placeholder="Ej. Asistiré acompañado; busco orientación sobre transporte público."
-                      className="w-full px-3.5 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-xs bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-[#0d233a] dark:focus:ring-amber-500 focus:outline-none"
+                      className="w-full px-3.5 py-2 rounded border border-[var(--color-border)] text-xs bg-[var(--color-surface)] text-[var(--color-text)] focus:border-[var(--color-accent)] focus:ring-1 focus:ring-[var(--color-accent)] focus:outline-none"
                     ></textarea>
                   </div>
 
-                  {/* Aclaración obligatoria */}
-                  <div className="bg-slate-100 dark:bg-slate-800/80 rounded-xl p-3 text-[11px] text-slate-600 dark:text-slate-300 leading-relaxed border border-slate-200/60 dark:border-slate-700/60">
-                    <strong>Importante:</strong> Esta solicitud no representa un bloqueo definitivo. Tu asesor revisará la agenda y se comunicará contigo vía WhatsApp para confirmar los detalles.
+                  {/* Aclaración */}
+                  <div className="bg-[var(--color-surface-alt)] rounded-lg p-3 text-[11px] text-[var(--color-text-secondary)] leading-relaxed border border-[var(--color-border)]">
+                    <strong className="text-[var(--color-text)]">Importante:</strong> Esta solicitud no representa un bloqueo definitivo. Tu asesor revisará la agenda y se comunicará contigo vía WhatsApp para confirmar los detalles.
                   </div>
                 </div>
               </div>
             )}
 
             {/* BOTONES DE NAVEGACIÓN */}
-            <div className="pt-4 border-t border-slate-200 dark:border-slate-800 flex justify-between items-center gap-3">
+            <div className="pt-4 border-t border-[var(--color-border)] flex justify-between items-center gap-3">
               {step > 1 ? (
                 <button
                   type="button"
                   onClick={handleBack}
-                  className="px-4 py-3 rounded-xl border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-200 font-semibold text-xs hover:bg-slate-50 dark:hover:bg-slate-800 transition flex items-center gap-1.5 cursor-pointer"
+                  className="px-4 py-2.5 rounded border border-[var(--color-border)] text-[var(--color-text-secondary)] hover:text-[var(--color-text)] hover:bg-[var(--color-surface-alt)] font-medium text-xs transition flex items-center gap-1.5 cursor-pointer"
                 >
                   <ArrowLeft className="w-4 h-4" />
                   <span>Atrás</span>
@@ -898,10 +909,10 @@ export function PrequalificationForm({
               <button
                 type="button"
                 onClick={handleNext}
-                className="bg-[#0d233a] hover:bg-[#163b5c] dark:bg-amber-500 dark:hover:bg-amber-400 dark:text-slate-950 text-white font-bold py-3.5 px-6 rounded-xl text-sm transition shadow flex items-center gap-2 cursor-pointer"
+                className="bg-[var(--color-accent)] hover:bg-[var(--color-accent-hover)] text-[var(--color-navy)] dark:text-[#0B1929] font-semibold py-2.5 px-6 rounded text-sm transition flex items-center gap-2 cursor-pointer shadow-sm"
               >
                 <span>{step === 4 ? 'Enviar Solicitud' : 'Continuar'}</span>
-                <ArrowRight className="w-4 h-4 text-amber-400 dark:text-slate-950" />
+                <ArrowRight className="w-4 h-4" />
               </button>
             </div>
           </div>

@@ -11,20 +11,20 @@ export default function SolicitarVisitaPage() {
   const [isPrivacyOpen, setIsPrivacyOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-slate-100 flex flex-col justify-between">
+    <div className="min-h-screen bg-[var(--color-bg)] flex flex-col justify-between transition-colors">
       {/* Barra superior */}
-      <header className="bg-[#0d233a] text-white py-3 px-4 shadow-md">
+      <header className="bg-[var(--color-navy)] text-white py-3.5 px-4 border-b border-white/10 shadow-sm">
         <div className="max-w-4xl mx-auto flex justify-between items-center">
           <Link
             href="/"
-            className="text-slate-300 hover:text-white transition flex items-center gap-1.5 text-xs font-semibold"
+            className="text-[#D1D5DB] hover:text-[var(--color-accent)] transition flex items-center gap-2 text-xs font-medium"
           >
-            <ArrowLeft className="w-4 h-4" />
+            <ArrowLeft className="w-4 h-4 text-[var(--color-accent)]" />
             <span>Volver a la Página Principal</span>
           </Link>
           <div className="flex items-center gap-2">
-            <Building2 className="w-4 h-4 text-amber-400" />
-            <span className="text-xs font-bold text-slate-200">
+            <Building2 className="w-4 h-4 text-[var(--color-accent)]" />
+            <span className="font-serif text-xs font-bold text-[#F0ECE4] tracking-tight">
               {COMMERCIAL_CONFIG.agencyName}
             </span>
           </div>

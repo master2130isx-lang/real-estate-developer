@@ -140,8 +140,19 @@ export function Footer({ onOpenPrivacy }: FooterProps) {
           <p>
             * Los precios y especificaciones mostrados son recursos de referencia ilustrativos para la evaluación técnica del prototipo. Los gastos notariales y de escrituración varían según la legislación y el municipio aplicable.
           </p>
-          <div className="flex flex-col sm:flex-row justify-between items-center gap-2 pt-2 text-[10px] text-[#4B4841]">
-            <span>© {new Date().getFullYear()} {commercialConfig.agencyName}. Prototipo Fase 1.1.</span>
+          <div className="flex flex-col sm:flex-row justify-between items-center gap-3 pt-3 text-[11px] text-[#6B7280]">
+            <div className="flex flex-wrap items-center gap-3">
+              <span>© {new Date().getFullYear()} {commercialConfig.agencyName}. Prototipo Fase 1.1.</span>
+              <span className="hidden sm:inline text-white/20">·</span>
+              <Link
+                href="/panel"
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-white/5 hover:bg-white/10 text-[#9CA3AF] hover:text-[var(--color-accent)] transition border border-white/8 text-[10px] tracking-wide"
+                title="Acceso exclusivo al panel de gestión del asesor"
+              >
+                <UserCheck className="w-3 h-3 text-[var(--color-accent)]" />
+                <span>Acceso Asesor (Panel)</span>
+              </Link>
+            </div>
             <span>Atención asignada a: {commercialConfig.advisorName} ({commercialConfig.advisorRole}).</span>
           </div>
         </div>

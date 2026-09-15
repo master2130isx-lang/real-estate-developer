@@ -15,57 +15,61 @@ export function PrivacyModal({ isOpen, onClose }: PrivacyModalProps) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/65 backdrop-blur-sm overflow-y-auto">
       <div
-        className="relative bg-white dark:bg-slate-900 rounded-3xl max-w-2xl w-full max-h-[85vh] overflow-y-auto shadow-2xl border border-slate-200 dark:border-slate-800 p-6 sm:p-8 text-slate-900 dark:text-slate-100"
+        className="relative bg-[var(--color-surface)] rounded-xl max-w-2xl w-full max-h-[85vh] overflow-y-auto shadow-2xl border border-[var(--color-border)] p-6 sm:p-8 text-[var(--color-text)] transition-colors"
         role="dialog"
         aria-modal="true"
         aria-labelledby="privacy-title"
       >
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 w-9 h-9 rounded-full bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 flex items-center justify-center transition cursor-pointer"
+          className="absolute top-4 right-4 w-9 h-9 rounded-full bg-[var(--color-surface-alt)] hover:bg-[var(--color-border)] text-[var(--color-text-secondary)] hover:text-[var(--color-text)] flex items-center justify-center transition cursor-pointer"
           aria-label="Cerrar aviso"
         >
           <X className="w-5 h-5" />
         </button>
 
-        <div className="flex items-center gap-2 text-[#0d233a] dark:text-amber-400 mb-2">
-          <Shield className="w-6 h-6 text-amber-500" />
-          <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+        <div className="flex items-center gap-2 text-[var(--color-accent)] mb-2">
+          <Shield className="w-5 h-5 text-[var(--color-accent)]" />
+          <span className="label-caps text-[var(--color-text-muted)] text-[10px]">
             Documento Legal en Desarrollo
           </span>
         </div>
 
-        <h2 id="privacy-title" className="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-slate-100 mb-4">
+        <h2 id="privacy-title" className="font-serif text-xl sm:text-2xl font-bold text-[var(--color-navy)] dark:text-[var(--color-text)] mb-4 leading-tight">
           Borrador del Aviso de Privacidad Integral
         </h2>
 
         {/* Advertencia de alcance y responsabilidad */}
-        <div className="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/50 rounded-xl p-3.5 mb-6 text-xs text-amber-900 dark:text-amber-200 flex items-start gap-2.5">
-          <AlertTriangle className="w-4 h-4 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
-          <div>
-            <strong>Requisito legal obligatorio antes de producción:</strong> El uso interno del NSS también exige identificar claramente quién es responsable de los datos y quién tiene acceso a ellos. Antes de activar la recopilación en producción, el titular comercial debe auditar y completar los campos entre corchetes <code>[PENDIENTE: ...]</code>.
+        <div className="bg-[var(--color-surface-alt)] border-l-2 border-[var(--color-accent)] rounded-r p-4 mb-6 text-xs text-[var(--color-text-secondary)] flex items-start gap-2.5">
+          <AlertTriangle className="w-4 h-4 text-[var(--color-accent)] flex-shrink-0 mt-0.5" />
+          <div className="leading-relaxed">
+            <strong className="text-[var(--color-text)]">Requisito legal obligatorio antes de producción:</strong> El uso interno del NSS también exige identificar claramente quién es responsable de los datos y quién tiene acceso a ellos. Antes de activar la recopilación en producción, el titular comercial debe auditar y completar los campos entre corchetes <code>[PENDIENTE: ...]</code>.
           </div>
         </div>
 
-        <div className="text-xs sm:text-sm text-slate-700 dark:text-slate-300 space-y-4 leading-relaxed">
+        <div className="text-xs sm:text-sm text-[var(--color-text-secondary)] space-y-4 leading-relaxed">
           <section>
-            <h3 className="font-bold text-slate-900 dark:text-slate-100 mb-1">1. Identidad y Responsable del Tratamiento</h3>
+            <h3 className="font-serif font-bold text-sm text-[var(--color-navy)] dark:text-[var(--color-text)] mb-1">
+              1. Identidad y Responsable del Tratamiento
+            </h3>
             <p>
               El responsable del resguardo de sus datos personales es{' '}
-              <strong>[PENDIENTE: Razón Social o Nombre Legal del Titular]</strong> (denominado en esta demostración como{' '}
+              <strong className="text-[var(--color-text)]">[PENDIENTE: Razón Social o Nombre Legal del Titular]</strong> (denominado en esta demostración como{' '}
               <em>{COMMERCIAL_CONFIG.agencyName}</em>), con domicilio en{' '}
-              <strong>[PENDIENTE: Domicilio legal en México]</strong> y correo de atención{' '}
-              <strong>{COMMERCIAL_CONFIG.contactChannels.email}</strong>.
+              <strong className="text-[var(--color-text)]">[PENDIENTE: Domicilio legal en México]</strong> y correo de atención{' '}
+              <strong className="text-[var(--color-text)]">{COMMERCIAL_CONFIG.contactChannels.email}</strong>.
             </p>
           </section>
 
           <section>
-            <h3 className="font-bold text-slate-900 dark:text-slate-100 mb-1">2. Finalidad Específica del Número de Seguridad Social (NSS)</h3>
+            <h3 className="font-serif font-bold text-sm text-[var(--color-navy)] dark:text-[var(--color-text)] mb-1">
+              2. Finalidad Específica del Número de Seguridad Social (NSS)
+            </h3>
             <p>
               El NSS se recaba de manera justificada y condicional <strong>únicamente</strong> para solicitar su registro en el mecanismo interno de la inmobiliaria y asignar al asesor la atribución comercial de su atención durante un periodo de 15 días, conforme a las reglas internas vigentes.
             </p>
-            <div className="bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-xl p-3 text-[11px] text-slate-600 dark:text-slate-300 mt-2 space-y-1">
-              <p className="font-bold text-slate-800 dark:text-slate-200">Límites expresos de esta recopilación:</p>
+            <div className="bg-[var(--color-surface-alt)] border border-[var(--color-border)] rounded p-3 text-[11px] text-[var(--color-text-secondary)] mt-2 space-y-1">
+              <p className="font-semibold text-[var(--color-text)]">Límites expresos de esta recopilación:</p>
               <ul className="list-disc pl-4 space-y-0.5">
                 <li>NO constituye el inicio de una solicitud formal de crédito ante Infonavit.</li>
                 <li>NO autoriza una consulta de historial crediticio ante sociedades de información crediticia (buró).</li>
@@ -76,9 +80,11 @@ export function PrivacyModal({ isOpen, onClose }: PrivacyModalProps) {
           </section>
 
           <section>
-            <h3 className="font-bold text-slate-900 dark:text-slate-100 mb-1">3. Finalidades del Tratamiento de Datos de Contacto</h3>
+            <h3 className="font-serif font-bold text-sm text-[var(--color-navy)] dark:text-[var(--color-text)] mb-1">
+              3. Finalidades del Tratamiento de Datos de Contacto
+            </h3>
             <p>
-              <strong>Finalidades Primarias:</strong>
+              <strong className="text-[var(--color-text)]">Finalidades Primarias:</strong>
             </p>
             <ul className="list-disc pl-5 mt-1 space-y-1">
               <li>Contactarle directamente por WhatsApp o teléfono para coordinar y confirmar visitas a las propiedades.</li>
@@ -86,7 +92,7 @@ export function PrivacyModal({ isOpen, onClose }: PrivacyModalProps) {
               <li>Llevar el control interno de asignación comercial del asesor.</li>
             </ul>
             <p className="mt-2">
-              <strong>Finalidades Secundarias (opcionales):</strong>
+              <strong className="text-[var(--color-text)]">Finalidades Secundarias (opcionales):</strong>
             </p>
             <ul className="list-disc pl-5 mt-1 space-y-1">
               <li>Envío de promociones o nuevos desarrollos residenciales (requiere consentimiento expreso sin casillas premarcadas).</li>
@@ -94,25 +100,29 @@ export function PrivacyModal({ isOpen, onClose }: PrivacyModalProps) {
           </section>
 
           <section>
-            <h3 className="font-bold text-slate-900 dark:text-slate-100 mb-1">4. Ejercicio de Derechos ARCO</h3>
+            <h3 className="font-serif font-bold text-sm text-[var(--color-navy)] dark:text-[var(--color-text)] mb-1">
+              4. Ejercicio de Derechos ARCO
+            </h3>
             <p>
               Usted tiene derecho en todo momento a Acceder, Rectificar, Cancelar u Oponerse al tratamiento de sus datos personales, así como a revocar el consentimiento otorgado. Dichas solicitudes se atenderán a través del correo{' '}
-              <strong>{COMMERCIAL_CONFIG.contactChannels.email}</strong>.
+              <strong className="text-[var(--color-text)]">{COMMERCIAL_CONFIG.contactChannels.email}</strong>.
             </p>
           </section>
 
           <section>
-            <h3 className="font-bold text-slate-900 dark:text-slate-100 mb-1">5. Política de Conservación y Destrucción</h3>
+            <h3 className="font-serif font-bold text-sm text-[var(--color-navy)] dark:text-[var(--color-text)] mb-1">
+              5. Política de Conservación y Destrucción
+            </h3>
             <p>
               La política de atribución comercial de 15 días es independiente de la política de conservación de datos personales. Conforme a las directrices de seguridad, el NSS de prospectos no convertidos será eliminado de forma segura una vez agotado el periodo de conservación legal y comercial aprobado por el responsable.
             </p>
           </section>
         </div>
 
-        <div className="pt-6 mt-6 border-t border-slate-100 dark:border-slate-800 text-right">
+        <div className="pt-6 mt-6 border-t border-[var(--color-border)] text-right">
           <button
             onClick={onClose}
-            className="bg-[#0d233a] hover:bg-[#163b5c] dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-100 text-white font-semibold py-2.5 px-5 rounded-xl text-xs transition cursor-pointer"
+            className="bg-[var(--color-navy)] hover:bg-[var(--color-navy-light)] text-white font-medium py-2.5 px-5 rounded text-xs transition cursor-pointer shadow-sm"
           >
             Entendido y Cerrar
           </button>
