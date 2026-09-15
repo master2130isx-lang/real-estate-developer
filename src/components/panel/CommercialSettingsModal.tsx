@@ -29,7 +29,7 @@ interface CommercialSettingsModalProps {
 }
 
 export function CommercialSettingsModal({ isOpen, onClose }: CommercialSettingsModalProps) {
-  const { commercialConfig, updateCommercialConfig } = useApp();
+  const { commercialConfig, updateCommercialConfig, resetToDemoDefaults } = useApp();
 
   const [activeTab, setActiveTab] = useState<'advisor' | 'social' | 'development' | 'telegram' | 'database'>('advisor');
 
@@ -830,6 +830,26 @@ CREATE POLICY "Permitir todo acceso funnel" ON funnel_events FOR ALL USING (true
                         <span>Copiar Script SQL</span>
                       </>
                     )}
+                  </button>
+                </div>
+
+                {/* Zona de Mantenimiento / Restablecimiento Protegido */}
+                <div className="pt-3 mt-2 border-t border-emerald-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <div>
+                    <span className="text-xs font-bold text-slate-800 block">Restablecer datos demostrativos</span>
+                    <span className="text-[10px] text-slate-500">Exclusivo para pruebas iniciales. Requiere confirmación expresa.</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (window.confirm("¿Seguro que deseas restablecer los datos de demostración iniciales? Se reiniciará tu almacenamiento local.")) {
+                        resetToDemoDefaults();
+                        onClose();
+                      }
+                    }}
+                    className="text-[11px] text-rose-700 hover:text-rose-900 font-semibold px-2.5 py-1 rounded-lg border border-rose-200 hover:bg-rose-50 transition cursor-pointer self-start sm:self-auto"
+                  >
+                    Restablecer datos de prueba
                   </button>
                 </div>
               </div>

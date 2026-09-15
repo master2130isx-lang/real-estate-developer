@@ -102,7 +102,7 @@ export const INITIAL_LEADS: Lead[] = [
     commercialStatus: 'cita_solicitada',
     compatibility: 'alta',
     nextAction: 'Registrar prospecto con NSS en sistema de la inmobiliaria y preparar mensaje de WhatsApp para coordinar visita',
-    assignedAdvisor: 'Asesor Asignado (Demostración)',
+    assignedAdvisor: 'Ismael Zapata',
     appointmentRequest: {
       modality: 'presencial',
       preferredDate: '2026-09-19',
@@ -125,7 +125,7 @@ export const INITIAL_LEADS: Lead[] = [
         timestamp: '2026-09-12T11:24:18Z',
         actor: 'Sistema',
         action: 'Captura de formulario con NSS para solicitud de atribución comercial',
-        ipMasked: '189.204.xx.xx (Demo)',
+        ipMasked: '189.204.xx.xx (Portal Web)',
       },
     ],
   },
@@ -152,7 +152,7 @@ export const INITIAL_LEADS: Lead[] = [
     commercialStatus: 'listo_revision',
     compatibility: 'alta',
     nextAction: 'Preparar mensaje de WhatsApp para coordinar visita a la casa muestra',
-    assignedAdvisor: 'Asesor Comercial Asignado',
+    assignedAdvisor: 'Ismael Zapata',
     appointmentRequest: {
       modality: 'presencial',
       preferredDate: '2026-09-15',
@@ -163,7 +163,7 @@ export const INITIAL_LEADS: Lead[] = [
     internalNotes: [
       {
         id: 'note-2',
-        author: 'Asesor Comercial Asignado',
+        author: 'Ismael Zapata',
         createdAt: '2026-09-11 17:05',
         content: 'Esquema bancario no requiere NSS para registro interno.',
       },
@@ -200,7 +200,7 @@ export const INITIAL_LEADS: Lead[] = [
     commercialStatus: 'pendiente_info',
     compatibility: 'requiere_orientacion',
     nextAction: 'Contactar por WhatsApp para brindar orientación previa sobre crédito Infonavit',
-    assignedAdvisor: 'Asesor Comercial Asignado',
+    assignedAdvisor: 'Ismael Zapata',
     internalNotes: [
       {
         id: 'note-3',
@@ -243,7 +243,7 @@ export const INITIAL_LEADS: Lead[] = [
     commercialStatus: 'cita_confirmada',
     compatibility: 'alta',
     nextAction: 'Recibir en caseta de Valle de los Encinos el viernes a las 11:00',
-    assignedAdvisor: 'Asesor Comercial Asignado',
+    assignedAdvisor: 'Ismael Zapata',
     appointmentRequest: {
       modality: 'presencial',
       preferredDate: '2026-09-18',
@@ -256,7 +256,7 @@ export const INITIAL_LEADS: Lead[] = [
     internalNotes: [
       {
         id: 'note-4',
-        author: 'Asesor Comercial Asignado',
+        author: 'Ismael Zapata',
         createdAt: '2026-09-10 10:15',
         content: 'Acuerdo de visita pactado directamente por llamada.',
       },
@@ -292,20 +292,20 @@ export const INITIAL_LEADS: Lead[] = [
     nssLastFour: '9921',
     nssValueEncryptedMock: '01928374992',
     attributionStatus: 'confirmado',
-    attributionAdvisor: 'Asesor Comercial Asignado',
+    attributionAdvisor: 'Ismael Zapata',
     attributionConfirmedAt: '2026-09-08 11:30',
     attributionExpiresAt: '2026-09-23 11:30',
     attributionReference: 'INM-FOL-2026-441',
-    attributionConfirmedBy: 'Asesor Comercial Asignado',
+    attributionConfirmedBy: 'Ismael Zapata',
     attributionNotes: 'Confirmado en sistema de la inmobiliaria; plazo de 15 días corriendo.',
     commercialStatus: 'en_seguimiento',
     compatibility: 'alta',
     nextAction: 'Dar seguimiento antes del vencimiento de la atribución el 23 de septiembre',
-    assignedAdvisor: 'Asesor Comercial Asignado',
+    assignedAdvisor: 'Ismael Zapata',
     internalNotes: [
       {
         id: 'note-5',
-        author: 'Asesor Comercial Asignado',
+        author: 'Ismael Zapata',
         createdAt: '2026-09-08 11:30',
         content: 'Registro interno confirmado con folio INM-FOL-2026-441. Vigencia de 15 días iniciada.',
       },
@@ -314,7 +314,7 @@ export const INITIAL_LEADS: Lead[] = [
       {
         id: 'aud-5',
         timestamp: '2026-09-08T11:30:00Z',
-        actor: 'Asesor Comercial Asignado',
+        actor: 'Ismael Zapata',
         action: 'Confirmación de registro interno en inmobiliaria (Folio: INM-FOL-2026-441)',
       },
     ],

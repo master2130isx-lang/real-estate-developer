@@ -31,21 +31,13 @@ export function PrivacyModal({ isOpen, onClose }: PrivacyModalProps) {
         <div className="flex items-center gap-2 text-[var(--color-accent)] mb-2">
           <Shield className="w-5 h-5 text-[var(--color-accent)]" />
           <span className="label-caps text-[var(--color-text-muted)] text-[10px]">
-            Documento Legal en Desarrollo
+            Aviso Legal Vigente • LFPDPPP
           </span>
         </div>
 
         <h2 id="privacy-title" className="font-serif text-xl sm:text-2xl font-bold text-[var(--color-navy)] dark:text-[var(--color-text)] mb-4 leading-tight">
-          Borrador del Aviso de Privacidad Integral
+          Aviso de Privacidad Integral
         </h2>
-
-        {/* Advertencia de alcance y responsabilidad */}
-        <div className="bg-[var(--color-surface-alt)] border-l-2 border-[var(--color-accent)] rounded-r p-4 mb-6 text-xs text-[var(--color-text-secondary)] flex items-start gap-2.5">
-          <AlertTriangle className="w-4 h-4 text-[var(--color-accent)] flex-shrink-0 mt-0.5" />
-          <div className="leading-relaxed">
-            <strong className="text-[var(--color-text)]">Requisito legal obligatorio antes de producción:</strong> El uso interno del NSS también exige identificar claramente quién es responsable de los datos y quién tiene acceso a ellos. Antes de activar la recopilación en producción, el titular comercial debe auditar y completar los campos entre corchetes <code>[PENDIENTE: ...]</code>.
-          </div>
-        </div>
 
         <div className="text-xs sm:text-sm text-[var(--color-text-secondary)] space-y-4 leading-relaxed">
           <section>
@@ -53,10 +45,9 @@ export function PrivacyModal({ isOpen, onClose }: PrivacyModalProps) {
               1. Identidad y Responsable del Tratamiento
             </h3>
             <p>
-              El responsable del resguardo de sus datos personales es{' '}
-              <strong className="text-[var(--color-text)]">[PENDIENTE: Razón Social o Nombre Legal del Titular]</strong> (denominado en esta demostración como{' '}
-              <em>{COMMERCIAL_CONFIG.agencyName}</em>), con domicilio en{' '}
-              <strong className="text-[var(--color-text)]">[PENDIENTE: Domicilio legal en México]</strong> y correo de atención{' '}
+              El responsable del tratamiento y resguardo legítimo de sus datos personales es{' '}
+              <strong className="text-[var(--color-text)]">{COMMERCIAL_CONFIG.agencyName}</strong>, con domicilio comercial para efectos de atención ubicado en{' '}
+              <strong className="text-[var(--color-text)]">{COMMERCIAL_CONFIG.contactChannels.officeAddressNote || 'Calzada del Sol, Salinas Victoria, Nuevo León'}</strong>, y correo electrónico de contacto oficial{' '}
               <strong className="text-[var(--color-text)]">{COMMERCIAL_CONFIG.contactChannels.email}</strong>.
             </p>
           </section>

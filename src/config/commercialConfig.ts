@@ -44,15 +44,15 @@ export interface CommercialConfig {
 export const COMMERCIAL_CONFIG: CommercialConfig = {
   isDemoMode: false,
   agencyName: 'Valle de los Encinos - Salinas Victoria',
-  agencyLegalStatus: 'demostracion_pendiente_confirmacion',
-  advisorName: 'Asesor Comercial Asignado',
+  agencyLegalStatus: 'confirmado',
+  advisorName: 'Ismael Zapata',
   advisorRole: 'Asesor Certificado de Atención Inmobiliaria',
   advisorVerificationStatus: 'verificado',
   coverageZone: 'Valle de los Encinos, Salinas Victoria, N.L.',
   contactChannels: {
-    phone: '+52 33 4254 6271',
-    whatsapp: '523342546271',
-    email: 'atencion@valledelosencinos.com',
+    phone: '+52 3143529773',
+    whatsapp: '523143529773',
+    email: 'master2130.isx@gmail.com',
     officeAddressNote: 'Calzada del Sol, Salinas Victoria, N.L. Atención con cita previa.',
   },
   socialLinks: {

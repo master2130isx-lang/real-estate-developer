@@ -32,7 +32,7 @@ import { AppointmentAgendaView } from '@/components/panel/AppointmentAgendaView'
 import { CommercialSettingsModal } from '@/components/panel/CommercialSettingsModal';
 
 export default function AgentPanelPage() {
-  const { leads, resetToDemoDefaults, commercialConfig } = useApp();
+  const { leads, commercialConfig } = useApp();
 
   // Pestaña activa principal: Agenda o Cartera de Prospectos
   const [activeTab, setActiveTab] = useState<'agenda' | 'prospectos'>('agenda');
@@ -161,15 +161,6 @@ export default function AgentPanelPage() {
             >
               <Plus className="w-4 h-4 text-[#0F2C40]" />
               <span>Agendar Cita</span>
-            </button>
-
-            <button
-              onClick={resetToDemoDefaults}
-              className="bg-[#13344C]/60 hover:bg-[#13344C] text-slate-300 hover:text-white px-2.5 py-1.5 rounded-xl transition flex items-center gap-1.5 cursor-pointer text-[11px] border border-white/5"
-              title="Restablecer datos demostrativos"
-            >
-              <RefreshCw className="w-3 h-3 text-slate-400" />
-              <span className="hidden lg:inline">Restablecer</span>
             </button>
 
             {/* Asesor Autenticado y Cerrar Sesión */}

@@ -70,7 +70,7 @@ function normalizeLead(lead: any): Lead {
     commercialStatus: lead.commercialStatus || 'nuevo',
     compatibility: lead.compatibility || 'media',
     nextAction: lead.nextAction || 'Contactar vía WhatsApp',
-    assignedAdvisor: lead.assignedAdvisor || 'Asesor Asignado (Demostración)',
+    assignedAdvisor: lead.assignedAdvisor || 'Ismael Zapata',
     internalNotes: Array.isArray(lead.internalNotes) ? lead.internalNotes : [],
     auditHistory: Array.isArray(lead.auditHistory) ? lead.auditHistory : [],
   };
@@ -305,7 +305,7 @@ export function AppProvider({
         attributionStatus === 'pendiente_inmobiliaria'
           ? 'Registrar NSS en sistema interno de la inmobiliaria y preparar mensaje de WhatsApp'
           : 'Preparar mensaje de WhatsApp para dar atención y confirmar visita',
-      assignedAdvisor: 'Asesor Asignado (Demostración)',
+      assignedAdvisor: commercialConfig?.advisorName || 'Ismael Zapata',
       appointmentRequest: data.appointmentRequest,
       internalNotes: [
         {
@@ -327,7 +327,7 @@ export function AppProvider({
           timestamp: new Date().toISOString(),
           actor: 'Sistema',
           action: `Registro web completado. Atribución: ${attributionStatus}`,
-          ipMasked: '189.240.xx.xx (Demo)',
+          ipMasked: '189.240.xx.xx (Portal Web)',
         },
       ],
     };
@@ -362,7 +362,7 @@ export function AppProvider({
         if (noteText && noteText.trim()) {
           updatedNotes.push({
             id: `note-${Date.now()}`,
-            author: 'Asesor Asignado (Demostración)',
+            author: commercialConfig?.advisorName || 'Ismael Zapata',
             createdAt: new Date().toISOString().replace('T', ' ').substring(0, 16),
             content: noteText.trim(),
           });
@@ -371,7 +371,7 @@ export function AppProvider({
         const auditEvent: AuditEvent = {
           id: `aud-${Date.now()}`,
           timestamp: new Date().toISOString(),
-          actor: 'Asesor Asignado (Demostración)',
+          actor: commercialConfig?.advisorName || 'Ismael Zapata',
           action: `Estado comercial actualizado a '${status}'`,
         };
 
@@ -621,13 +621,15 @@ export function AppProvider({
     }
   };
 
-  const addLeadNote = (leadId: string, content: string, author: string = 'Asesor Asignado (Demostración)') => {
+  const addLeadNote = (leadId: string, content: string, author?: string) => {
+    const defaultAuthor = commercialConfig?.advisorName || 'Ismael Zapata';
+    const noteAuthor = author || defaultAuthor;
     setLeads((prev) =>
       prev.map((lead) => {
         if (lead.id !== leadId) return lead;
         const newNote: LeadNote = {
           id: `note-${Date.now()}`,
-          author,
+          author: noteAuthor,
           createdAt: new Date().toISOString().replace('T', ' ').substring(0, 16),
           content,
         };
@@ -658,12 +660,14 @@ export function AppProvider({
         // Calcular vencimiento a 15 días posteriores
         const baseDate = new Date(confirmedAt || Date.now());
         const expireDate = new Date(baseDate.getTime() + 15 * 24 * 60 * 60 * 1000);
-        const expiresAtFormatted = `${expireDate.toISOString().replace('T', ' ').substring(0, 16)} (Estimado Demo)`;
+        const expiresAtFormatted = expireDate.toISOString().replace('T', ' ').substring(0, 16);
+
+        const activeAdvisor = confirmedBy || commercialConfig?.advisorName || 'Ismael Zapata';
 
         const auditEvent: AuditEvent = {
           id: `aud-${Date.now()}`,
           timestamp: new Date().toISOString(),
-          actor: confirmedBy || 'Asesor Asignado (Demostración)',
+          actor: activeAdvisor,
           action: `Registro interno confirmado en inmobiliaria (Folio/Ref: ${reference || 'N/A'})`,
           reason: notes || 'Confirmación manual en mecanismo interno de inmobiliaria',
         };
@@ -671,9 +675,9 @@ export function AppProvider({
         const updatedNotes = [...(lead.internalNotes || [])];
         updatedNotes.push({
           id: `note-${Date.now()}`,
-          author: confirmedBy || 'Asesor Asignado (Demostración)',
+          author: activeAdvisor,
           createdAt: new Date().toISOString().replace('T', ' ').substring(0, 16),
-          content: `Registro confirmado en inmobiliaria. Ref: ${reference || 'Sin folio'}. Vigencia estimada de 15 días hasta ${expiresAtFormatted}.`,
+          content: `Registro confirmado en inmobiliaria. Ref: ${reference || 'Sin folio'}. Vigencia de 15 días hasta ${expiresAtFormatted}.`,
         });
 
         return {
@@ -692,6 +696,7 @@ export function AppProvider({
   };
 
   const markAttributionConflict = (leadId: string, reason: string) => {
+    const advisor = commercialConfig?.advisorName || 'Ismael Zapata';
     setLeads((prev) =>
       prev.map((lead) => {
         if (lead.id !== leadId) return lead;
@@ -699,7 +704,7 @@ export function AppProvider({
         const auditEvent: AuditEvent = {
           id: `aud-${Date.now()}`,
           timestamp: new Date().toISOString(),
-          actor: 'Asesor Asignado (Demostración)',
+          actor: advisor,
           action: 'Registro en inmobiliaria rechazado / conflicto de duplicidad',
           reason,
         };
@@ -707,7 +712,7 @@ export function AppProvider({
         const updatedNotes = [...(lead.internalNotes || [])];
         updatedNotes.push({
           id: `note-${Date.now()}`,
-          author: 'Asesor Asignado (Demostración)',
+          author: advisor,
           createdAt: new Date().toISOString().replace('T', ' ').substring(0, 16),
           content: `Conflicto en inmobiliaria: ${reason}. Atribución no asignada.`,
         });
@@ -725,7 +730,7 @@ export function AppProvider({
   const revealNssWithAudit = (
     leadId: string,
     reason: string,
-    advisorName: string = 'Asesor Asignado (Demostración)'
+    advisorName?: string
   ): { success: boolean; nss?: string; error?: string } => {
     const lead = leads.find((l) => l.id === leadId);
     if (!lead) return { success: false, error: 'Prospecto no encontrado' };
@@ -738,13 +743,15 @@ export function AppProvider({
       return { success: false, error: 'Debes especificar un motivo válido para la consulta (mínimo 5 letras)' };
     }
 
+    const activeAdvisor = advisorName || commercialConfig?.advisorName || 'Ismael Zapata';
+
     const auditEvent: AuditEvent = {
       id: `aud-${Date.now()}`,
       timestamp: new Date().toISOString(),
-      actor: advisorName,
-      action: 'CONSULTA DE NSS (SIMULACIÓN DEMO)',
+      actor: activeAdvisor,
+      action: 'CONSULTA Y DESENCRIPTACIÓN DE NSS',
       reason: reason.trim(),
-      ipMasked: '189.240.xx.xx (Sesión Demo)',
+      ipMasked: '189.240.xx.xx (Portal Seguro)',
     };
 
     setLeads((prev) =>

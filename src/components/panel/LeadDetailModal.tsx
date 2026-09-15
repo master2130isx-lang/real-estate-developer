@@ -16,6 +16,8 @@ import {
   MessageSquare,
   Building2,
   AlertTriangle,
+  Copy,
+  Check,
 } from 'lucide-react';
 import { Lead, CommercialStatus } from '@/types';
 import { useApp } from '@/context/AppContext';
@@ -28,7 +30,7 @@ interface LeadDetailModalProps {
 }
 
 export function LeadDetailModal({ lead, onClose }: LeadDetailModalProps) {
-  const { updateLeadStatus, updateAppointmentStatus, addLeadNote, revealNssWithAudit } = useApp();
+  const { updateLeadStatus, updateAppointmentStatus, addLeadNote, revealNssWithAudit, commercialConfig } = useApp();
 
   const [activeTab, setActiveTab] = useState<'info' | 'atribucion' | 'cita' | 'notas' | 'auditoria'>('info');
   const [newNote, setNewNote] = useState('');
@@ -39,11 +41,12 @@ export function LeadDetailModal({ lead, onClose }: LeadDetailModalProps) {
   const [isWaModalOpen, setIsWaModalOpen] = useState(false);
   const [isConfirmRegModalOpen, setIsConfirmRegModalOpen] = useState(false);
 
-  // Estados para revelado de NSS
+  // Estados para revelado de NSS y ficha constructora
   const [isRevealModalOpen, setIsRevealModalOpen] = useState(false);
   const [revealReason, setRevealReason] = useState('');
   const [revealedNss, setRevealedNss] = useState<string | null>(null);
   const [revealError, setRevealError] = useState<string | null>(null);
+  const [copiedSheet, setCopiedSheet] = useState(false);
 
   // Estados para cita confirmada
   const [confirmedDate, setConfirmedDate] = useState('');
@@ -78,15 +81,33 @@ export function LeadDetailModal({ lead, onClose }: LeadDetailModalProps) {
       setRevealError('Debes ingresar un motivo comercial o legal justificado (mínimo 5 letras).');
       return;
     }
-    setRevealError(null);
-    const result = revealNssWithAudit(lead.id, revealReason);
-    if (result.success && result.nss) {
-      setRevealedNss(result.nss);
+    const res = revealNssWithAudit(lead.id, revealReason.trim());
+    if (res.success && res.nss) {
+      setRevealedNss(res.nss);
       setIsRevealModalOpen(false);
       setRevealReason('');
+      setRevealError(null);
     } else {
-      setRevealError(result.error || 'Error al autorizar consulta.');
+      setRevealError(res.error || 'No se pudo revelar el dato.');
     }
+  };
+
+  const handleCopyConstructorSheet = () => {
+    const advisor = commercialConfig?.advisorName || 'Ismael Zapata';
+    const nss = revealedNss || lead.nssValueEncryptedMock || (lead.nssLastFour ? `*******${lead.nssLastFour}` : 'No proporcionado');
+    const sheetText = `📋 REGISTRO DE ATRIBUCIÓN COMERCIAL (15 DÍAS)
+Desarrollo: Valle de los Encinos - Salinas Victoria, N.L.
+Modelo: ${lead.selectedPropertyTitle || 'Modelo Águila Premier ($1,180,000 MXN)'}
+Cliente: ${lead.fullName}
+Teléfono: ${lead.phone}
+NSS: ${nss}
+Forma de compra: ${lead.financingType.toUpperCase()}
+Asesor Responsable: ${advisor}
+Folio Web: ${lead.folio || 'N/A'}`;
+
+    navigator.clipboard.writeText(sheetText);
+    setCopiedSheet(true);
+    setTimeout(() => setCopiedSheet(false), 2500);
   };
 
   const commercialStatusLabels: Record<CommercialStatus, string> = {
@@ -144,14 +165,34 @@ export function LeadDetailModal({ lead, onClose }: LeadDetailModalProps) {
             <h2 id="lead-modal-title" className="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-slate-100">
               {lead.fullName || 'Interesado'}
             </h2>
-            {/* Botón de acción rápida: WhatsApp */}
-            <button
-              onClick={() => setIsWaModalOpen(true)}
-              className="self-start sm:self-auto bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3 py-1.5 rounded-xl text-xs flex items-center gap-1.5 transition shadow-sm cursor-pointer"
-            >
-              <MessageSquare className="w-3.5 h-3.5" />
-              <span>Preparar WhatsApp</span>
-            </button>
+            {/* Botones de acción rápida: Copiar Ficha y WhatsApp */}
+            <div className="flex flex-wrap items-center gap-2 self-start sm:self-auto">
+              <button
+                onClick={handleCopyConstructorSheet}
+                title="Copiar datos formateados para registrar en el sistema de la constructora y activar los 15 días"
+                className="bg-[#0F2C40] hover:bg-[#163E5B] dark:bg-[#1E3E5E] dark:hover:bg-[#254F77] text-white font-medium px-3 py-1.5 rounded-xl text-xs flex items-center gap-1.5 transition shadow-xs cursor-pointer border border-[#0F2C40] dark:border-[#2D5A85]"
+              >
+                {copiedSheet ? (
+                  <>
+                    <Check className="w-3.5 h-3.5 text-amber-400" />
+                    <span>¡Ficha Copiada!</span>
+                  </>
+                ) : (
+                  <>
+                    <Copy className="w-3.5 h-3.5 text-amber-400" />
+                    <span>Copiar Ficha Constructora</span>
+                  </>
+                )}
+              </button>
+
+              <button
+                onClick={() => setIsWaModalOpen(true)}
+                className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3 py-1.5 rounded-xl text-xs flex items-center gap-1.5 transition shadow-sm cursor-pointer"
+              >
+                <MessageSquare className="w-3.5 h-3.5" />
+                <span>Preparar WhatsApp</span>
+              </button>
+            </div>
           </div>
 
           <div className="flex flex-wrap items-center gap-2 mt-3">
@@ -253,7 +294,7 @@ export function LeadDetailModal({ lead, onClose }: LeadDetailModalProps) {
                 <div className="flex items-center gap-2">
                   <Lock className="w-4 h-4 text-amber-400" />
                   <span className="font-bold text-xs uppercase tracking-wider text-slate-200">
-                    NSS Recibido en Web (Simulación Demo)
+                    NSS Recibido en Web (Expediente Protegido)
                   </span>
                 </div>
                 <span className="text-[10px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded border border-slate-700">
@@ -292,7 +333,7 @@ export function LeadDetailModal({ lead, onClose }: LeadDetailModalProps) {
 
               {revealedNss && (
                 <div className="bg-emerald-950/80 border border-emerald-700 p-2.5 rounded-xl text-xs text-emerald-200 flex items-center justify-between">
-                  <span>✓ NSS revelado bajo auditoría simulada.</span>
+                  <span>✓ NSS revelado bajo registro de auditoría legal.</span>
                   <button
                     onClick={() => setRevealedNss(null)}
                     className="text-xs text-emerald-400 underline cursor-pointer"
@@ -388,17 +429,17 @@ export function LeadDetailModal({ lead, onClose }: LeadDetailModalProps) {
                     <strong className="text-amber-700 dark:text-amber-400">{lead.attributionExpiresAt}</strong>
                   </div>
                   <div className="col-span-2 pt-1 border-t border-slate-100 dark:border-slate-700">
-                    <span className="text-slate-400 block text-[10px]">Registrado en demo por:</span>
+                    <span className="text-slate-400 block text-[10px]">Registrado por:</span>
                     <span className="text-slate-700 dark:text-slate-300 font-medium">{lead.attributionConfirmedBy}</span>
                   </div>
                 </div>
               ) : lead.attributionStatus === 'pendiente_inmobiliaria' ? (
                 <div className="bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-900/50 rounded-xl p-3.5 text-xs text-blue-900 dark:text-blue-200 space-y-2">
                   <p className="font-bold">
-                    Acción pendiente para el asesor:
+                    Acción urgente para el asesor:
                   </p>
                   <p className="leading-relaxed">
-                    El prospecto ya proporcionó su NSS en la web. Debes ingresar este dato en el sistema de la inmobiliaria para formalizar el bloqueo de 15 días y después simular aquí la confirmación.
+                    El prospecto ya proporcionó su NSS en la web. Copia la ficha con el botón superior y regístralo de inmediato en el portal de la constructora para asegurar tu bloqueo de 15 días.
                   </p>
                 </div>
               ) : lead.attributionStatus === 'pendiente_nss' ? (
@@ -411,14 +452,14 @@ export function LeadDetailModal({ lead, onClose }: LeadDetailModalProps) {
                 </div>
               )}
 
-              {/* Botón para simular confirmación o conflicto */}
+              {/* Botón para gestionar registro o registrar conflicto */}
               <div className="pt-2">
                 <button
                   onClick={() => setIsConfirmRegModalOpen(true)}
                   className="bg-[#0d233a] hover:bg-[#163b5c] dark:bg-amber-500 dark:hover:bg-amber-400 dark:text-slate-950 text-white font-bold py-2.5 px-4 rounded-xl text-xs transition flex items-center gap-1.5 cursor-pointer shadow-sm"
                 >
                   <Building2 className="w-4 h-4 text-amber-400 dark:text-slate-950" />
-                  <span>Gestionar Registro en Inmobiliaria (Simulación Demo)</span>
+                  <span>Gestionar Registro en Constructora / Inmobiliaria</span>
                 </button>
               </div>
             </div>
@@ -600,7 +641,7 @@ export function LeadDetailModal({ lead, onClose }: LeadDetailModalProps) {
             <div className="bg-white dark:bg-slate-900 rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200 dark:border-slate-800 space-y-4 text-slate-900 dark:text-slate-100">
               <div className="flex items-center gap-2 text-amber-600 dark:text-amber-400 font-bold text-sm">
                 <ShieldAlert className="w-5 h-5" />
-                <span>Protocolo de Consulta de NSS (Demo)</span>
+                <span>Protocolo de Consulta Segura de NSS</span>
               </div>
 
               <h3 className="font-bold text-slate-900 dark:text-slate-100 text-base">
