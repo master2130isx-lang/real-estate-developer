@@ -162,6 +162,28 @@ export default function AgentPanelPage() {
               <RefreshCw className="w-3 h-3" />
               <span className="hidden sm:inline">Restablecer datos</span>
             </button>
+
+            {/* Asesor Autenticado y Cerrar Sesión */}
+            <div className="flex items-center gap-2 pl-2 border-l border-slate-700">
+              <div className="hidden lg:flex items-center gap-1.5 text-[11px] text-slate-300 bg-slate-800/60 px-2.5 py-1 rounded-xl border border-slate-700">
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span className="font-mono text-emerald-300 font-semibold">master2130.isx@gmail.com</span>
+              </div>
+
+              <button
+                onClick={async () => {
+                  try {
+                    await fetch('/api/auth/logout', { method: 'POST' });
+                  } catch {}
+                  window.location.href = '/login';
+                }}
+                className="bg-rose-950/70 hover:bg-rose-900 text-rose-200 border border-rose-800/60 px-2.5 py-1.5 rounded-xl transition flex items-center gap-1 cursor-pointer text-[11px] font-bold shadow-xs"
+                title="Cerrar sesión segura del panel"
+              >
+                <span className="hidden sm:inline">Cerrar Sesión</span>
+                <span className="sm:hidden">Salir</span>
+              </button>
+            </div>
           </div>
         </div>
       </header>

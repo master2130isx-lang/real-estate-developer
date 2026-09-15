@@ -69,6 +69,15 @@ El asistente leerá este archivo automáticamente y tendrá el 100% del contexto
   - `/api/telegram/webhook`: Endpoint para producción en Vercel.
   - `/api/telegram/setup-webhook`: Conector automático de Webhook.
 
+### 6. Base de Datos Definitiva en la Nube (Supabase PostgreSQL)
+- **Persistencia real en Vercel Serverless:** Mapeo nativo de tablas `leads`, `commercial_config` y `funnel_events`.
+- **Arquitectura de Resiliencia con Fallback Híbrido:** Si Supabase no está configurado o pierde conectividad, el sistema cae en `/tmp` y JSON local automáticamente sin interrumpir el funcionamiento ni arrojar errores de pantalla blanca.
+- **Auto-sembrado inteligente:** Si la tabla `leads` está recién creada y vacía, el servidor migra automáticamente los registros iniciales para que el panel nunca quede vacío.
+- **Herramientas de Base de Datos incluidas:**
+  - `supabase/schema.sql`: Script DDL listo para copiar y ejecutar en el SQL Editor de Supabase con 1 clic.
+  - `/api/db/status`: Endpoint de diagnóstico en tiempo real de salud, latencia y conteo de registros.
+  - Pestaña **"Base de Datos"** en `CommercialSettingsModal` con semáforo de conexión, comprobador en vivo y copiador de script SQL.
+
 ---
 
 ## 🔐 Configuración de Variables de Entorno (Producción y Local)
@@ -77,17 +86,18 @@ El asistente leerá este archivo automáticamente y tendrá el 100% del contexto
 | :--- | :--- | :--- |
 | `TELEGRAM_BOT_TOKEN` | Token del bot de Telegram | `.env.local` (Local) y Vercel Settings > Environment Variables |
 | `TELEGRAM_ADVISOR_CHAT_ID` | ID de Chat de Telegram (`948786976`) | `.env.local` (Local) y Vercel Settings > Environment Variables |
+| `NEXT_PUBLIC_SUPABASE_URL` | URL del proyecto Supabase (`https://...supabase.co`) | `.env.local` (Local) y Vercel Settings > Environment Variables |
+| `SUPABASE_SERVICE_ROLE_KEY` | Clave secreta service_role de Supabase para backend | `.env.local` (Local) y Vercel Settings > Environment Variables |
 
 > [!NOTE]
-> Los tokens fueron retirados de los archivos rastreados por Git para mantener limpio el repositorio y cumplir con las normas de seguridad de GitHub (*Secret Scanning*).
+> Consulta `.env.example` para una plantilla comentada de todas las variables del sistema.
 
 ---
 
-## ⚠️ Estado de la Persistencia en Vercel (Producción)
+## 💾 Estado de la Persistencia en Vercel (Producción)
 
-- Actualmente, en desarrollo local los datos se guardan en `src/data/leadsStore.json` y `localStorage`.
-- En **Vercel (producción)**, las funciones son *serverless* con sistema de archivos de solo lectura (`read-only`). Cuentan con soporte temporal en `/tmp` y el cliente tiene un algoritmo de *merge* para no perder prospectos dentro de la misma sesión del navegador.
-- **Para producción masiva:** El paso recomendado es conectar una base de datos en la nube (ej. **Supabase PostgreSQL** o **Neon**) para que los datos queden permanentemente sincronizados entre cualquier dispositivo (celular del cliente, laptop del asesor, etc.).
+- **Producción con Supabase:** La aplicación cuenta con integración completa con `@supabase/supabase-js`. Para activarla en cualquier instancia de Vercel solo se requiere configurar `NEXT_PUBLIC_SUPABASE_URL` y `SUPABASE_SERVICE_ROLE_KEY`.
+- **Modo Local / Desconectado:** En desarrollo local o antes de ingresar credenciales, la plataforma utiliza de forma segura su memoria caché, `src/data/leadsStore.json` y `/tmp`, permitiendo probar y demostrar el 100% de las funciones sin necesidad de internet ni base de datos externa.
 
 ---
 
@@ -95,11 +105,10 @@ El asistente leerá este archivo automáticamente y tendrá el 100% del contexto
 
 Elige cualquiera de estos temas al reanudar según la prioridad del cliente:
 
-1. **Base de Datos Definitiva para el MVP:**
-   - Conectar Supabase (PostgreSQL gratuito) o Vercel Postgres para almacenar prospectos, notas, citas y configuraciones comerciales permanentemente entre todos los dispositivos.
-2. **Sección Interactiva "Cómo Llegar" / Mapa:**
+1. **Sección Interactiva "Cómo Llegar" / Mapa:**
    - Añadir mapa interactivo (Google Maps embebido o Leaflet) con rutas sugeridas desde Monterrey, San Nicolás y Escobedo hacia la caseta de Valle de los Encinos.
-3. **Automatización de Correos Electrónicos (Email Notifications):**
+2. **Automatización de Correos Electrónicos (Email Notifications):**
    - Integrar Resend o Nodemailer para enviar automáticamente un correo formal al cliente con los detalles de su cita y una copia al correo del asesor.
-4. **Catálogo Multi-Modelo:**
+3. **Catálogo Multi-Modelo:**
    - Incorporar fichas técnicas y galerías de los modelos restantes de la desarrolladora en Valle de los Encinos conforme entreguen su material.
+
