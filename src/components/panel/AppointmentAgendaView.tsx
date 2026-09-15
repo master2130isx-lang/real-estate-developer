@@ -359,7 +359,7 @@ export function AppointmentAgendaView({
                   {/* Fila 1: Nombre del Prospecto, Folio y Teléfono */}
                   <div className="flex items-start justify-between gap-1.5">
                     <div>
-                      <h4 className="font-serif text-[15px] font-bold text-slate-900 dark:text-white leading-tight">
+                      <h4 className="font-sans text-[15px] font-bold text-slate-900 dark:text-white tracking-tight leading-tight">
                         {lead.fullName || 'Prospecto'}
                       </h4>
                       <div className="flex items-center gap-2 text-[11px] mt-1">
@@ -529,7 +529,7 @@ export function AppointmentAgendaView({
             <Calendar className="w-6 h-6" />
           </div>
           <div>
-            <h4 className="font-serif font-bold text-slate-900 dark:text-white text-base">
+            <h4 className="font-sans font-bold text-slate-900 dark:text-white text-base">
               No hay citas en el periodo seleccionado
             </h4>
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-sm mx-auto">
@@ -551,7 +551,7 @@ export function AppointmentAgendaView({
         <div className="fixed inset-0 z-60 flex items-center justify-center p-4 bg-black/65 backdrop-blur-sm">
           <div className="bg-white dark:bg-[#102033] rounded-2xl max-w-md w-full p-5 shadow-2xl border border-slate-200 dark:border-[#1E354D] space-y-4 text-slate-900 dark:text-slate-100">
             <div>
-              <h3 className="text-base font-serif font-bold text-slate-900 dark:text-white">
+              <h3 className="text-base font-sans font-bold text-slate-900 dark:text-white">
                 Reprogramar Visita para {rescheduleLead.fullName}
               </h3>
               <p className="text-xs text-slate-500 dark:text-slate-400">

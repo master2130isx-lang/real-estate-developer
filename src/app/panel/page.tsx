@@ -132,7 +132,7 @@ export default function AgentPanelPage() {
               </div>
               <div>
                 <div className="flex items-center gap-2">
-                  <span className="font-serif font-bold text-sm sm:text-base tracking-wide text-white">
+                  <span className="font-sans font-bold text-sm sm:text-base tracking-normal text-white">
                     Panel Comercial
                   </span>
                   <span className="bg-[#C09B53]/20 text-[#D4AF37] text-[10px] px-2 py-0.5 rounded-full font-semibold border border-[#C09B53]/30 tracking-wider">
