@@ -18,6 +18,7 @@ import {
   Copy,
   ExternalLink,
   RefreshCw,
+  ShieldCheck,
 } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
 import { WhatsAppIcon } from '@/components/common/WhatsAppIcon';
@@ -311,63 +312,63 @@ CREATE POLICY "Permitir todo acceso funnel" ON funnel_events FOR ALL USING (true
         </div>
 
         {/* Pestañas de Ajustes */}
-        <div className="flex items-center gap-1.5 pt-3 border-b border-slate-100 overflow-x-auto text-xs font-semibold">
+        <div className="flex items-center justify-between gap-1 pt-3 border-b border-slate-100 text-xs font-semibold">
           <button
             type="button"
             onClick={() => setActiveTab('advisor')}
-            className={`pb-2 px-3 border-b-2 transition flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
+            className={`pb-2 px-2.5 border-b-2 transition flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
               activeTab === 'advisor'
                 ? 'border-[#0d233a] text-[#0d233a] font-bold'
                 : 'border-transparent text-slate-500 hover:text-slate-800'
             }`}
           >
             <User className="w-3.5 h-3.5" />
-            <span>Asesor y Teléfonos</span>
+            <span>Asesor</span>
           </button>
 
           <button
             type="button"
             onClick={() => setActiveTab('social')}
-            className={`pb-2 px-3 border-b-2 transition flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
+            className={`pb-2 px-2.5 border-b-2 transition flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
               activeTab === 'social'
                 ? 'border-[#0d233a] text-[#0d233a] font-bold'
                 : 'border-transparent text-slate-500 hover:text-slate-800'
             }`}
           >
             <Share2 className="w-3.5 h-3.5" />
-            <span>Redes Sociales</span>
+            <span>Redes</span>
           </button>
 
           <button
             type="button"
             onClick={() => setActiveTab('development')}
-            className={`pb-2 px-3 border-b-2 transition flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
+            className={`pb-2 px-2.5 border-b-2 transition flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
               activeTab === 'development'
                 ? 'border-[#0d233a] text-[#0d233a] font-bold'
                 : 'border-transparent text-slate-500 hover:text-slate-800'
             }`}
           >
             <Building2 className="w-3.5 h-3.5" />
-            <span>Inmobiliaria / Caseta</span>
+            <span>Inmobiliaria</span>
           </button>
 
           <button
             type="button"
             onClick={() => setActiveTab('telegram')}
-            className={`pb-2 px-3 border-b-2 transition flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
+            className={`pb-2 px-2.5 border-b-2 transition flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
               activeTab === 'telegram'
                 ? 'border-[#0d233a] text-[#0d233a] font-bold'
                 : 'border-transparent text-slate-500 hover:text-slate-800'
             }`}
           >
             <Send className="w-3.5 h-3.5 text-sky-600" />
-            <span>Bot de Telegram</span>
+            <span>Telegram</span>
           </button>
 
           <button
             type="button"
             onClick={() => setActiveTab('database')}
-            className={`pb-2 px-3 border-b-2 transition flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
+            className={`pb-2 px-2.5 border-b-2 transition flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
               activeTab === 'database'
                 ? 'border-[#0d233a] text-[#0d233a] font-bold'
                 : 'border-transparent text-slate-500 hover:text-slate-800'
@@ -583,68 +584,63 @@ CREATE POLICY "Permitir todo acceso funnel" ON funnel_events FOR ALL USING (true
 
           {/* TAB 4: BOT DE TELEGRAM */}
           {activeTab === 'telegram' && (
-            <div className="space-y-3">
-              <div className="bg-sky-50 border border-sky-200 rounded-2xl p-3.5 text-xs text-sky-950 space-y-1.5">
-                <div className="flex items-center gap-1.5 font-bold text-sky-900">
-                  <Send className="w-4 h-4 text-sky-600" />
-                  <span>Configuración del Bot Móvil de Alertas</span>
+            <div className="space-y-3.5">
+              <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 text-xs text-emerald-950 space-y-2.5">
+                <div className="flex items-center gap-2 font-bold text-emerald-900">
+                  <ShieldCheck className="w-5 h-5 text-emerald-600 shrink-0" />
+                  <span>Bot Móvil de Alertas Protegido en el Servidor (Vercel)</span>
                 </div>
-                <p className="text-[11px] leading-relaxed">
-                  Cualquier agente que adquiera tu plantilla solo debe pegar su <strong>Token de @BotFather</strong> y su <strong>Chat ID de @userinfobot</strong> para recibir las citas en su celular y aprobarlas con botones interactivos.
+                <p className="text-[11px] leading-relaxed text-emerald-800">
+                  Las credenciales de tu bot (<code>TELEGRAM_BOT_TOKEN</code> y <code>TELEGRAM_ADVISOR_CHAT_ID</code>) se encuentran encriptadas y guardadas de forma segura en las variables de entorno de Vercel. Ya no se exponen ni requieren edición manual en el panel.
                 </p>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1 font-mono text-[11px]">
+                  <div className="bg-white/90 p-2.5 rounded-xl border border-emerald-200">
+                    <span className="text-slate-400 block text-[10px] uppercase tracking-wider font-sans font-bold">Chat ID del Asesor:</span>
+                    <span className="font-bold text-slate-900 flex items-center gap-1.5 mt-0.5">
+                      <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+                      948786976 (Vinculado)
+                    </span>
+                  </div>
+                  <div className="bg-white/90 p-2.5 rounded-xl border border-emerald-200">
+                    <span className="text-slate-400 block text-[10px] uppercase tracking-wider font-sans font-bold">Bot de Telegram:</span>
+                    <span className="font-bold text-slate-900 flex items-center gap-1.5 mt-0.5">
+                      <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+                      @RED192142_bot (Activo)
+                    </span>
+                  </div>
+                </div>
               </div>
 
-              <div className="space-y-3">
+              <div className="p-3 bg-slate-50 rounded-2xl border border-slate-200 flex items-center justify-between gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
-                    HTTP API Bot Token
-                  </label>
-                  <input
-                    type="text"
-                    value={botToken}
-                    onChange={(e) => setBotToken(e.target.value)}
-                    placeholder="Ej. 8744099329:AAEKPsqni4ugVioOXYd7dMi3zZREBP0RrKc"
-                    className="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs font-mono focus:ring-2 focus:ring-[#0d233a] focus:outline-none"
-                  />
+                  <h4 className="text-xs font-bold text-slate-800">Prueba de Conexión Móvil</h4>
+                  <p className="text-[11px] text-slate-500">Envía un mensaje instantáneo a tu celular para verificar la recepción de alertas</p>
                 </div>
 
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
-                    Telegram Advisor Chat ID
-                  </label>
-                  <input
-                    type="text"
-                    value={advisorChatId}
-                    onChange={(e) => setAdvisorChatId(e.target.value)}
-                    placeholder="Ej. 948786976"
-                    className="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs font-mono focus:ring-2 focus:ring-[#0d233a] focus:outline-none"
-                  />
-                </div>
+                <button
+                  type="button"
+                  onClick={handleTestTelegram}
+                  disabled={testStatus === 'loading'}
+                  className="bg-sky-600 hover:bg-sky-700 disabled:bg-slate-300 text-white font-bold px-3.5 py-2 rounded-xl text-xs transition flex items-center gap-1.5 cursor-pointer shadow-sm shrink-0"
+                >
+                  <Send className="w-3.5 h-3.5" />
+                  <span>{testStatus === 'loading' ? 'Enviando...' : 'Enviar Prueba al Celular'}</span>
+                </button>
+              </div>
 
-                <div className="pt-1 flex items-center justify-between">
-                  <button
-                    type="button"
-                    onClick={handleTestTelegram}
-                    disabled={!botToken || !advisorChatId || testStatus === 'loading'}
-                    className="bg-sky-600 hover:bg-sky-700 disabled:bg-slate-300 text-white font-bold px-3.5 py-2 rounded-xl text-xs transition flex items-center gap-1.5 cursor-pointer shadow-sm"
-                  >
-                    <Send className="w-3.5 h-3.5" />
-                    <span>{testStatus === 'loading' ? 'Enviando...' : 'Enviar Mensaje de Prueba al Celular'}</span>
-                  </button>
-
-                  {testStatus === 'success' && (
-                    <span className="text-xs text-emerald-700 font-bold flex items-center gap-1 animate-in fade-in">
-                      <CheckCircle2 className="w-4 h-4" />
-                      ¡Mensaje enviado a tu Telegram!
-                    </span>
-                  )}
-                  {testStatus === 'error' && (
-                    <span className="text-xs text-rose-600 font-semibold flex items-center gap-1 animate-in fade-in">
-                      <AlertCircle className="w-4 h-4" />
-                      {testError}
-                    </span>
-                  )}
+              {testStatus === 'success' && (
+                <div className="p-2.5 rounded-xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-700 font-bold flex items-center gap-2 animate-in fade-in">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                  <span>¡Mensaje de prueba enviado exitosamente a tu celular vía Telegram!</span>
                 </div>
+              )}
+              {testStatus === 'error' && (
+                <div className="p-2.5 rounded-xl bg-rose-50 border border-rose-200 text-xs text-rose-600 font-semibold flex items-center gap-2 animate-in fade-in">
+                  <AlertCircle className="w-4 h-4 text-rose-500 shrink-0" />
+                  <span>{testError}</span>
+                </div>
+              )}
 
                 {/* Conexión de Webhook (Producción vs Local) */}
                 <div className="pt-3 mt-3 border-t border-slate-200/70 space-y-2.5">
@@ -699,7 +695,6 @@ CREATE POLICY "Permitir todo acceso funnel" ON funnel_events FOR ALL USING (true
                   </div>
                 </div>
               </div>
-            </div>
           )}
 
           {/* TAB 5: BASE DE DATOS (SUPABASE) */}

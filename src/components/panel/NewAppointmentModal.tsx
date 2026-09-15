@@ -123,13 +123,13 @@ export function NewAppointmentModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/65 backdrop-blur-sm overflow-y-auto">
       <div
-        className="relative bg-white rounded-3xl max-w-xl w-full max-h-[92vh] overflow-y-auto shadow-2xl border border-slate-200 p-5 sm:p-7 text-slate-900"
+        className="relative bg-white dark:bg-slate-900 rounded-3xl max-w-xl w-full max-h-[92vh] overflow-y-auto shadow-2xl border border-slate-200 dark:border-slate-800 p-5 sm:p-7 text-slate-900 dark:text-slate-100"
         role="dialog"
         aria-modal="true"
       >
         <button
           onClick={handleResetAndClose}
-          className="absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center transition cursor-pointer"
+          className="absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 flex items-center justify-center transition cursor-pointer"
         >
           <X className="w-4 h-4" />
         </button>
@@ -137,40 +137,40 @@ export function NewAppointmentModal({
         {createdLead ? (
           /* Pantalla de Éxito y Acción Rápida */
           <div className="text-center py-4 space-y-4">
-            <div className="w-14 h-14 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto shadow-inner">
+            <div className="w-14 h-14 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mx-auto shadow-inner">
               <CheckCircle2 className="w-8 h-8" />
             </div>
 
             <div>
-              <h3 className="text-xl font-black text-slate-900">
+              <h3 className="text-xl font-black text-slate-900 dark:text-slate-100">
                 ¡Cita Agendada con Éxito!
               </h3>
-              <p className="text-xs text-slate-500 mt-1">
-                Folio asignado: <strong className="font-mono text-slate-800">{createdLead.folio}</strong>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                Folio asignado: <strong className="font-mono text-slate-800 dark:text-amber-400">{createdLead.folio}</strong>
               </p>
             </div>
 
-            <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 text-left text-xs space-y-2 max-w-md mx-auto">
+            <div className="bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 text-left text-xs space-y-2 max-w-md mx-auto">
               <div className="flex justify-between">
-                <span className="text-slate-500">Cliente:</span>
-                <span className="font-bold text-slate-900">{createdLead.fullName}</span>
+                <span className="text-slate-500 dark:text-slate-400">Cliente:</span>
+                <span className="font-bold text-slate-900 dark:text-slate-100">{createdLead.fullName}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-500">Celular WhatsApp:</span>
-                <span className="font-semibold text-slate-900">{createdLead.phone}</span>
+                <span className="text-slate-500 dark:text-slate-400">Celular WhatsApp:</span>
+                <span className="font-semibold text-slate-900 dark:text-slate-200">{createdLead.phone}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-500">Fecha y Hora:</span>
-                <span className="font-bold text-emerald-700">
+                <span className="text-slate-500 dark:text-slate-400">Fecha y Hora:</span>
+                <span className="font-bold text-emerald-700 dark:text-emerald-400">
                   {createdLead.appointmentRequest?.confirmedDate} a las {createdLead.appointmentRequest?.confirmedTime}
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-500">Propiedad:</span>
-                <span className="font-semibold text-slate-800">Modelo Águila Premier</span>
+                <span className="text-slate-500 dark:text-slate-400">Propiedad:</span>
+                <span className="font-semibold text-slate-800 dark:text-slate-200">Modelo Águila Premier</span>
               </div>
               {createdLead.attributionStatus === 'pendiente_inmobiliaria' && (
-                <div className="pt-2 border-t border-slate-200 text-blue-800 font-semibold text-[11px]">
+                <div className="pt-2 border-t border-slate-200 dark:border-slate-700 text-blue-800 dark:text-blue-300 font-semibold text-[11px]">
                   ⚡ NSS capturado: Recuerda ingresarlo en el sistema de la constructora para iniciar tus 15 días de exclusividad.
                 </div>
               )}
@@ -190,7 +190,7 @@ export function NewAppointmentModal({
 
               <button
                 onClick={handleResetAndClose}
-                className="bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-3 px-4 rounded-xl text-xs transition cursor-pointer"
+                className="bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-semibold py-3 px-4 rounded-xl text-xs transition cursor-pointer"
               >
                 Cerrar y Ver Agenda
               </button>
@@ -199,21 +199,21 @@ export function NewAppointmentModal({
         ) : (
           /* Formulario de Agendamiento Rápido */
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="flex items-center gap-2 text-[#0d233a] border-b border-slate-100 pb-3">
+            <div className="flex items-center gap-2 text-[#0d233a] dark:text-slate-100 border-b border-slate-100 dark:border-slate-800 pb-3">
               <Calendar className="w-5 h-5 text-amber-500" />
               <div>
-                <h3 className="text-base font-bold text-slate-900 leading-tight">
+                <h3 className="text-base font-bold text-slate-900 dark:text-slate-100 leading-tight">
                   Agendar Nueva Cita de Visita
                 </h3>
-                <p className="text-[11px] text-slate-500">
+                <p className="text-[11px] text-slate-500 dark:text-slate-400">
                   Registra visitas de prospectos de llamada, WhatsApp o espontáneos
                 </p>
               </div>
             </div>
 
             {error && (
-              <div className="bg-rose-50 border border-rose-200 text-rose-800 p-3 rounded-xl text-xs flex items-center gap-2">
-                <AlertCircle className="w-4 h-4 text-rose-600 flex-shrink-0" />
+              <div className="bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/60 text-rose-800 dark:text-rose-300 p-3 rounded-xl text-xs flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 text-rose-600 dark:text-rose-400 flex-shrink-0" />
                 <span>{error}</span>
               </div>
             )}
@@ -221,7 +221,7 @@ export function NewAppointmentModal({
             {/* Datos del Cliente */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
                   Nombre Completo del Cliente *
                 </label>
                 <div className="relative">
@@ -232,13 +232,13 @@ export function NewAppointmentModal({
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
                     placeholder="Ej. Roberto Sánchez Gómez"
-                    className="w-full pl-9 pr-3 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-[#0d233a] focus:outline-none"
+                    className="w-full pl-9 pr-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-xs focus:ring-2 focus:ring-[#0d233a] dark:focus:ring-amber-500 focus:outline-none"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
                   Teléfono Celular (WhatsApp) *
                 </label>
                 <div className="relative">
@@ -249,17 +249,17 @@ export function NewAppointmentModal({
                     value={phone}
                     onChange={(e) => handlePhoneChange(e.target.value)}
                     placeholder="10 dígitos (ej. 8112345678)"
-                    className="w-full pl-9 pr-3 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-[#0d233a] focus:outline-none"
+                    className="w-full pl-9 pr-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-xs focus:ring-2 focus:ring-[#0d233a] dark:focus:ring-amber-500 focus:outline-none"
                   />
                 </div>
               </div>
             </div>
 
             {/* Fecha y Horario */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-amber-50/60 p-3 rounded-2xl border border-amber-200/60">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-amber-50/60 dark:bg-amber-950/20 p-3 rounded-2xl border border-amber-200/60 dark:border-amber-900/40">
               <div>
-                <label className="block text-xs font-bold text-amber-950 mb-1 flex items-center gap-1">
-                  <Calendar className="w-3.5 h-3.5 text-amber-600" />
+                <label className="block text-xs font-bold text-amber-950 dark:text-amber-300 mb-1 flex items-center gap-1">
+                  <Calendar className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
                   <span>Día de la Visita *</span>
                 </label>
                 <input
@@ -267,19 +267,19 @@ export function NewAppointmentModal({
                   required
                   value={preferredDate}
                   onChange={(e) => setPreferredDate(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl border border-amber-300 text-xs bg-white focus:ring-2 focus:ring-[#0d233a] focus:outline-none font-medium"
+                  className="w-full px-3 py-2 rounded-xl border border-amber-300 dark:border-amber-800/80 text-xs bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-[#0d233a] dark:focus:ring-amber-500 focus:outline-none font-medium"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-amber-950 mb-1 flex items-center gap-1">
-                  <Clock className="w-3.5 h-3.5 text-amber-600" />
+                <label className="block text-xs font-bold text-amber-950 dark:text-amber-300 mb-1 flex items-center gap-1">
+                  <Clock className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
                   <span>Horario Pactado *</span>
                 </label>
                 <select
                   value={timeSlot}
                   onChange={(e) => setTimeSlot(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl border border-amber-300 text-xs bg-white focus:ring-2 focus:ring-[#0d233a] focus:outline-none font-medium"
+                  className="w-full px-3 py-2 rounded-xl border border-amber-300 dark:border-amber-800/80 text-xs bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-[#0d233a] dark:focus:ring-amber-500 focus:outline-none font-medium"
                 >
                   <option value="10:00 AM">10:00 AM</option>
                   <option value="11:00 AM">11:00 AM</option>
@@ -296,14 +296,14 @@ export function NewAppointmentModal({
             {/* Forma de Pago y NSS */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1 flex items-center gap-1">
+                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1 flex items-center gap-1">
                   <CreditCard className="w-3.5 h-3.5 text-slate-400" />
                   <span>Forma de Compra / Crédito</span>
                 </label>
                 <select
                   value={financingType}
                   onChange={(e) => setFinancingType(e.target.value as Lead['financingType'])}
-                  className="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs bg-white focus:ring-2 focus:ring-[#0d233a] focus:outline-none"
+                  className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-xs bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-[#0d233a] dark:focus:ring-amber-500 focus:outline-none"
                 >
                   <option value="infonavit">Crédito Infonavit (Tradicional / Total)</option>
                   <option value="bancario">Crédito Hipotecario Bancario</option>
@@ -313,7 +313,7 @@ export function NewAppointmentModal({
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
                   NSS (Opcional - 11 dígitos)
                 </label>
                 <input
@@ -321,7 +321,7 @@ export function NewAppointmentModal({
                   value={rawNss}
                   onChange={(e) => handleNssChange(e.target.value)}
                   placeholder="Si lo tiene en mano"
-                  className="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs font-mono focus:ring-2 focus:ring-[#0d233a] focus:outline-none"
+                  className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-xs font-mono bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-[#0d233a] dark:focus:ring-amber-500 focus:outline-none"
                 />
                 <span className="text-[10px] text-slate-400 mt-0.5 block">
                   Permite apartar atribución de 15 días en la constructora
@@ -331,7 +331,7 @@ export function NewAppointmentModal({
 
             {/* Notas Comerciales */}
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1 flex items-center gap-1">
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1 flex items-center gap-1">
                 <FileText className="w-3.5 h-3.5 text-slate-400" />
                 <span>Notas o Requerimientos de la Familia</span>
               </label>
@@ -340,25 +340,25 @@ export function NewAppointmentModal({
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 placeholder="Ej. Interesados en recámara principal y patio amplio. Vienen 3 adultos y 1 menor."
-                className="w-full p-2.5 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-[#0d233a] focus:outline-none resize-none"
+                className="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 text-xs bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-[#0d233a] dark:focus:ring-amber-500 focus:outline-none resize-none"
               />
             </div>
 
             {/* Botones de Acción */}
-            <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+            <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
               <button
                 type="button"
                 onClick={handleResetAndClose}
-                className="px-4 py-2.5 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 transition cursor-pointer"
+                className="px-4 py-2.5 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer"
               >
                 Cancelar
               </button>
 
               <button
                 type="submit"
-                className="bg-[#0d233a] hover:bg-[#163b5c] text-white font-bold px-5 py-2.5 rounded-xl text-xs transition flex items-center gap-2 shadow-md cursor-pointer"
+                className="bg-[#0d233a] hover:bg-[#163b5c] dark:bg-amber-500 dark:hover:bg-amber-400 dark:text-slate-950 text-white font-bold px-5 py-2.5 rounded-xl text-xs transition flex items-center gap-2 shadow-md cursor-pointer"
               >
-                <Calendar className="w-4 h-4 text-amber-400" />
+                <Calendar className="w-4 h-4 text-amber-400 dark:text-slate-950" />
                 <span>Agendar y Guardar Cita</span>
               </button>
             </div>

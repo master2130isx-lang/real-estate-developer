@@ -19,15 +19,15 @@ export function WhatsAppFloatingButton() {
     <div className="fixed bottom-[calc(5.25rem+env(safe-area-inset-bottom,0px))] md:bottom-6 right-4 md:right-6 z-50 flex flex-col items-end gap-2 pointer-events-auto">
       {/* Ventana flotante de saludo rápido */}
       {isOpen && (
-        <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 p-4 max-w-[calc(100vw-2rem)] w-72 mb-1 animate-in fade-in slide-in-from-bottom-3 duration-200">
-          <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+        <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 p-4 max-w-[calc(100vw-2rem)] w-72 mb-1 animate-in fade-in slide-in-from-bottom-3 duration-200">
+          <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800">
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-full bg-[#25D366] text-white flex items-center justify-center shadow-sm">
                 <WhatsAppIcon className="w-4 h-4" />
               </div>
               <div>
-                <p className="text-xs font-bold text-slate-900 leading-tight">{commercialConfig.advisorName}</p>
-                <span className="flex items-center gap-1 text-[10px] text-emerald-600 font-semibold">
+                <p className="text-xs font-bold text-slate-900 dark:text-slate-100 leading-tight">{commercialConfig.advisorName}</p>
+                <span className="flex items-center gap-1 text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
                   En línea ahora
                 </span>
@@ -35,14 +35,14 @@ export function WhatsAppFloatingButton() {
             </div>
             <button
               onClick={() => setIsOpen(false)}
-              className="text-slate-400 hover:text-slate-600 p-1 rounded-full hover:bg-slate-100 transition cursor-pointer"
+              className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 p-1 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer"
               aria-label="Cerrar chat de WhatsApp"
             >
               <X className="w-4 h-4" />
             </button>
           </div>
 
-          <div className="py-3 text-xs text-slate-600 leading-relaxed">
+          <div className="py-3 text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
             ¡Hola! ¿Tienes dudas sobre el <strong>Modelo Águila Premier</strong> o deseas agendar tu visita a la casa muestra? Escríbenos directamente por WhatsApp.
           </div>
 
@@ -63,7 +63,7 @@ export function WhatsAppFloatingButton() {
         {!isOpen && (
           <button
             onClick={() => setIsOpen(true)}
-            className="hidden md:flex items-center gap-2 bg-white text-slate-800 hover:text-emerald-700 text-xs font-bold px-3.5 py-2 rounded-full shadow-lg border border-slate-200 transition group cursor-pointer"
+            className="hidden md:flex items-center gap-2 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 hover:text-emerald-700 dark:hover:text-emerald-400 text-xs font-bold px-3.5 py-2 rounded-full shadow-lg border border-slate-200 dark:border-slate-800 transition group cursor-pointer"
           >
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
             <span>¿Dudas? Chatea con un asesor</span>

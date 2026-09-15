@@ -6,6 +6,7 @@ import { Building2, Menu, X, ArrowRight, UserCheck, AlertCircle } from 'lucide-r
 import { useApp } from '@/context/AppContext';
 import { WhatsAppIcon } from '@/components/common/WhatsAppIcon';
 import { FacebookIcon, InstagramIcon, TikTokIcon, YouTubeIcon } from '@/components/common/SocialIcons';
+import { ThemeToggle } from '@/components/common/ThemeToggle';
 
 interface NavbarProps {
   onOpenPrequalification: () => void;
@@ -20,7 +21,7 @@ export function Navbar({ onOpenPrequalification, onOpenPrivacy }: NavbarProps) {
   const cleanWa = commercialConfig.contactChannels.whatsapp.replace(/\D/g, '');
 
   return (
-    <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200">
+    <header className="sticky top-0 z-40 bg-white/95 dark:bg-slate-950/95 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 transition-colors">
       {/* Top bar con información del fraccionamiento y redes */}
       <div className="bg-[#0d233a] text-slate-200 text-xs py-1.5 px-4 border-b border-slate-800">
         <div className="max-w-[1220px] mx-auto flex flex-col sm:flex-row justify-between items-center gap-1.5">
@@ -136,26 +137,29 @@ export function Navbar({ onOpenPrequalification, onOpenPrivacy }: NavbarProps) {
             <span>WhatsApp</span>
           </a>
 
+          <ThemeToggle />
+
           <button
             onClick={onOpenPrequalification}
-            className="bg-[#0d233a] text-white hover:bg-[#163b5c] px-4 py-2.5 rounded-xl font-semibold text-sm transition shadow-sm flex items-center gap-1.5 cursor-pointer"
+            className="bg-[#0d233a] dark:bg-amber-500 text-white dark:text-slate-950 hover:bg-[#163b5c] dark:hover:bg-amber-400 px-4 py-2.5 rounded-xl font-bold text-sm transition shadow-sm flex items-center gap-1.5 cursor-pointer"
           >
             <span>Solicitar visita</span>
-            <ArrowRight className="w-4 h-4 text-amber-400" />
+            <ArrowRight className="w-4 h-4 text-amber-400 dark:text-slate-950" />
           </button>
         </div>
 
-        {/* Botón hamburguesa móvil */}
+        {/* Botón hamburguesa móvil y ThemeToggle */}
         <div className="flex md:hidden items-center gap-2">
+          <ThemeToggle />
           <button
             onClick={onOpenPrequalification}
-            className="bg-[#0d233a] text-white px-3 py-2 rounded-lg text-xs font-bold"
+            className="bg-[#0d233a] dark:bg-amber-500 text-white dark:text-slate-950 px-3 py-2 rounded-lg text-xs font-bold"
           >
             Visita
           </button>
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="p-2 text-slate-700 hover:text-slate-900 focus:outline-none"
+            className="p-2 text-slate-700 dark:text-slate-300 hover:text-slate-900 focus:outline-none"
             aria-label="Abrir menú"
           >
             {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
@@ -165,7 +169,7 @@ export function Navbar({ onOpenPrequalification, onOpenPrivacy }: NavbarProps) {
 
       {/* Menú Móvil desplegable */}
       {mobileMenuOpen && (
-        <div className="md:hidden bg-white border-b border-slate-200 px-4 py-4 space-y-3">
+        <div className="md:hidden bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-4 py-4 space-y-3">
           <a
             href="#opciones"
             onClick={() => setMobileMenuOpen(false)}

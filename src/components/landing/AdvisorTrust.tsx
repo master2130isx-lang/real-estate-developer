@@ -21,65 +21,65 @@ export function AdvisorTrust() {
     .toUpperCase() || 'AS';
 
   return (
-    <section id="asesor" className="py-16 px-4 bg-white border-b border-slate-200">
+    <section id="asesor" className="py-16 px-4 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 transition-colors">
       <div className="max-w-[1220px] mx-auto space-y-10">
         <div className="text-center max-w-2xl mx-auto space-y-2">
-          <span className="text-xs font-bold tracking-widest text-[#1c456f] uppercase bg-slate-100 px-3 py-1 rounded-full">
+          <span className="text-xs font-bold tracking-widest text-[#1c456f] dark:text-amber-400 uppercase bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded-full border border-slate-200 dark:border-slate-700">
             Atención humana y personalizada
           </span>
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900">
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-slate-100">
             ¿Quién atenderá tu solicitud?
           </h2>
-          <p className="text-slate-600 text-sm sm:text-base">
+          <p className="text-slate-600 dark:text-slate-400 text-sm sm:text-base">
             Tu solicitud es revisada directamente por un asesor asignado que coordinará contigo la visita por WhatsApp o llamada telefónica.
           </p>
         </div>
 
-        <div className="bg-slate-50 border border-slate-200 rounded-3xl p-6 sm:p-10 shadow-sm">
+        <div className="bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 sm:p-10 shadow-sm">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
             {/* Tarjeta del asesor con datos administrables */}
-            <div className="lg:col-span-5 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+            <div className="lg:col-span-5 bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
               <div className="flex items-center gap-4">
-                <div className="w-16 h-16 rounded-2xl bg-[#0d233a] text-white flex items-center justify-center font-bold text-2xl flex-shrink-0 shadow">
+                <div className="w-16 h-16 rounded-2xl bg-[#0d233a] dark:bg-slate-800 text-white flex items-center justify-center font-bold text-2xl flex-shrink-0 shadow">
                   {initials}
                 </div>
                 <div>
-                  <div className="flex items-center gap-1 text-slate-500 text-xs font-bold">
-                    <UserCheck className="w-3.5 h-3.5 text-amber-600" />
+                  <div className="flex items-center gap-1 text-slate-500 dark:text-slate-400 text-xs font-bold">
+                    <UserCheck className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
                     <span>{commercialConfig.advisorRole}</span>
                   </div>
-                  <h3 className="text-lg font-bold text-slate-900 leading-tight">
+                  <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 leading-tight">
                     {commercialConfig.advisorName}
                   </h3>
-                  <span className="inline-block mt-1 bg-emerald-100 text-emerald-900 text-[10px] font-bold px-2 py-0.5 rounded">
+                  <span className="inline-block mt-1 bg-emerald-100 dark:bg-emerald-950/60 text-emerald-900 dark:text-emerald-300 text-[10px] font-bold px-2 py-0.5 rounded">
                     Atención personalizada y directa
                   </span>
                 </div>
               </div>
 
-              <div className="space-y-2.5 pt-3 border-t border-slate-100 text-xs text-slate-600">
+              <div className="space-y-2.5 pt-3 border-t border-slate-100 dark:border-slate-800 text-xs text-slate-600 dark:text-slate-300">
                 <div className="flex items-start gap-2.5">
-                  <MapPin className="w-4 h-4 text-slate-500 flex-shrink-0 mt-0.5" />
+                  <MapPin className="w-4 h-4 text-slate-500 dark:text-slate-400 flex-shrink-0 mt-0.5" />
                   <span>
                     <strong>Zona de atención:</strong> {commercialConfig.coverageZone}
                   </span>
                 </div>
                 <div className="flex items-start gap-2.5">
-                  <Phone className="w-4 h-4 text-slate-500 flex-shrink-0 mt-0.5" />
+                  <Phone className="w-4 h-4 text-slate-500 dark:text-slate-400 flex-shrink-0 mt-0.5" />
                   <span>
                     <strong>Canal de contacto directo:</strong> {commercialConfig.contactChannels.phone} (WhatsApp y llamadas en horario comercial).
                   </span>
                 </div>
                 {commercialConfig.contactChannels.email && (
                   <div className="flex items-start gap-2.5">
-                    <Mail className="w-4 h-4 text-slate-500 flex-shrink-0 mt-0.5" />
+                    <Mail className="w-4 h-4 text-slate-500 dark:text-slate-400 flex-shrink-0 mt-0.5" />
                     <span>
                       <strong>Correo de atención:</strong> {commercialConfig.contactChannels.email}
                     </span>
                   </div>
                 )}
                 <div className="flex items-start gap-2.5">
-                  <Clock className="w-4 h-4 text-slate-500 flex-shrink-0 mt-0.5" />
+                  <Clock className="w-4 h-4 text-slate-500 dark:text-slate-400 flex-shrink-0 mt-0.5" />
                   <span>
                     <strong>Horario de visitas:</strong> Conforme a disponibilidad de casas muestra (previa cita confirmada por WhatsApp).
                   </span>
@@ -87,8 +87,8 @@ export function AdvisorTrust() {
 
                 {/* Redes sociales del asesor */}
                 {hasSocial && (
-                  <div className="pt-2 border-t border-slate-100 flex items-center justify-between">
-                    <span className="text-[11px] font-semibold text-slate-500">Sígueme en redes:</span>
+                  <div className="pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                    <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400">Sígueme en redes:</span>
                     <div className="flex items-center gap-1.5">
                       {social?.facebook && (
                         <a
@@ -96,7 +96,7 @@ export function AdvisorTrust() {
                           target="_blank"
                           rel="noopener noreferrer"
                           title="Facebook"
-                          className="w-7 h-7 rounded-lg bg-slate-100 hover:bg-[#1877F2] text-slate-600 hover:text-white flex items-center justify-center transition"
+                          className="w-7 h-7 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-[#1877F2] text-slate-600 dark:text-slate-300 hover:text-white flex items-center justify-center transition"
                         >
                           <FacebookIcon className="w-3.5 h-3.5" />
                         </a>
@@ -107,7 +107,7 @@ export function AdvisorTrust() {
                           target="_blank"
                           rel="noopener noreferrer"
                           title="Instagram"
-                          className="w-7 h-7 rounded-lg bg-slate-100 hover:bg-gradient-to-tr hover:from-[#F58529] hover:via-[#DD2A7B] hover:to-[#8134AF] text-slate-600 hover:text-white flex items-center justify-center transition"
+                          className="w-7 h-7 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-gradient-to-tr hover:from-[#F58529] hover:via-[#DD2A7B] hover:to-[#8134AF] text-slate-600 dark:text-slate-300 hover:text-white flex items-center justify-center transition"
                         >
                           <InstagramIcon className="w-3.5 h-3.5" />
                         </a>
@@ -118,7 +118,7 @@ export function AdvisorTrust() {
                           target="_blank"
                           rel="noopener noreferrer"
                           title="TikTok"
-                          className="w-7 h-7 rounded-lg bg-slate-100 hover:bg-black text-slate-600 hover:text-[#25F4EE] flex items-center justify-center transition"
+                          className="w-7 h-7 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-black text-slate-600 dark:text-slate-300 hover:text-[#25F4EE] flex items-center justify-center transition"
                         >
                           <TikTokIcon className="w-3.5 h-3.5" />
                         </a>
@@ -129,7 +129,7 @@ export function AdvisorTrust() {
                           target="_blank"
                           rel="noopener noreferrer"
                           title="YouTube"
-                          className="w-7 h-7 rounded-lg bg-slate-100 hover:bg-[#FF0000] text-slate-600 hover:text-white flex items-center justify-center transition"
+                          className="w-7 h-7 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-[#FF0000] text-slate-600 dark:text-slate-300 hover:text-white flex items-center justify-center transition"
                         >
                           <YouTubeIcon className="w-3.5 h-3.5" />
                         </a>
@@ -154,50 +154,50 @@ export function AdvisorTrust() {
 
             {/* Compromisos de atención comercial */}
             <div className="lg:col-span-7 space-y-4">
-              <h4 className="text-lg font-bold text-slate-900">
+              <h4 className="text-lg font-bold text-slate-900 dark:text-slate-100">
                 Criterios de atención y claridad para el comprador
               </h4>
-              <p className="text-sm text-slate-600 leading-relaxed">
+              <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
                 Priorizamos conversaciones útiles y transparentes. No utilizamos llamadas no solicitadas ni presionamos con falsas ofertas de urgencia.
               </p>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
-                <div className="bg-white p-4 rounded-xl border border-slate-200 text-xs space-y-1.5">
-                  <div className="flex items-center gap-1.5 font-bold text-slate-800">
-                    <Info className="w-4 h-4 text-blue-600" />
+                <div className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 text-xs space-y-1.5">
+                  <div className="flex items-center gap-1.5 font-bold text-slate-800 dark:text-slate-200">
+                    <Info className="w-4 h-4 text-blue-600 dark:text-blue-400" />
                     <span>Visitas con confirmación manual</span>
                   </div>
-                  <p className="text-slate-500">
+                  <p className="text-slate-500 dark:text-slate-400">
                     Tu asesor valida la agenda y te contacta por WhatsApp para coordinar el horario sin sobrecupos.
                   </p>
                 </div>
 
-                <div className="bg-white p-4 rounded-xl border border-slate-200 text-xs space-y-1.5">
-                  <div className="flex items-center gap-1.5 font-bold text-slate-800">
-                    <Info className="w-4 h-4 text-blue-600" />
+                <div className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 text-xs space-y-1.5">
+                  <div className="flex items-center gap-1.5 font-bold text-slate-800 dark:text-slate-200">
+                    <Info className="w-4 h-4 text-blue-600 dark:text-blue-400" />
                     <span>NSS con finalidad específica</span>
                   </div>
-                  <p className="text-slate-500">
+                  <p className="text-slate-500 dark:text-slate-400">
                     Se utiliza para registrar la atención ante la inmobiliaria; no autoriza consultas crediticias ni te compromete a comprar.
                   </p>
                 </div>
 
-                <div className="bg-white p-4 rounded-xl border border-slate-200 text-xs space-y-1.5">
-                  <div className="flex items-center gap-1.5 font-bold text-slate-800">
-                    <HelpCircle className="w-4 h-4 text-amber-600" />
+                <div className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 text-xs space-y-1.5">
+                  <div className="flex items-center gap-1.5 font-bold text-slate-800 dark:text-slate-200">
+                    <HelpCircle className="w-4 h-4 text-amber-600 dark:text-amber-400" />
                     <span>Orientación preliminar</span>
                   </div>
-                  <p className="text-slate-500">
+                  <p className="text-slate-500 dark:text-slate-400">
                     Si aún no decides tu esquema de compra, puedes solicitar información sin entregar el NSS.
                   </p>
                 </div>
 
-                <div className="bg-white p-4 rounded-xl border border-slate-200 text-xs space-y-1.5">
-                  <div className="flex items-center gap-1.5 font-bold text-slate-800">
-                    <Info className="w-4 h-4 text-blue-600" />
+                <div className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 text-xs space-y-1.5">
+                  <div className="flex items-center gap-1.5 font-bold text-slate-800 dark:text-slate-200">
+                    <Info className="w-4 h-4 text-blue-600 dark:text-blue-400" />
                     <span>Gastos transparentes</span>
                   </div>
-                  <p className="text-slate-500">
+                  <p className="text-slate-500 dark:text-slate-400">
                     Te informamos sobre avalúo, derechos y gastos notariales antes de cualquier pago o apartado.
                   </p>
                 </div>

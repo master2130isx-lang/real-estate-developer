@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
 import { Lead, CommercialStatus, AttributionStatus } from '@/types';
+import { ThemeToggle } from '@/components/common/ThemeToggle';
 import { LeadDetailModal } from '@/components/panel/LeadDetailModal';
 import { WhatsAppDraftModal } from '@/components/panel/WhatsAppDraftModal';
 import { ConfirmRegistrationModal } from '@/components/panel/ConfirmRegistrationModal';
@@ -112,9 +113,9 @@ export default function AgentPanelPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-100 flex flex-col text-slate-900">
+    <div className="min-h-screen bg-slate-100 dark:bg-slate-950 flex flex-col text-slate-900 dark:text-slate-100 transition-colors duration-200">
       {/* Barra Superior del Panel */}
-      <header className="bg-[#0d233a] text-white py-3 px-4 shadow-md sticky top-0 z-30">
+      <header className="bg-[#0d233a] dark:bg-slate-900 text-white py-3 px-4 shadow-md sticky top-0 z-30 border-b dark:border-slate-800">
         <div className="max-w-7xl mx-auto flex flex-wrap justify-between items-center gap-3">
           <div className="flex items-center gap-3">
             <Link
@@ -137,6 +138,8 @@ export default function AgentPanelPage() {
           </div>
 
           <div className="flex items-center gap-2 text-xs">
+            <ThemeToggle className="!w-8 !h-8 !rounded-xl !bg-slate-800 !border-slate-700 !text-slate-200 hover:!bg-slate-700" />
+
             <button
               onClick={() => setIsSettingsOpen(true)}
               className="bg-slate-800 hover:bg-slate-700 text-amber-300 font-bold px-3 py-1.5 rounded-xl transition flex items-center gap-1.5 shadow-sm cursor-pointer border border-slate-700"
@@ -148,10 +151,10 @@ export default function AgentPanelPage() {
 
             <button
               onClick={() => setIsNewAppointmentOpen(true)}
-              className="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-3 py-1.5 rounded-xl transition flex items-center gap-1.5 shadow-md cursor-pointer"
+              className="bg-amber-500 hover:bg-amber-400 text-slate-950 font-semibold px-3 py-1.5 rounded-xl transition flex items-center gap-1.5 shadow-sm cursor-pointer"
             >
               <Plus className="w-4 h-4" />
-              <span>+ Agendar Cita</span>
+              <span>Agendar Cita</span>
             </button>
 
             <button
@@ -189,10 +192,10 @@ export default function AgentPanelPage() {
       </header>
 
       {/* Regla Fundamental y Alerta de Exclusividad */}
-      <div className="bg-amber-50 border-b border-amber-200 px-4 py-2 text-xs text-amber-950">
+      <div className="bg-amber-50 dark:bg-amber-950/40 border-b border-amber-200 dark:border-amber-900/50 px-4 py-2 text-xs text-amber-950 dark:text-amber-200">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-2">
           <div className="flex items-center gap-2">
-            <AlertTriangle className="w-4 h-4 text-amber-700 flex-shrink-0" />
+            <AlertTriangle className="w-4 h-4 text-amber-700 dark:text-amber-400 flex-shrink-0" />
             <span>
               <strong>Protección de Comisión:</strong> Registrar el NSS en el sistema de la constructora garantiza tu periodo de 15 días de atribución comercial por cada prospecto calificado.
             </span>
@@ -207,28 +210,28 @@ export default function AgentPanelPage() {
             onClick={() => setActiveTab('agenda')}
             className={`p-3.5 rounded-2xl border transition shadow-sm cursor-pointer ${
               todayVisits > 0
-                ? 'bg-rose-50/70 border-rose-200 hover:bg-rose-100/70 ring-1 ring-rose-300'
-                : 'bg-white border-slate-200 hover:bg-slate-50'
+                ? 'bg-rose-50/70 dark:bg-rose-950/40 border-rose-200 dark:border-rose-900/60 hover:bg-rose-100/70 dark:hover:bg-rose-900/50 ring-1 ring-rose-300 dark:ring-rose-800'
+                : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/60'
             }`}
           >
-            <div className="flex items-center justify-between text-slate-500 text-xs font-semibold mb-1">
+            <div className="flex items-center justify-between text-slate-500 dark:text-slate-400 text-xs font-semibold mb-1">
               <span>Visitas Hoy</span>
-              <Calendar className="w-4 h-4 text-rose-600" />
+              <Calendar className="w-4 h-4 text-rose-600 dark:text-rose-400" />
             </div>
-            <p className="text-2xl font-black text-rose-600" suppressHydrationWarning>{todayVisits}</p>
-            <p className="text-[10px] text-slate-500 mt-0.5">En caseta de acceso</p>
+            <p className="text-2xl font-black text-rose-600 dark:text-rose-400" suppressHydrationWarning>{todayVisits}</p>
+            <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">En caseta de acceso</p>
           </div>
 
           <div
             onClick={() => setActiveTab('agenda')}
-            className="bg-white p-3.5 rounded-2xl border border-slate-200 shadow-sm hover:bg-slate-50 transition cursor-pointer"
+            className="bg-white dark:bg-slate-900 p-3.5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm hover:bg-slate-50 dark:hover:bg-slate-800/60 transition cursor-pointer"
           >
-            <div className="flex items-center justify-between text-slate-500 text-xs font-semibold mb-1">
+            <div className="flex items-center justify-between text-slate-500 dark:text-slate-400 text-xs font-semibold mb-1">
               <span>Por Confirmar</span>
-              <CalendarCheck className="w-4 h-4 text-amber-600" />
+              <CalendarCheck className="w-4 h-4 text-amber-600 dark:text-amber-400" />
             </div>
-            <p className="text-2xl font-black text-amber-600" suppressHydrationWarning>{pendingVisits}</p>
-            <p className="text-[10px] text-slate-500 mt-0.5">Requieren WhatsApp</p>
+            <p className="text-2xl font-black text-amber-600 dark:text-amber-400" suppressHydrationWarning>{pendingVisits}</p>
+            <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">Requieren WhatsApp</p>
           </div>
 
           <div
@@ -236,14 +239,14 @@ export default function AgentPanelPage() {
               setActiveTab('prospectos');
               setAttributionFilter('pendiente_inmobiliaria');
             }}
-            className="bg-white p-3.5 rounded-2xl border border-slate-200 shadow-sm hover:bg-slate-50 transition cursor-pointer"
+            className="bg-white dark:bg-slate-900 p-3.5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm hover:bg-slate-50 dark:hover:bg-slate-800/60 transition cursor-pointer"
           >
-            <div className="flex items-center justify-between text-slate-500 text-xs font-semibold mb-1">
+            <div className="flex items-center justify-between text-slate-500 dark:text-slate-400 text-xs font-semibold mb-1">
               <span>NSS por Registrar</span>
-              <Flame className="w-4 h-4 text-blue-600" />
+              <Flame className="w-4 h-4 text-blue-600 dark:text-blue-400" />
             </div>
-            <p className="text-2xl font-black text-blue-600" suppressHydrationWarning>{pendingInAgency}</p>
-            <p className="text-[10px] text-slate-500 mt-0.5">Prioridad en constructora</p>
+            <p className="text-2xl font-black text-blue-600 dark:text-blue-400" suppressHydrationWarning>{pendingInAgency}</p>
+            <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">Prioridad en constructora</p>
           </div>
 
           <div
@@ -251,14 +254,14 @@ export default function AgentPanelPage() {
               setActiveTab('prospectos');
               setAttributionFilter('confirmado');
             }}
-            className="bg-white p-3.5 rounded-2xl border border-slate-200 shadow-sm hover:bg-slate-50 transition cursor-pointer"
+            className="bg-white dark:bg-slate-900 p-3.5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm hover:bg-slate-50 dark:hover:bg-slate-800/60 transition cursor-pointer"
           >
-            <div className="flex items-center justify-between text-slate-500 text-xs font-semibold mb-1">
+            <div className="flex items-center justify-between text-slate-500 dark:text-slate-400 text-xs font-semibold mb-1">
               <span>15 Días Activos</span>
-              <ShieldCheck className="w-4 h-4 text-emerald-600" />
+              <ShieldCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
             </div>
-            <p className="text-2xl font-black text-emerald-600" suppressHydrationWarning>{confirmedAttributions}</p>
-            <p className="text-[10px] text-slate-500 mt-0.5">Exclusividad vigente</p>
+            <p className="text-2xl font-black text-emerald-600 dark:text-emerald-400" suppressHydrationWarning>{confirmedAttributions}</p>
+            <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">Exclusividad vigente</p>
           </div>
 
           <div
@@ -266,29 +269,29 @@ export default function AgentPanelPage() {
               setActiveTab('prospectos');
               setAttributionFilter('todos');
             }}
-            className="bg-white p-3.5 rounded-2xl border border-slate-200 shadow-sm hover:bg-slate-50 transition cursor-pointer col-span-2 lg:col-span-1"
+            className="bg-white dark:bg-slate-900 p-3.5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm hover:bg-slate-50 dark:hover:bg-slate-800/60 transition cursor-pointer col-span-2 lg:col-span-1"
           >
-            <div className="flex items-center justify-between text-slate-500 text-xs font-semibold mb-1">
+            <div className="flex items-center justify-between text-slate-500 dark:text-slate-400 text-xs font-semibold mb-1">
               <span>Total Cartera</span>
-              <Users className="w-4 h-4 text-slate-600" />
+              <Users className="w-4 h-4 text-slate-600 dark:text-slate-400" />
             </div>
-            <p className="text-2xl font-black text-slate-800" suppressHydrationWarning>{totalLeads}</p>
-            <p className="text-[10px] text-slate-500 mt-0.5">Base acumulada</p>
+            <p className="text-2xl font-black text-slate-800 dark:text-slate-100" suppressHydrationWarning>{totalLeads}</p>
+            <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">Base acumulada</p>
           </div>
         </div>
 
         {/* Selector de Pestañas Principales (Agenda vs Cartera) */}
-        <div className="flex items-center justify-between border-b border-slate-200 pb-1">
+        <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-1">
           <div className="flex items-center gap-2">
             <button
               onClick={() => setActiveTab('agenda')}
               className={`px-4 py-2.5 rounded-xl text-xs font-bold transition flex items-center gap-2 cursor-pointer ${
                 activeTab === 'agenda'
-                  ? 'bg-[#0d233a] text-white shadow-sm'
-                  : 'bg-white text-slate-700 hover:bg-slate-200/70 border border-slate-200'
+                  ? 'bg-[#0d233a] dark:bg-amber-500 text-white dark:text-slate-950 font-bold shadow-sm'
+                  : 'bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 hover:bg-slate-200/70 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800'
               }`}
             >
-              <Calendar className="w-4 h-4 text-amber-400" />
+              <Calendar className="w-4 h-4 text-amber-400 dark:text-slate-950" />
               <span>Agenda de Citas</span>
               {todayVisits > 0 && (
                 <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span>
@@ -299,19 +302,19 @@ export default function AgentPanelPage() {
               onClick={() => setActiveTab('prospectos')}
               className={`px-4 py-2.5 rounded-xl text-xs font-bold transition flex items-center gap-2 cursor-pointer ${
                 activeTab === 'prospectos'
-                  ? 'bg-[#0d233a] text-white shadow-sm'
-                  : 'bg-white text-slate-700 hover:bg-slate-200/70 border border-slate-200'
+                  ? 'bg-[#0d233a] dark:bg-amber-500 text-white dark:text-slate-950 font-bold shadow-sm'
+                  : 'bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 hover:bg-slate-200/70 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800'
               }`}
             >
-              <Users className="w-4 h-4 text-amber-400" />
+              <Users className="w-4 h-4 text-amber-400 dark:text-slate-950" />
               <span>Cartera de Prospectos y 15 Días</span>
-              <span className="bg-slate-200/80 text-slate-800 text-[10px] px-1.5 py-0.5 rounded-full font-bold">
+              <span className="bg-slate-200/80 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-[10px] px-1.5 py-0.5 rounded-full font-bold">
                 {totalLeads}
               </span>
             </button>
           </div>
 
-          <span className="text-[11px] text-slate-500 hidden md:inline">
+          <span className="text-[11px] text-slate-500 dark:text-slate-400 hidden md:inline">
             Fraccionamiento Valle de los Encinos • Salinas Victoria, N.L.
           </span>
         </div>
@@ -330,7 +333,7 @@ export default function AgentPanelPage() {
         {activeTab === 'prospectos' && (
           <div className="space-y-4">
             {/* Barra de Búsqueda y Filtros */}
-            <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col md:flex-row gap-3 items-center justify-between">
+            <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col md:flex-row gap-3 items-center justify-between">
               <div className="relative w-full md:w-80">
                 <Search className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
                 <input
@@ -338,19 +341,19 @@ export default function AgentPanelPage() {
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   placeholder="Buscar por nombre, folio o teléfono..."
-                  className="w-full pl-9 pr-4 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-[#0d233a] focus:outline-none"
+                  className="w-full pl-9 pr-4 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-xs focus:ring-2 focus:ring-[#0d233a] dark:focus:ring-amber-500 focus:outline-none"
                 />
               </div>
 
               <div className="flex flex-wrap items-center gap-2.5 w-full md:w-auto text-xs">
-                <div className="flex items-center gap-1 text-slate-600 font-semibold">
+                <div className="flex items-center gap-1 text-slate-600 dark:text-slate-400 font-semibold">
                   <Filter className="w-3.5 h-3.5" />
                   <span>Atribución:</span>
                 </div>
                 <select
                   value={attributionFilter}
                   onChange={(e) => setAttributionFilter(e.target.value)}
-                  className="px-3 py-1.5 rounded-xl border border-slate-300 text-xs bg-white"
+                  className="px-3 py-1.5 rounded-xl border border-slate-300 dark:border-slate-700 text-xs bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
                 >
                   <option value="todos">Todos los registros</option>
                   <option value="pendiente_inmobiliaria">🔥 Pendiente en Inmobiliaria</option>
@@ -364,7 +367,7 @@ export default function AgentPanelPage() {
                 <select
                   value={statusFilter}
                   onChange={(e) => setStatusFilter(e.target.value)}
-                  className="px-3 py-1.5 rounded-xl border border-slate-300 text-xs bg-white"
+                  className="px-3 py-1.5 rounded-xl border border-slate-300 dark:border-slate-700 text-xs bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
                 >
                   <option value="todos">Todos los estados de visita</option>
                   <option value="cita_solicitada">Visita Solicitada</option>
@@ -374,14 +377,14 @@ export default function AgentPanelPage() {
                   <option value="nuevo">Nuevo</option>
                 </select>
 
-                <div className="flex items-center gap-1 pl-2 border-l border-slate-200">
+                <div className="flex items-center gap-1 pl-2 border-l border-slate-200 dark:border-slate-700">
                   <button
                     type="button"
                     onClick={() => setPriorityOrder(priorityOrder === 'prioridad' ? 'recientes' : 'prioridad')}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition ${
+                    className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition cursor-pointer ${
                       priorityOrder === 'prioridad'
-                        ? 'bg-[#0d233a] text-white border-[#0d233a]'
-                        : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'
+                        ? 'bg-[#0d233a] dark:bg-amber-500 text-white dark:text-slate-950 border-[#0d233a] dark:border-amber-500 font-bold'
+                        : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-300 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700'
                     }`}
                   >
                     {priorityOrder === 'prioridad' ? '⚡ Por Prioridad Comercial' : '🕒 Por Fecha'}
@@ -391,11 +394,11 @@ export default function AgentPanelPage() {
             </div>
 
             {/* Tabla de Prospectos con Atribución Comercial de 15 Días */}
-            <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+            <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-xs border-collapse">
                   <thead>
-                    <tr className="bg-slate-50 border-b border-slate-200 text-slate-500 uppercase tracking-wider font-semibold">
+                    <tr className="bg-slate-50 dark:bg-slate-800/80 border-b border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 uppercase tracking-wider font-semibold">
                       <th className="p-3.5">Folio / Fecha</th>
                       <th className="p-3.5">Prospecto</th>
                       <th className="p-3.5">Vivienda</th>
@@ -406,7 +409,7 @@ export default function AgentPanelPage() {
                       <th className="p-3.5 text-center">Acciones</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-100">
+                  <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                     {filteredLeads.length > 0 ? (
                       filteredLeads.map((lead) => {
                         const statusObj = (lead.commercialStatus && statusBadgeStyle[lead.commercialStatus]) || {
@@ -421,24 +424,24 @@ export default function AgentPanelPage() {
                         };
 
                         return (
-                          <tr key={lead.id} className="hover:bg-slate-50/80 transition">
+                          <tr key={lead.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/50 transition">
                             {/* Folio y fecha */}
                             <td className="p-3.5 font-mono text-[11px] whitespace-nowrap">
-                              <span className="font-bold text-slate-900 block">{lead.folio || 'N/A'}</span>
+                              <span className="font-bold text-slate-900 dark:text-white block">{lead.folio || 'N/A'}</span>
                               <span className="text-slate-400">{lead.createdAt || 'Reciente'}</span>
                             </td>
 
                             {/* Prospecto y contacto */}
                             <td className="p-3.5">
-                              <span className="font-bold text-slate-900 block">{lead.fullName || 'Prospecto'}</span>
-                              <span className="text-slate-500 text-[11px] block">
+                              <span className="font-bold text-slate-900 dark:text-white block">{lead.fullName || 'Prospecto'}</span>
+                              <span className="text-slate-500 dark:text-slate-400 text-[11px] block">
                                 📞 {lead.phone || 'Sin tel'} • {lead.preferredChannel || 'whatsapp'}
                               </span>
                             </td>
 
                             {/* Zona y modelo */}
                             <td className="p-3.5 max-w-[160px]">
-                              <span className="text-slate-800 font-medium block truncate">
+                              <span className="text-slate-800 dark:text-slate-200 font-medium block truncate">
                                 Modelo Águila Premier
                               </span>
                               <span className="text-[10px] text-slate-400 block truncate">
@@ -447,7 +450,7 @@ export default function AgentPanelPage() {
                             </td>
 
                             {/* Forma de compra */}
-                            <td className="p-3.5 capitalize text-slate-700 font-medium whitespace-nowrap">
+                            <td className="p-3.5 capitalize text-slate-700 dark:text-slate-300 font-medium whitespace-nowrap">
                               {((lead.financingType || 'infonavit') as string).replace(/_/g, ' ')}
                             </td>
 
@@ -460,14 +463,14 @@ export default function AgentPanelPage() {
                                   {attribObj.label}
                                 </span>
                                 {lead.attributionStatus === 'confirmado' && lead.attributionExpiresAt && (
-                                  <span className="block text-[10px] text-emerald-800 font-semibold">
+                                  <span className="block text-[10px] text-emerald-800 dark:text-emerald-400 font-semibold">
                                     Vence: {lead.attributionExpiresAt.split(' ')[0]}
                                   </span>
                                 )}
                                 {lead.attributionStatus === 'pendiente_inmobiliaria' && (
                                   <button
                                     onClick={() => setRegLead(lead)}
-                                    className="block text-[10px] text-blue-700 font-bold hover:underline cursor-pointer"
+                                    className="block text-[10px] text-blue-700 dark:text-blue-400 font-bold hover:underline cursor-pointer"
                                   >
                                     ⚡ Registrar en sistema constructora
                                   </button>
@@ -483,7 +486,7 @@ export default function AgentPanelPage() {
                                 {statusObj.label}
                               </span>
                               {lead.appointmentRequest && (
-                                <span className="block text-[10px] text-slate-500 mt-0.5 font-medium">
+                                <span className="block text-[10px] text-slate-500 dark:text-slate-400 mt-0.5 font-medium">
                                   {lead.appointmentRequest.confirmedDate || lead.appointmentRequest.preferredDate} (
                                   {lead.appointmentRequest.confirmedTime || lead.appointmentRequest.timeSlot})
                                 </span>
@@ -492,7 +495,7 @@ export default function AgentPanelPage() {
 
                             {/* Próxima Acción */}
                             <td className="p-3.5 max-w-[200px]">
-                              <span className="text-[11px] text-slate-600 block line-clamp-2">
+                              <span className="text-[11px] text-slate-600 dark:text-slate-300 block line-clamp-2">
                                 {lead.nextAction}
                               </span>
                             </td>
@@ -503,14 +506,14 @@ export default function AgentPanelPage() {
                                 <button
                                   onClick={() => setWaLead(lead)}
                                   title="Enviar mensaje rápido de WhatsApp"
-                                  className="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 p-1.5 rounded-lg border border-emerald-200 transition cursor-pointer"
+                                  className="bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 text-emerald-700 dark:text-emerald-400 p-1.5 rounded-lg border border-emerald-200 dark:border-emerald-800 transition cursor-pointer"
                                 >
                                   <MessageSquare className="w-3.5 h-3.5" />
                                 </button>
 
                                 <button
                                   onClick={() => setSelectedLead(lead)}
-                                  className="bg-[#0d233a] hover:bg-[#163b5c] text-white font-semibold px-2.5 py-1.5 rounded-lg text-xs transition flex items-center gap-1 cursor-pointer shadow-sm"
+                                  className="bg-[#0d233a] hover:bg-[#163b5c] dark:bg-slate-800 dark:hover:bg-slate-700 text-white font-semibold px-2.5 py-1.5 rounded-lg text-xs transition flex items-center gap-1 cursor-pointer shadow-xs border dark:border-slate-700"
                                 >
                                   <Eye className="w-3.5 h-3.5" />
                                   <span>Ficha</span>
@@ -522,7 +525,7 @@ export default function AgentPanelPage() {
                       })
                     ) : (
                       <tr>
-                        <td colSpan={8} className="p-8 text-center text-slate-500">
+                        <td colSpan={8} className="p-8 text-center text-slate-500 dark:text-slate-400">
                           No se encontraron prospectos con los filtros seleccionados.
                         </td>
                       </tr>

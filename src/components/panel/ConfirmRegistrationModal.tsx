@@ -42,55 +42,55 @@ export function ConfirmRegistrationModal({ lead, onClose }: ConfirmRegistrationM
   return (
     <div className="fixed inset-0 z-60 flex items-center justify-center p-4 bg-black/65 backdrop-blur-sm">
       <div
-        className="relative bg-white rounded-2xl max-w-lg w-full p-5 sm:p-6 shadow-2xl border border-slate-200 space-y-4"
+        className="relative bg-white dark:bg-slate-900 rounded-2xl max-w-lg w-full p-5 sm:p-6 shadow-2xl border border-slate-200 dark:border-slate-800 space-y-4 text-slate-900 dark:text-slate-100"
         role="dialog"
         aria-modal="true"
         aria-labelledby="confirm-reg-title"
       >
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center justify-center transition cursor-pointer"
+          className="absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 flex items-center justify-center transition cursor-pointer"
         >
           <X className="w-4 h-4" />
         </button>
 
-        <div className="flex items-center gap-2 text-[#0d233a]">
+        <div className="flex items-center gap-2 text-[#0d233a] dark:text-amber-400">
           <ShieldCheck className="w-5 h-5 text-amber-500" />
-          <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
+          <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
             Seguimiento de Atribución Comercial (15 Días)
           </span>
         </div>
 
         <div>
-          <h3 id="confirm-reg-title" className="text-lg font-bold text-slate-900">
+          <h3 id="confirm-reg-title" className="text-lg font-bold text-slate-900 dark:text-slate-100">
             Registro en Inmobiliaria: {lead.fullName || 'Prospecto'}
           </h3>
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-slate-500 dark:text-slate-400">
             Folio web: <strong>{lead.folio || 'N/A'}</strong> • Estado actual: <strong>{lead.attributionStatus || 'Sin registro'}</strong>
           </p>
         </div>
 
         {/* REGLA CRÍTICA DE NEGOCIO */}
-        <div className="bg-blue-50 border border-blue-200 rounded-xl p-3 text-xs text-blue-900 space-y-1">
-          <div className="flex items-center gap-1.5 font-bold text-blue-950">
-            <Clock className="w-4 h-4 text-blue-600 flex-shrink-0" />
+        <div className="bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-900/50 rounded-xl p-3 text-xs text-blue-900 dark:text-blue-200 space-y-1">
+          <div className="flex items-center gap-1.5 font-bold text-blue-950 dark:text-blue-300">
+            <Clock className="w-4 h-4 text-blue-600 dark:text-blue-400 flex-shrink-0" />
             <span>Regla fundamental de inicio de los 15 días:</span>
           </div>
-          <p className="text-[11px] leading-relaxed text-blue-900">
+          <p className="text-[11px] leading-relaxed text-blue-900 dark:text-blue-200">
             Los 15 días de atribución comercial <strong>NO inician desde que el prospecto envió el formulario web</strong>.
             Inician únicamente a partir de la fecha y hora en que la inmobiliaria confirma el registro efectivo en su mecanismo interno.
           </p>
         </div>
 
         {/* Selector de modo */}
-        <div className="flex border-b border-slate-200 gap-3 text-xs font-bold">
+        <div className="flex border-b border-slate-200 dark:border-slate-800 gap-3 text-xs font-bold">
           <button
             type="button"
             onClick={() => setMode('confirmar')}
             className={`pb-2 border-b-2 transition cursor-pointer ${
               mode === 'confirmar'
-                ? 'border-[#0d233a] text-[#0d233a]'
-                : 'border-transparent text-slate-500 hover:text-slate-800'
+                ? 'border-[#0d233a] text-[#0d233a] dark:border-amber-400 dark:text-amber-400'
+                : 'border-transparent text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200'
             }`}
           >
             Confirmar Registro Efectivo
@@ -100,8 +100,8 @@ export function ConfirmRegistrationModal({ lead, onClose }: ConfirmRegistrationM
             onClick={() => setMode('conflicto')}
             className={`pb-2 border-b-2 transition cursor-pointer ${
               mode === 'conflicto'
-                ? 'border-red-600 text-red-600'
-                : 'border-transparent text-slate-500 hover:text-red-700'
+                ? 'border-red-600 text-red-600 dark:border-red-400 dark:text-red-400'
+                : 'border-transparent text-slate-500 hover:text-red-700 dark:text-slate-400 dark:hover:text-red-300'
             }`}
           >
             Reportar Conflicto o Rechazo
@@ -112,29 +112,29 @@ export function ConfirmRegistrationModal({ lead, onClose }: ConfirmRegistrationM
           <form onSubmit={handleConfirm} className="space-y-3 text-xs">
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1">
-                <label className="block font-bold text-slate-800">Fecha efectiva en inmobiliaria</label>
+                <label className="block font-bold text-slate-800 dark:text-slate-200">Fecha efectiva en inmobiliaria</label>
                 <input
                   type="date"
                   value={confirmedAtDate}
                   onChange={(e) => setConfirmedAtDate(e.target.value)}
                   required
-                  className="w-full px-3 py-2 rounded-xl border border-slate-300 bg-white"
+                  className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
                 />
               </div>
               <div className="space-y-1">
-                <label className="block font-bold text-slate-800">Hora de registro</label>
+                <label className="block font-bold text-slate-800 dark:text-slate-200">Hora de registro</label>
                 <input
                   type="time"
                   value={confirmedAtTime}
                   onChange={(e) => setConfirmedAtTime(e.target.value)}
                   required
-                  className="w-full px-3 py-2 rounded-xl border border-slate-300 bg-white"
+                  className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
                 />
               </div>
             </div>
 
             <div className="space-y-1">
-              <label className="block font-bold text-slate-800">
+              <label className="block font-bold text-slate-800 dark:text-slate-200">
                 Folio o Referencia interna de la Inmobiliaria
               </label>
               <input
@@ -142,49 +142,49 @@ export function ConfirmRegistrationModal({ lead, onClose }: ConfirmRegistrationM
                 value={reference}
                 onChange={(e) => setReference(e.target.value)}
                 placeholder="Ej. INM-2026-9812 (Opcional)"
-                className="w-full px-3 py-2 rounded-xl border border-slate-300 bg-white"
+                className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
               />
             </div>
 
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1">
-                <label className="block font-bold text-slate-800">Asesor asignado</label>
+                <label className="block font-bold text-slate-800 dark:text-slate-200">Asesor asignado</label>
                 <input
                   type="text"
                   value={advisorName}
                   onChange={(e) => setAdvisorName(e.target.value)}
                   required
-                  className="w-full px-3 py-2 rounded-xl border border-slate-300 bg-white"
+                  className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
                 />
               </div>
               <div className="space-y-1">
-                <label className="block font-bold text-slate-800">Usuario que registra</label>
+                <label className="block font-bold text-slate-800 dark:text-slate-200">Usuario que registra</label>
                 <input
                   type="text"
                   value={operatorUser}
                   onChange={(e) => setOperatorUser(e.target.value)}
                   required
-                  className="w-full px-3 py-2 rounded-xl border border-slate-300 bg-white"
+                  className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
                 />
               </div>
             </div>
 
             <div className="space-y-1">
-              <label className="block font-bold text-slate-800">Notas internas sobre el registro</label>
+              <label className="block font-bold text-slate-800 dark:text-slate-200">Notas internas sobre el registro</label>
               <textarea
                 rows={2}
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 placeholder="Detalles sobre la mesa de control o clave de oferente..."
-                className="w-full px-3 py-1.5 rounded-xl border border-slate-300 text-xs"
+                className="w-full px-3 py-1.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-xs"
               />
             </div>
 
-            <div className="pt-2 flex justify-end gap-2 border-t border-slate-100">
+            <div className="pt-2 flex justify-end gap-2 border-t border-slate-100 dark:border-slate-800">
               <button
                 type="button"
                 onClick={onClose}
-                className="px-4 py-2 rounded-xl text-slate-600 hover:bg-slate-100"
+                className="px-4 py-2 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
               >
                 Cancelar
               </button>
@@ -199,9 +199,9 @@ export function ConfirmRegistrationModal({ lead, onClose }: ConfirmRegistrationM
           </form>
         ) : (
           <form onSubmit={handleRejectConflict} className="space-y-3 text-xs">
-            <div className="bg-red-50 border border-red-200 rounded-xl p-3 text-red-900 space-y-1">
-              <div className="flex items-center gap-1.5 font-bold text-red-950">
-                <AlertCircle className="w-4 h-4 text-red-600 flex-shrink-0" />
+            <div className="bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900/50 rounded-xl p-3 text-red-900 dark:text-red-200 space-y-1">
+              <div className="flex items-center gap-1.5 font-bold text-red-950 dark:text-red-300">
+                <AlertCircle className="w-4 h-4 text-red-600 dark:text-red-400 flex-shrink-0" />
                 <span>Registro rechazado o duplicado:</span>
               </div>
               <p className="text-[11px] leading-relaxed">
@@ -210,11 +210,11 @@ export function ConfirmRegistrationModal({ lead, onClose }: ConfirmRegistrationM
             </div>
 
             <div className="space-y-1">
-              <label className="block font-bold text-slate-800">Motivo del conflicto o rechazo:</label>
+              <label className="block font-bold text-slate-800 dark:text-slate-200">Motivo del conflicto o rechazo:</label>
               <select
                 value={conflictReason}
                 onChange={(e) => setConflictReason(e.target.value)}
-                className="w-full px-3 py-2 rounded-xl border border-slate-300 bg-white"
+                className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
               >
                 <option value="Prospecto ya registrado por otro asesor previamente.">
                   Prospecto ya registrado por otro asesor (Conflicto de asignación)
@@ -231,11 +231,11 @@ export function ConfirmRegistrationModal({ lead, onClose }: ConfirmRegistrationM
               </select>
             </div>
 
-            <div className="pt-2 flex justify-end gap-2 border-t border-slate-100">
+            <div className="pt-2 flex justify-end gap-2 border-t border-slate-100 dark:border-slate-800">
               <button
                 type="button"
                 onClick={onClose}
-                className="px-4 py-2 rounded-xl text-slate-600 hover:bg-slate-100"
+                className="px-4 py-2 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
               >
                 Cancelar
               </button>

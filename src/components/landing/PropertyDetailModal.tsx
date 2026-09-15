@@ -65,7 +65,7 @@ export function PropertyDetailModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/70 backdrop-blur-sm overflow-y-auto">
       <div
-        className="relative bg-white rounded-3xl max-w-2xl w-full max-h-[92vh] overflow-y-auto shadow-2xl border border-slate-200"
+        className="relative bg-white dark:bg-slate-900 rounded-3xl max-w-2xl w-full max-h-[92vh] overflow-y-auto shadow-2xl border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100"
         role="dialog"
         aria-modal="true"
         aria-labelledby="modal-title"
@@ -148,9 +148,7 @@ export function PropertyDetailModal({
                 key={idx}
                 onClick={() => setActiveImageIndex(idx)}
                 className={`relative w-16 h-12 flex-shrink-0 rounded-lg overflow-hidden border-2 transition cursor-pointer ${
-                  activeImageIndex === idx
-                    ? 'border-amber-400 scale-105 shadow-md'
-                    : 'border-transparent opacity-60 hover:opacity-100'
+                  activeImageIndex === idx ? 'border-amber-400 scale-105 shadow' : 'border-transparent opacity-60 hover:opacity-100'
                 }`}
               >
                 <Image
@@ -170,66 +168,66 @@ export function PropertyDetailModal({
           {/* Título y Ubicación */}
           <div>
             <div className="flex flex-wrap items-center justify-between gap-2 mb-1.5">
-              <span className="text-xs font-bold text-amber-700 bg-amber-50 px-2.5 py-0.5 rounded border border-amber-200 uppercase tracking-wider">
+              <span className="text-xs font-bold text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/40 px-2.5 py-0.5 rounded border border-amber-200 dark:border-amber-900/60 uppercase tracking-wider">
                 Código: {property.code} {property.development ? `• ${property.development}` : ''}
               </span>
-              <span className="text-xs text-slate-500 flex items-center gap-1">
+              <span className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1">
                 <Calendar className="w-3.5 h-3.5 text-slate-400" />
                 Actualizado: {property.lastUpdated}
               </span>
             </div>
 
-            <h2 id="modal-title" className="text-2xl sm:text-3xl font-extrabold text-slate-900 leading-tight">
+            <h2 id="modal-title" className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-slate-100 leading-tight">
               {property.model}
             </h2>
 
             {property.address && (
-              <p className="text-xs text-slate-500 flex items-center gap-1.5 mt-1 font-semibold">
-                <MapPin className="w-3.5 h-3.5 text-amber-600 flex-shrink-0" />
+              <p className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1.5 mt-1 font-semibold">
+                <MapPin className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 flex-shrink-0" />
                 <span>{property.address}</span>
               </p>
             )}
 
-            <p className="text-sm text-slate-600 mt-2.5 leading-relaxed">{property.description}</p>
+            <p className="text-sm text-slate-600 dark:text-slate-300 mt-2.5 leading-relaxed">{property.description}</p>
           </div>
 
           {/* Métricas clave */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 py-3 border-y border-slate-100 text-center">
-            <div className="p-2.5 bg-slate-50 rounded-xl">
-              <Bed className="w-4 h-4 text-slate-500 mx-auto mb-1" />
-              <p className="text-[11px] text-slate-500">Recámaras</p>
-              <p className="text-sm font-bold text-slate-900">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 py-3 border-y border-slate-100 dark:border-slate-800 text-center">
+            <div className="p-2.5 bg-slate-50 dark:bg-slate-800/60 rounded-xl">
+              <Bed className="w-4 h-4 text-slate-500 dark:text-slate-400 mx-auto mb-1" />
+              <p className="text-[11px] text-slate-500 dark:text-slate-400">Recámaras</p>
+              <p className="text-sm font-bold text-slate-900 dark:text-slate-100">
                 {property.bedrooms} {property.hasStayArea ? '+ Estancia' : ''}
               </p>
             </div>
-            <div className="p-2.5 bg-slate-50 rounded-xl">
-              <Bath className="w-4 h-4 text-slate-500 mx-auto mb-1" />
-              <p className="text-[11px] text-slate-500">Baños</p>
-              <p className="text-sm font-bold text-slate-900">{property.bathrooms} Baños</p>
+            <div className="p-2.5 bg-slate-50 dark:bg-slate-800/60 rounded-xl">
+              <Bath className="w-4 h-4 text-slate-500 dark:text-slate-400 mx-auto mb-1" />
+              <p className="text-[11px] text-slate-500 dark:text-slate-400">Baños</p>
+              <p className="text-sm font-bold text-slate-900 dark:text-slate-100">{property.bathrooms} Baños</p>
             </div>
-            <div className="p-2.5 bg-slate-50 rounded-xl">
-              <Maximize2 className="w-4 h-4 text-slate-500 mx-auto mb-1" />
-              <p className="text-[11px] text-slate-500">Construcción / Terreno</p>
-              <p className="text-sm font-bold text-slate-900">
+            <div className="p-2.5 bg-slate-50 dark:bg-slate-800/60 rounded-xl">
+              <Maximize2 className="w-4 h-4 text-slate-500 dark:text-slate-400 mx-auto mb-1" />
+              <p className="text-[11px] text-slate-500 dark:text-slate-400">Construcción / Terreno</p>
+              <p className="text-sm font-bold text-slate-900 dark:text-slate-100">
                 {property.constructionM2} m² / {property.landM2} m²
               </p>
             </div>
-            <div className="p-2.5 bg-slate-50 rounded-xl">
-              <Car className="w-4 h-4 text-slate-500 mx-auto mb-1" />
-              <p className="text-[11px] text-slate-500">Estacionamiento</p>
-              <p className="text-sm font-bold text-slate-900">{property.parkingSpots} auto(s)</p>
+            <div className="p-2.5 bg-slate-50 dark:bg-slate-800/60 rounded-xl">
+              <Car className="w-4 h-4 text-slate-500 dark:text-slate-400 mx-auto mb-1" />
+              <p className="text-[11px] text-slate-500 dark:text-slate-400">Estacionamiento</p>
+              <p className="text-sm font-bold text-slate-900 dark:text-slate-100">{property.parkingSpots} auto(s)</p>
             </div>
           </div>
 
           {/* Características y acabados */}
           <div>
-            <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2.5">
+            <h3 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2.5">
               Acabados y distribución interior
             </h3>
-            <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs sm:text-sm text-slate-700">
+            <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs sm:text-sm text-slate-700 dark:text-slate-300">
               {property.keyFeatures.map((feature, i) => (
                 <li key={i} className="flex items-start gap-2">
-                  <ShieldCheck className="w-4 h-4 text-emerald-600 flex-shrink-0 mt-0.5" />
+                  <ShieldCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400 flex-shrink-0 mt-0.5" />
                   <span>{feature}</span>
                 </li>
               ))}
@@ -238,15 +236,15 @@ export function PropertyDetailModal({
 
           {/* Amenidades del desarrollo */}
           {property.amenities && property.amenities.length > 0 && (
-            <div className="bg-emerald-50/60 border border-emerald-200/80 rounded-2xl p-4 space-y-2">
-              <div className="flex items-center gap-1.5 font-bold text-emerald-900 text-xs sm:text-sm">
-                <Trees className="w-4 h-4 text-emerald-700" />
+            <div className="bg-emerald-50/60 dark:bg-emerald-950/30 border border-emerald-200/80 dark:border-emerald-900/50 rounded-2xl p-4 space-y-2">
+              <div className="flex items-center gap-1.5 font-bold text-emerald-900 dark:text-emerald-300 text-xs sm:text-sm">
+                <Trees className="w-4 h-4 text-emerald-700 dark:text-emerald-400" />
                 <span>Amenidades del Fraccionamiento Privado</span>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-emerald-950 pt-1">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-emerald-950 dark:text-emerald-200 pt-1">
                 {property.amenities.map((amenity, i) => (
                   <div key={i} className="flex items-center gap-2">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 dark:bg-emerald-400"></span>
                     <span>{amenity}</span>
                   </div>
                 ))}
@@ -256,12 +254,12 @@ export function PropertyDetailModal({
 
           {/* Cercanías y servicios */}
           {property.nearbyServices && property.nearbyServices.length > 0 && (
-            <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 space-y-2">
-              <div className="flex items-center gap-1.5 font-bold text-slate-800 text-xs sm:text-sm">
-                <GraduationCap className="w-4 h-4 text-blue-600" />
+            <div className="bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 space-y-2">
+              <div className="flex items-center gap-1.5 font-bold text-slate-800 dark:text-slate-200 text-xs sm:text-sm">
+                <GraduationCap className="w-4 h-4 text-blue-600 dark:text-blue-400" />
                 <span>Ubicación estratégica y servicios cercanos</span>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-slate-600 pt-1">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-slate-600 dark:text-slate-400 pt-1">
                 {property.nearbyServices.map((service, i) => (
                   <div key={i} className="flex items-center gap-2">
                     <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
@@ -273,23 +271,23 @@ export function PropertyDetailModal({
           )}
 
           {/* Formas de pago y gastos notariales */}
-          <div className="bg-slate-50 rounded-2xl p-4 border border-slate-200 text-xs space-y-2">
-            <div className="flex items-center gap-1.5 font-bold text-slate-900">
-              <FileText className="w-4 h-4 text-amber-600" />
+          <div className="bg-slate-50 dark:bg-slate-800/60 rounded-2xl p-4 border border-slate-200 dark:border-slate-700 text-xs space-y-2">
+            <div className="flex items-center gap-1.5 font-bold text-slate-900 dark:text-slate-100">
+              <FileText className="w-4 h-4 text-amber-600 dark:text-amber-400" />
               <span>Gastos adicionales y formas de compra admitidas</span>
             </div>
-            <p className="text-slate-600">
+            <p className="text-slate-600 dark:text-slate-300">
               <strong>Gastos notariales / escrituración estimados:</strong> {property.estimatedClosingCosts}
             </p>
             <div className="pt-1">
-              <p className="text-slate-600 mb-1">
+              <p className="text-slate-600 dark:text-slate-300 mb-1">
                 <strong>Esquemas que acepta esta propiedad:</strong>
               </p>
               <div className="flex flex-wrap gap-1.5">
                 {property.admittedFinancing.map((type) => (
                   <span
                     key={type}
-                    className="bg-white border border-slate-300 text-slate-700 px-2.5 py-0.5 rounded-md font-medium text-[11px]"
+                    className="bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-200 px-2.5 py-0.5 rounded-md font-medium text-[11px]"
                   >
                     {financingLabels[type] || type}
                   </span>
@@ -305,14 +303,14 @@ export function PropertyDetailModal({
                 onClose();
                 onSelectForPrequalification(property);
               }}
-              className="w-full sm:w-auto flex-1 bg-[#0d233a] hover:bg-[#163b5c] text-white font-bold py-3.5 px-6 rounded-xl text-sm transition shadow flex items-center justify-center gap-2 cursor-pointer"
+              className="w-full sm:w-auto flex-1 bg-[#0d233a] hover:bg-[#163b5c] dark:bg-amber-500 dark:hover:bg-amber-400 dark:text-slate-950 text-white font-bold py-3.5 px-6 rounded-xl text-sm transition shadow flex items-center justify-center gap-2 cursor-pointer"
             >
               <span>Solicitar visita para este modelo</span>
-              <ArrowRight className="w-4 h-4 text-amber-400" />
+              <ArrowRight className="w-4 h-4 text-amber-400 dark:text-slate-950" />
             </button>
             <button
               onClick={onClose}
-              className="w-full sm:w-auto bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-3.5 px-5 rounded-xl text-sm transition cursor-pointer"
+              className="w-full sm:w-auto bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-semibold py-3.5 px-5 rounded-xl text-sm transition cursor-pointer"
             >
               Cerrar ficha
             </button>

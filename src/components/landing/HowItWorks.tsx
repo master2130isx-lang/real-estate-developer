@@ -36,16 +36,16 @@ export function HowItWorks({ onOpenPrequalification }: HowItWorksProps) {
   ];
 
   return (
-    <section id="como-funciona" className="py-16 px-4 bg-slate-50 border-b border-slate-200">
+    <section id="como-funciona" className="py-16 px-4 bg-slate-50 dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 transition-colors">
       <div className="max-w-[1220px] mx-auto space-y-12">
         <div className="text-center max-w-2xl mx-auto space-y-3">
-          <span className="text-xs font-bold tracking-widest text-[#1c456f] uppercase bg-blue-50 px-3 py-1 rounded-full border border-blue-100">
+          <span className="text-xs font-bold tracking-widest text-[#1c456f] dark:text-amber-400 uppercase bg-blue-50 dark:bg-slate-900 px-3 py-1 rounded-full border border-blue-100 dark:border-slate-800">
             Proceso transparente y directo
           </span>
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900">
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-slate-100">
             ¿Cómo funciona el proceso de atención?
           </h2>
-          <p className="text-slate-600 text-sm sm:text-base">
+          <p className="text-slate-600 dark:text-slate-400 text-sm sm:text-base">
             Diseñamos un método claro para que conozcas las opciones y condiciones antes de coordinar una visita física con tu asesor.
           </p>
         </div>
@@ -56,23 +56,23 @@ export function HowItWorks({ onOpenPrequalification }: HowItWorksProps) {
             return (
               <div
                 key={index}
-                className="bg-white rounded-2xl p-6 sm:p-7 border border-slate-200 shadow-sm relative flex flex-col justify-between"
+                className="bg-white dark:bg-slate-900 rounded-2xl p-6 sm:p-7 border border-slate-200 dark:border-slate-800 shadow-sm relative flex flex-col justify-between"
               >
                 <div>
                   <div className="flex items-center justify-between mb-5">
-                    <span className="text-3xl font-black text-slate-200">{step.number}</span>
-                    <div className="w-12 h-12 rounded-xl bg-[#0d233a] text-amber-400 flex items-center justify-center shadow-sm">
+                    <span className="text-3xl font-black text-slate-200 dark:text-slate-800">{step.number}</span>
+                    <div className="w-12 h-12 rounded-xl bg-[#0d233a] dark:bg-slate-800 text-amber-400 flex items-center justify-center shadow-sm">
                       <IconComponent className="w-6 h-6" />
                     </div>
                   </div>
 
-                  <h3 className="text-lg font-bold text-slate-900 mb-2">{step.title}</h3>
-                  <p className="text-xs sm:text-sm text-slate-600 leading-relaxed mb-4">
+                  <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-2">{step.title}</h3>
+                  <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed mb-4">
                     {step.description}
                   </p>
                 </div>
 
-                <div className="pt-3 border-t border-slate-100 text-[11px] text-slate-500 font-medium">
+                <div className="pt-3 border-t border-slate-100 dark:border-slate-800 text-[11px] text-slate-500 dark:text-slate-400 font-medium">
                   {step.detail}
                 </div>
               </div>
@@ -83,10 +83,10 @@ export function HowItWorks({ onOpenPrequalification }: HowItWorksProps) {
         <div className="text-center pt-2">
           <button
             onClick={onOpenPrequalification}
-            className="inline-flex items-center gap-2 bg-[#0d233a] hover:bg-[#163b5c] text-white font-bold py-3.5 px-6 rounded-xl text-sm transition shadow cursor-pointer"
+            className="inline-flex items-center gap-2 bg-[#0d233a] hover:bg-[#163b5c] dark:bg-amber-500 dark:hover:bg-amber-400 dark:text-slate-950 text-white font-bold py-3.5 px-6 rounded-xl text-sm transition shadow cursor-pointer"
           >
             <span>Solicitar una visita</span>
-            <ArrowRight className="w-4 h-4 text-amber-400" />
+            <ArrowRight className="w-4 h-4 text-amber-400 dark:text-slate-950" />
           </button>
         </div>
       </div>

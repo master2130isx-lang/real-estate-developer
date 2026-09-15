@@ -38,7 +38,7 @@ export default function Home() {
   }, []);
 
   return (
-    <main className="min-h-screen flex flex-col bg-slate-50 selection:bg-amber-100 selection:text-amber-950 pb-16 md:pb-0">
+    <main className="min-h-screen flex flex-col bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 selection:bg-amber-100 selection:text-amber-950 pb-16 md:pb-0 transition-colors">
       {/* Barra de navegación superior */}
       <Navbar
         onOpenPrequalification={() => handleOpenPrequalification()}

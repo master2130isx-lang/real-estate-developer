@@ -110,33 +110,33 @@ export function WhatsAppDraftModal({ lead, onClose }: WhatsAppDraftModalProps) {
   return (
     <div className="fixed inset-0 z-60 flex items-center justify-center p-3 sm:p-4 bg-black/65 backdrop-blur-sm overflow-y-auto">
       <div
-        className="relative bg-white rounded-3xl max-w-xl w-full max-h-[92vh] overflow-y-auto shadow-2xl border border-slate-200 p-5 sm:p-6 space-y-4 text-slate-900"
+        className="relative bg-white dark:bg-slate-900 rounded-3xl max-w-xl w-full max-h-[92vh] overflow-y-auto shadow-2xl border border-slate-200 dark:border-slate-800 p-5 sm:p-6 space-y-4 text-slate-900 dark:text-slate-100"
         role="dialog"
         aria-modal="true"
       >
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center transition cursor-pointer"
+          className="absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 flex items-center justify-center transition cursor-pointer"
         >
           <X className="w-4 h-4" />
         </button>
 
         {/* Cabecera */}
-        <div className="flex items-center gap-2 text-emerald-600 border-b border-slate-100 pb-3">
+        <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 border-b border-slate-100 dark:border-slate-800 pb-3">
           <WhatsAppIcon className="w-5 h-5" />
           <div>
-            <h3 className="text-base font-bold text-slate-900 leading-tight">
+            <h3 className="text-base font-bold text-slate-900 dark:text-slate-100 leading-tight">
               Respuestas Rápidas para {lead.fullName}
             </h3>
-            <p className="text-[11px] text-slate-500">
-              Teléfono de destino: <strong className="text-slate-800 font-mono">{lead.phone}</strong>
+            <p className="text-[11px] text-slate-500 dark:text-slate-400">
+              Teléfono de destino: <strong className="text-slate-800 dark:text-amber-400 font-mono">{lead.phone}</strong>
             </p>
           </div>
         </div>
 
         {/* Selector de Plantillas Comerciales */}
         <div>
-          <label className="block text-xs font-bold text-slate-700 mb-2">
+          <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-2">
             Elige una plantilla comercial para enviar:
           </label>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
@@ -150,11 +150,11 @@ export function WhatsAppDraftModal({ lead, onClose }: WhatsAppDraftModalProps) {
                   onClick={() => handleSelectTemplate(id)}
                   className={`p-2 rounded-xl text-left text-xs font-semibold transition border flex items-center gap-1.5 cursor-pointer ${
                     isSelected
-                      ? 'bg-emerald-50 border-emerald-400 text-emerald-950 ring-2 ring-emerald-200 shadow-sm'
-                      : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100'
+                      ? 'bg-emerald-50 dark:bg-emerald-950/50 border-emerald-400 dark:border-emerald-600 text-emerald-950 dark:text-emerald-200 ring-2 ring-emerald-200 dark:ring-emerald-900/40 shadow-sm'
+                      : 'bg-slate-50 dark:bg-slate-800/60 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
                   }`}
                 >
-                  <span className={isSelected ? 'text-emerald-600' : 'text-slate-400'}>
+                  <span className={isSelected ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-400'}>
                     {tmpl.icon}
                   </span>
                   <span className="truncate">{tmpl.title}</span>
@@ -167,7 +167,7 @@ export function WhatsAppDraftModal({ lead, onClose }: WhatsAppDraftModalProps) {
         {/* Editor de Texto del Mensaje */}
         <div className="space-y-1.5">
           <div className="flex items-center justify-between text-xs">
-            <label className="font-bold text-slate-800">
+            <label className="font-bold text-slate-800 dark:text-slate-200">
               Texto del mensaje (puedes editarlo libremente):
             </label>
             <span className="text-[11px] text-slate-400">Listo para WhatsApp</span>
@@ -177,18 +177,18 @@ export function WhatsAppDraftModal({ lead, onClose }: WhatsAppDraftModalProps) {
             rows={7}
             value={activeMessage}
             onChange={handleTextChange}
-            className="w-full p-3.5 rounded-2xl border border-slate-300 text-xs font-sans text-slate-800 leading-relaxed focus:ring-2 focus:ring-emerald-500 focus:outline-none bg-slate-50/50 resize-y"
+            className="w-full p-3.5 rounded-2xl border border-slate-300 dark:border-slate-700 text-xs font-sans text-slate-800 dark:text-slate-100 leading-relaxed focus:ring-2 focus:ring-emerald-500 focus:outline-none bg-slate-50/50 dark:bg-slate-800/80 resize-y"
           />
         </div>
 
         {/* Botones de Acción Inmediata */}
-        <div className="space-y-2 pt-2 border-t border-slate-100">
+        <div className="space-y-2 pt-2 border-t border-slate-100 dark:border-slate-800">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             <button
               onClick={handleCopy}
-              className="w-full bg-slate-100 hover:bg-slate-200 text-slate-800 font-semibold py-3 px-3 rounded-xl text-xs transition flex items-center justify-center gap-1.5 cursor-pointer"
+              className="w-full bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-semibold py-3 px-3 rounded-xl text-xs transition flex items-center justify-center gap-1.5 cursor-pointer"
             >
-              {copied ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4" />}
+              {copied ? <Check className="w-4 h-4 text-emerald-600 dark:text-emerald-400" /> : <Copy className="w-4 h-4" />}
               <span>{copied ? '¡Copiado al portapapeles!' : 'Copiar texto'}</span>
             </button>
 
@@ -204,7 +204,7 @@ export function WhatsAppDraftModal({ lead, onClose }: WhatsAppDraftModalProps) {
 
           <button
             onClick={handleMarkAsContacted}
-            className="w-full bg-[#0d233a] hover:bg-[#163b5c] text-white font-semibold py-2.5 px-4 rounded-xl text-xs transition cursor-pointer"
+            className="w-full bg-[#0d233a] hover:bg-[#163b5c] dark:bg-amber-500 dark:hover:bg-amber-400 dark:text-slate-950 text-white font-semibold py-2.5 px-4 rounded-xl text-xs transition cursor-pointer"
           >
             Guardar y Registrar en Expediente como &quot;Contactado&quot;
           </button>

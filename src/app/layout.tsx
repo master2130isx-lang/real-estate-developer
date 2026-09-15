@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
 import { AppProvider } from '@/context/AppContext';
+import { ThemeProvider } from '@/context/ThemeContext';
 import { getServerCommercialConfig } from '@/lib/commercialConfigStore';
 
 const geistSans = Geist({
@@ -15,9 +16,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'Residencial & Asesoría Inmobiliaria | Encuentra tu opción real',
+  title: 'Residencial & Asesoría Inmobiliaria | Valle de los Encinos',
   description:
-    'Portal inmobiliario y precalificación transparente para compra de vivienda con Infonavit, crédito bancario o contado en la Zona Metropolitana.',
+    'Portal comercial y precalificación transparente para compra de vivienda con Infonavit, crédito bancario o contado en Valle de los Encinos, Salinas Victoria, N.L.',
 };
 
 export default async function RootLayout({
@@ -31,9 +32,12 @@ export default async function RootLayout({
     <html
       lang="es-MX"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      suppressHydrationWarning
     >
-      <body className="min-h-full flex flex-col bg-slate-50 text-slate-900 font-sans">
-        <AppProvider initialConfig={initialConfig}>{children}</AppProvider>
+      <body className="min-h-full flex flex-col bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans transition-colors duration-200">
+        <ThemeProvider>
+          <AppProvider initialConfig={initialConfig}>{children}</AppProvider>
+        </ThemeProvider>
       </body>
     </html>
   );
