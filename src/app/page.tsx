@@ -6,6 +6,7 @@ import { Hero } from '@/components/landing/Hero';
 import { PropertiesSection } from '@/components/landing/PropertiesSection';
 import { HowItWorks } from '@/components/landing/HowItWorks';
 import { AdvisorTrust } from '@/components/landing/AdvisorTrust';
+import { LocationMapSection } from '@/components/landing/LocationMapSection';
 import { FaqSection } from '@/components/landing/FaqSection';
 import { StickyMobileCTA } from '@/components/landing/StickyMobileCTA';
 import { Footer } from '@/components/landing/Footer';
@@ -54,6 +55,9 @@ export default function Home() {
 
       {/* Proceso transparente en 3 pasos */}
       <HowItWorks onOpenPrequalification={() => handleOpenPrequalification()} />
+
+      {/* Ubicación estratégica, mapa y cómo llegar */}
+      <LocationMapSection />
 
       {/* Identidad del asesor y compromisos de ética */}
       <AdvisorTrust />

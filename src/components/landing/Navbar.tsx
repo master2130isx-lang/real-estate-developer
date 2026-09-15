@@ -61,6 +61,9 @@ export function Navbar({ onOpenPrequalification, onOpenPrivacy }: NavbarProps) {
           <a href="#como-funciona" className="hover:text-[#0d233a] transition">
             Cómo Funciona
           </a>
+          <a href="#ubicacion" className="hover:text-[#0d233a] transition">
+            Ubicación
+          </a>
           <a href="#asesor" className="hover:text-[#0d233a] transition">
             Atención
           </a>
@@ -121,6 +124,13 @@ export function Navbar({ onOpenPrequalification, onOpenPrivacy }: NavbarProps) {
             className="block py-2 text-sm font-semibold text-slate-700 hover:text-[#0d233a]"
           >
             Cómo Funciona
+          </a>
+          <a
+            href="#ubicacion"
+            onClick={() => setMobileMenuOpen(false)}
+            className="block py-2 text-sm font-semibold text-slate-700 hover:text-[#0d233a]"
+          >
+            Ubicación y Cómo Llegar
           </a>
           <a
             href="#asesor"

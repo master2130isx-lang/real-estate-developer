@@ -311,15 +311,15 @@ export function PrequalificationForm({
                 : 'Orientación personalizada';
 
               const visitDetails = createdLead.appointmentRequest
-                ? `📅 *Visita propuesta:* ${createdLead.appointmentRequest.preferredDate} (${createdLead.appointmentRequest.timeSlot})\n`
+                ? `\u2022 *Visita propuesta:* ${createdLead.appointmentRequest.preferredDate} (${createdLead.appointmentRequest.timeSlot})\n`
                 : '';
 
               const waMessage = encodeURIComponent(
                 `¡Hola! Acabo de registrar mi solicitud para conocer el *Modelo Águila Premier* en *Valle de los Encinos*.\n\n` +
-                `📋 *Folio de solicitud:* ${createdLead.folio}\n` +
-                `👤 *Nombre:* ${createdLead.fullName}\n` +
-                `📱 *Celular:* ${createdLead.phone}\n` +
-                `💳 *Forma de compra:* ${financingLabel}\n` +
+                `\u2022 *Folio de solicitud:* ${createdLead.folio}\n` +
+                `\u2022 *Nombre:* ${createdLead.fullName}\n` +
+                `\u2022 *Celular:* ${createdLead.phone}\n` +
+                `\u2022 *Forma de compra:* ${financingLabel}\n` +
                 visitDetails +
                 `\n¿Podrían confirmarme la disponibilidad para recibirme en la casa muestra? ¡Muchas gracias!`
               );
