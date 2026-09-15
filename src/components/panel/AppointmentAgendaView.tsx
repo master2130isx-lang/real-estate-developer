@@ -209,16 +209,16 @@ export function AppointmentAgendaView({
   };
 
   return (
-    <div className="space-y-3.5">
-      {/* Barra de Filtros Ejecutiva */}
-      <div className="bg-white dark:bg-slate-900 p-3.5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2.5">
+    <div className="space-y-4">
+      {/* Barra de Sub-filtros Ejecutiva */}
+      <div className="bg-white dark:bg-[#102033] p-2.5 rounded-2xl border border-slate-200/80 dark:border-[#1E354D] shadow-xs flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2.5">
         <div className="flex flex-wrap items-center gap-1.5 text-xs">
           <button
             onClick={() => setFilterType('todas')}
-            className={`px-3 py-1.5 rounded-xl font-bold transition cursor-pointer ${
+            className={`px-3 py-1.5 rounded-xl font-medium transition cursor-pointer ${
               filterType === 'todas'
-                ? 'bg-[#0d233a] dark:bg-amber-500 text-white dark:text-slate-950 shadow-sm'
-                : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
+                ? 'bg-[#0F2C40] dark:bg-[#1E3E5E] text-white shadow-xs font-semibold'
+                : 'bg-slate-100 dark:bg-[#0B1522] text-slate-700 dark:text-slate-300 hover:bg-slate-200/70 dark:hover:bg-slate-800'
             }`}
           >
             Todas ({totalCount})
@@ -226,46 +226,46 @@ export function AppointmentAgendaView({
 
           <button
             onClick={() => setFilterType('hoy')}
-            className={`px-3 py-1.5 rounded-xl font-bold transition flex items-center gap-1.5 cursor-pointer ${
+            className={`px-3 py-1.5 rounded-xl font-medium transition flex items-center gap-1.5 cursor-pointer ${
               filterType === 'hoy'
-                ? 'bg-rose-600 text-white shadow-sm'
-                : 'bg-rose-50 dark:bg-rose-950/40 text-rose-800 dark:text-rose-300 border border-rose-200 dark:border-rose-900/50 hover:bg-rose-100 dark:hover:bg-rose-900/60'
+                ? 'bg-rose-700 text-white shadow-xs font-semibold'
+                : 'bg-slate-100 dark:bg-[#0B1522] text-slate-700 dark:text-slate-300 hover:bg-slate-200/70 dark:hover:bg-slate-800'
             }`}
           >
-            <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span>
+            {todayCount > 0 && <span className="w-2 h-2 rounded-full bg-rose-500"></span>}
             <span>Hoy ({todayCount})</span>
           </button>
 
           <button
             onClick={() => setFilterType('pendientes')}
-            className={`px-3 py-1.5 rounded-xl font-bold transition flex items-center gap-1.5 cursor-pointer ${
+            className={`px-3 py-1.5 rounded-xl font-medium transition flex items-center gap-1.5 cursor-pointer ${
               filterType === 'pendientes'
-                ? 'bg-amber-600 text-white shadow-sm'
-                : 'bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-900/50 hover:bg-amber-100 dark:hover:bg-amber-900/60'
+                ? 'bg-amber-700 text-white shadow-xs font-semibold'
+                : 'bg-slate-100 dark:bg-[#0B1522] text-slate-700 dark:text-slate-300 hover:bg-slate-200/70 dark:hover:bg-slate-800'
             }`}
           >
-            <AlertTriangle className="w-3.5 h-3.5" />
+            <AlertTriangle className="w-3.5 h-3.5 text-amber-500" />
             <span>Por Confirmar ({pendingCount})</span>
           </button>
 
           <button
             onClick={() => setFilterType('confirmadas')}
-            className={`px-3 py-1.5 rounded-xl font-bold transition flex items-center gap-1.5 cursor-pointer ${
+            className={`px-3 py-1.5 rounded-xl font-medium transition flex items-center gap-1.5 cursor-pointer ${
               filterType === 'confirmadas'
-                ? 'bg-emerald-600 text-white shadow-sm'
-                : 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-900/50 hover:bg-emerald-100 dark:hover:bg-emerald-900/60'
+                ? 'bg-emerald-700 text-white shadow-xs font-semibold'
+                : 'bg-slate-100 dark:bg-[#0B1522] text-slate-700 dark:text-slate-300 hover:bg-slate-200/70 dark:hover:bg-slate-800'
             }`}
           >
-            <CheckCircle2 className="w-3.5 h-3.5" />
+            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
             <span>Confirmadas ({confirmedCount})</span>
           </button>
 
           <button
             onClick={() => setFilterType('canceladas')}
-            className={`px-3 py-1.5 rounded-xl font-bold transition flex items-center gap-1.5 cursor-pointer ${
+            className={`px-3 py-1.5 rounded-xl font-medium transition flex items-center gap-1.5 cursor-pointer ${
               filterType === 'canceladas'
-                ? 'bg-rose-700 text-white shadow-sm'
-                : 'bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-900/50 hover:bg-rose-100 dark:hover:bg-rose-900/60'
+                ? 'bg-slate-700 text-white shadow-xs font-semibold'
+                : 'bg-slate-100 dark:bg-[#0B1522] text-slate-600 dark:text-slate-400 hover:bg-slate-200/70 dark:hover:bg-slate-800'
             }`}
           >
             <CalendarX2 className="w-3.5 h-3.5" />
@@ -274,10 +274,10 @@ export function AppointmentAgendaView({
 
           <button
             onClick={() => setFilterType('archivadas')}
-            className={`px-3 py-1.5 rounded-xl font-bold transition flex items-center gap-1.5 cursor-pointer ${
+            className={`px-3 py-1.5 rounded-xl font-medium transition flex items-center gap-1.5 cursor-pointer ${
               filterType === 'archivadas'
-                ? 'bg-slate-800 dark:bg-slate-700 text-white shadow-sm'
-                : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
+                ? 'bg-slate-800 text-white shadow-xs font-semibold'
+                : 'bg-slate-100 dark:bg-[#0B1522] text-slate-600 dark:text-slate-400 hover:bg-slate-200/70 dark:hover:bg-slate-800'
             }`}
             title="Citas canceladas hace más de 14 días o archivadas manualmente"
           >
@@ -288,16 +288,16 @@ export function AppointmentAgendaView({
 
         <button
           onClick={onOpenNewAppointment}
-          className="w-full sm:w-auto bg-[#0d233a] hover:bg-[#163b5c] dark:bg-amber-500 dark:hover:bg-amber-400 dark:text-slate-950 text-white font-bold px-3.5 py-1.5 rounded-xl text-xs transition flex items-center justify-center gap-1.5 shadow-md cursor-pointer"
+          className="w-full sm:w-auto bg-[#0F2C40] hover:bg-[#163E5B] dark:bg-[#C09B53] dark:hover:bg-[#D4AF37] text-white dark:text-[#0F2C40] font-semibold px-3.5 py-1.5 rounded-xl text-xs transition flex items-center justify-center gap-1.5 shadow-xs cursor-pointer"
         >
-          <Plus className="w-4 h-4 text-amber-400 dark:text-slate-950" />
+          <Plus className="w-4 h-4 text-[#C09B53] dark:text-[#0F2C40]" />
           <span>Agendar Cita</span>
         </button>
       </div>
 
-      {/* Grid de Tarjetas Compactas */}
+      {/* Grid de Tarjetas Arquitectónicas */}
       {filteredAppointments.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5">
           {filteredAppointments.map((lead) => {
             const apt = lead.appointmentRequest;
             const aptDate = apt?.confirmedDate || apt?.preferredDate || 'Fecha por definir';
@@ -312,131 +312,111 @@ export function AppointmentAgendaView({
             return (
               <div
                 key={lead.id}
-                className={`bg-white dark:bg-slate-900 rounded-2xl border transition shadow-sm hover:shadow-md flex flex-col justify-between overflow-hidden text-xs ${
-                  isArchived
-                    ? 'border-slate-300 dark:border-slate-800 opacity-80 bg-slate-50/50 dark:bg-slate-900/50'
-                    : isCancelled
-                    ? 'border-rose-300 dark:border-rose-900 bg-rose-50/15 dark:bg-rose-950/20'
-                    : isToday
-                    ? 'border-rose-400 dark:border-rose-500 ring-2 ring-rose-200 dark:ring-rose-900/50'
-                    : isConfirmed
-                    ? 'border-emerald-300 dark:border-emerald-800'
-                    : 'border-amber-300 dark:border-amber-800'
+                className={`bg-white dark:bg-[#102033] rounded-2xl border border-slate-200/80 dark:border-[#1E354D] shadow-xs hover:shadow-md transition flex flex-col justify-between overflow-hidden text-xs ${
+                  isArchived ? 'opacity-70' : ''
                 }`}
               >
-                {/* Cabecera Compacta (Fecha, Hora y Estado) */}
-                <div
-                  className={`px-3 py-2 border-b flex items-center justify-between ${
-                    isArchived
-                      ? 'bg-slate-100 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-800'
-                      : isCancelled
-                      ? 'bg-rose-100/70 dark:bg-rose-950/60 text-rose-900 dark:text-rose-200 border-rose-200 dark:border-rose-900'
-                      : isToday
-                      ? 'bg-rose-50 dark:bg-rose-950/50 text-rose-900 dark:text-rose-200 border-rose-100 dark:border-rose-900'
-                      : isConfirmed
-                      ? 'bg-emerald-50 dark:bg-emerald-950/50 text-emerald-950 dark:text-emerald-200 border-emerald-100 dark:border-emerald-900'
-                      : 'bg-amber-50 dark:bg-amber-950/50 text-amber-950 dark:text-amber-200 border-amber-100 dark:border-amber-900'
-                  }`}
-                >
-                  <div className="flex items-center gap-1.5 font-bold">
-                    <Calendar className="w-3.5 h-3.5 text-slate-600 dark:text-slate-400 flex-shrink-0" />
-                    <span>{aptDate}</span>
-                    <span className="text-slate-400">•</span>
-                    <span className="flex items-center gap-1 text-[11px] font-semibold text-slate-600 dark:text-slate-300">
+                {/* Cabecera Sobria (Fecha, Hora y Estado) */}
+                <div className="px-3.5 py-2.5 bg-slate-50/80 dark:bg-[#0E1E2E]/90 border-b border-slate-100 dark:border-[#182C40] flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-slate-800 dark:text-slate-200 text-xs font-medium">
+                    <Calendar className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500 flex-shrink-0" />
+                    <span className="font-semibold text-slate-900 dark:text-white">{aptDate}</span>
+                    <span className="text-slate-300 dark:text-slate-600">•</span>
+                    <span className="flex items-center gap-1 text-[11px] text-slate-600 dark:text-slate-400 font-medium">
                       <Clock className="w-3 h-3" />
                       {aptTime}
                     </span>
-                    {isToday && (
-                      <span className="bg-rose-600 text-white text-[9px] font-black px-1.5 py-0.2 rounded-full uppercase ml-1 animate-pulse">
-                        Hoy
-                      </span>
-                    )}
                   </div>
 
                   <div>
                     {isArchived ? (
-                      <span className="bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-[10px] font-bold px-2 py-0.5 rounded-full border border-slate-300 dark:border-slate-700">
-                        📦 Archivada
+                      <span className="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-[10px] font-semibold px-2 py-0.5 rounded-full border border-slate-200 dark:border-slate-700">
+                        Archivada
                       </span>
                     ) : isCancelled ? (
-                      <span className="bg-rose-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm">
-                        ❌ Cancelada
+                      <span className="bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 text-[10px] font-semibold px-2 py-0.5 rounded-full border border-rose-200 dark:border-rose-900/50">
+                        Cancelada
+                      </span>
+                    ) : isToday ? (
+                      <span className="bg-rose-50 dark:bg-rose-950/50 text-rose-800 dark:text-rose-300 text-[10px] font-bold px-2 py-0.5 rounded-full border border-rose-200 dark:border-rose-900/60 flex items-center gap-1">
+                        <span className="w-1.5 h-1.5 rounded-full bg-rose-600 animate-pulse"></span>
+                        <span>Hoy</span>
                       </span>
                     ) : isConfirmed ? (
-                      <span className="bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 text-[10px] font-bold px-2 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800">
-                        ✅ Confirmada
+                      <span className="bg-emerald-50 dark:bg-emerald-950/50 text-emerald-800 dark:text-emerald-300 text-[10px] font-bold px-2 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-900/60">
+                        Confirmada
                       </span>
                     ) : (
-                      <span className="bg-amber-100 dark:bg-amber-950/60 text-amber-900 dark:text-amber-300 text-[10px] font-bold px-2 py-0.5 rounded-full border border-amber-200 dark:border-amber-800">
-                        ⏳ Por Confirmar
+                      <span className="bg-amber-50 dark:bg-amber-950/50 text-amber-900 dark:text-amber-300 text-[10px] font-bold px-2 py-0.5 rounded-full border border-amber-200 dark:border-amber-900/60">
+                        Por Confirmar
                       </span>
                     )}
                   </div>
                 </div>
 
-                {/* Contenido Compacto */}
-                <div className="p-3 space-y-2 flex-1">
+                {/* Contenido de la Tarjeta */}
+                <div className="p-3.5 space-y-2.5 flex-1">
                   {/* Fila 1: Nombre del Prospecto, Folio y Teléfono */}
-                  <div className="flex items-start justify-between gap-1">
+                  <div className="flex items-start justify-between gap-1.5">
                     <div>
-                      <h4 className="font-bold text-slate-900 dark:text-white text-[13px] leading-snug">
+                      <h4 className="font-serif text-[15px] font-bold text-slate-900 dark:text-white leading-tight">
                         {lead.fullName || 'Prospecto'}
                       </h4>
-                      <div className="flex items-center gap-2 text-[11px] mt-0.5">
+                      <div className="flex items-center gap-2 text-[11px] mt-1">
                         <a
                           href={`tel:${cleanPhone}`}
-                          className="text-blue-700 dark:text-blue-400 hover:underline flex items-center gap-1 font-semibold"
+                          className="text-slate-600 dark:text-slate-300 hover:text-[#0F2C40] dark:hover:text-white flex items-center gap-1 font-medium transition"
                         >
-                          <Phone className="w-3 h-3 text-blue-600 dark:text-blue-400" />
+                          <Phone className="w-3 h-3 text-slate-400" />
                           <span>{lead.phone || 'Sin teléfono'}</span>
                         </a>
                         <span className="text-slate-300 dark:text-slate-700">•</span>
                         <span className="text-slate-500 dark:text-slate-400 capitalize">{lead.preferredChannel || 'whatsapp'}</span>
                       </div>
                     </div>
-                    <span className="font-mono text-[10px] bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 px-1.5 py-0.5 rounded font-medium border dark:border-slate-700">
+                    <span className="font-mono text-[10px] bg-slate-100 dark:bg-[#0B1522] text-slate-500 dark:text-slate-400 px-1.5 py-0.5 rounded font-medium border border-slate-200/60 dark:border-[#1E354D]">
                       {lead.folio || 'N/A'}
                     </span>
                   </div>
 
-                  {/* Fila 2: Inmueble y Esquema de Compra en Tira Compacta */}
-                  <div className="bg-slate-50 dark:bg-slate-800/70 border border-slate-100 dark:border-slate-800 rounded-xl px-2.5 py-1.5 flex flex-wrap items-center justify-between gap-1.5 text-[11px] text-slate-600 dark:text-slate-300">
-                    <span className="font-bold text-slate-800 dark:text-slate-200">Modelo Águila Premier</span>
+                  {/* Fila 2: Inmueble y Esquema de Compra */}
+                  <div className="bg-slate-50 dark:bg-[#0B1522] border border-slate-100 dark:border-[#1A2E44] rounded-xl px-2.5 py-1.5 flex flex-wrap items-center justify-between gap-1.5 text-[11px] text-slate-600 dark:text-slate-300">
+                    <span className="font-medium text-slate-800 dark:text-slate-200">Modelo Águila Premier</span>
                     <span className="text-slate-300 dark:text-slate-700">•</span>
-                    <span className="capitalize font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1">
+                    <span className="capitalize font-medium text-slate-700 dark:text-slate-300 flex items-center gap-1">
                       <CreditCard className="w-3 h-3 text-slate-400" />
                       {((lead.financingType || 'infonavit') as string).replace(/_/g, ' ')}
                     </span>
                     <span className="text-slate-300 dark:text-slate-700">•</span>
                     <span className="text-slate-500 dark:text-slate-400 flex items-center gap-0.5">
-                      <MapPin className="w-3 h-3 text-amber-600 dark:text-amber-400" />
-                      Caseta Principal
+                      <MapPin className="w-3 h-3 text-[#C09B53]" />
+                      Caseta Acceso
                     </span>
                   </div>
 
-                  {/* Notas o comentarios del cliente si existen */}
+                  {/* Notas o comentarios del cliente */}
                   {apt?.notes && (
-                    <div className="text-[10px] text-slate-600 dark:text-slate-300 bg-amber-50/50 dark:bg-amber-950/30 px-2 py-1 rounded-lg border border-amber-100 dark:border-amber-900/40 italic truncate" title={apt.notes}>
+                    <div className="text-[10px] text-slate-600 dark:text-slate-300 bg-[#FDFBF7] dark:bg-[#0E1F30] px-2 py-1 rounded-lg border border-[#EAE3D6] dark:border-[#1E354D] italic truncate" title={apt.notes}>
                       💬 &quot;{apt.notes}&quot;
                     </div>
                   )}
 
                   {/* Protección 15 Días */}
                   {lead.attributionStatus === 'confirmado' && lead.attributionExpiresAt && (
-                    <div className="flex items-center gap-1 text-[10px] text-emerald-800 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded-lg font-semibold border border-emerald-200 dark:border-emerald-900/50">
+                    <div className="flex items-center gap-1.5 text-[10px] text-emerald-800 dark:text-emerald-300 bg-emerald-50/60 dark:bg-emerald-950/30 px-2 py-0.5 rounded-lg font-medium border border-emerald-100 dark:border-emerald-900/40">
                       <ShieldCheck className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
-                      <span>Exclusividad activa: {lead.attributionExpiresAt.split(' ')[0]}</span>
+                      <span>Exclusividad activa hasta {lead.attributionExpiresAt.split(' ')[0]}</span>
                     </div>
                   )}
                 </div>
 
                 {/* Barra de Acciones Ejecutivas */}
-                <div className="px-3 py-2 bg-slate-50/80 dark:bg-slate-800/60 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between gap-1">
+                <div className="px-3.5 py-2.5 bg-slate-50/70 dark:bg-[#0E1E2E]/60 border-t border-slate-100 dark:border-[#182C40] flex items-center justify-between gap-1.5">
                   <div className="flex items-center gap-1">
                     <button
                       onClick={() => onOpenWhatsApp(lead)}
                       title="Enviar mensaje rápido de WhatsApp"
-                      className="bg-[#25D366] hover:bg-[#20bd5a] text-white p-1.5 rounded-xl transition shadow-sm flex items-center gap-1 font-bold text-[11px] cursor-pointer"
+                      className="bg-[#25D366] hover:bg-[#20bd5a] text-white px-2.5 py-1.5 rounded-lg transition shadow-xs flex items-center gap-1.5 font-semibold text-[11px] cursor-pointer"
                     >
                       <WhatsAppIcon className="w-3.5 h-3.5" />
                       <span className="hidden sm:inline">WhatsApp</span>
@@ -445,9 +425,9 @@ export function AppointmentAgendaView({
                     <a
                       href={`tel:${cleanPhone}`}
                       title="Llamar directamente"
-                      className="bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 p-1.5 rounded-xl border border-slate-200 dark:border-slate-700 transition text-[11px] font-semibold flex items-center gap-1 cursor-pointer"
+                      className="bg-white dark:bg-[#13283E] hover:bg-slate-100 dark:hover:bg-[#1A344D] text-slate-700 dark:text-slate-300 p-1.5 rounded-lg border border-slate-200 dark:border-[#1E354D] transition text-[11px] font-medium flex items-center gap-1 cursor-pointer"
                     >
-                      <Phone className="w-3 h-3 text-blue-600 dark:text-blue-400" />
+                      <Phone className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
                     </a>
                   </div>
 
@@ -457,7 +437,7 @@ export function AppointmentAgendaView({
                       <button
                         onClick={() => handleToggleArchive(lead.id, false)}
                         title="Restaurar cita a la agenda activa"
-                        className="bg-slate-700 hover:bg-slate-800 text-white px-2 py-1.5 rounded-xl text-[11px] font-bold transition flex items-center gap-1 cursor-pointer shadow-sm"
+                        className="bg-slate-700 hover:bg-slate-800 text-white px-2.5 py-1.5 rounded-lg text-[11px] font-medium transition flex items-center gap-1 cursor-pointer shadow-xs"
                       >
                         <ArchiveRestore className="w-3 h-3" />
                         <span>Restaurar</span>
@@ -467,7 +447,7 @@ export function AppointmentAgendaView({
                         <button
                           onClick={() => handleOpenReschedule(lead)}
                           title="Reactivar y reprogramar cita"
-                          className="bg-emerald-600 hover:bg-emerald-700 text-white px-2 py-1.5 rounded-xl text-[11px] font-bold transition flex items-center gap-1 cursor-pointer shadow-sm"
+                          className="bg-[#0F2C40] hover:bg-[#163E5B] dark:bg-[#C09B53] dark:hover:bg-[#D4AF37] text-white dark:text-[#0F2C40] px-2.5 py-1.5 rounded-lg text-[11px] font-semibold transition flex items-center gap-1 cursor-pointer shadow-xs"
                         >
                           <RotateCcw className="w-3 h-3" />
                           <span>Reagendar</span>
@@ -475,7 +455,7 @@ export function AppointmentAgendaView({
                         <button
                           onClick={() => handleToggleArchive(lead.id, true)}
                           title="Archivar de inmediato"
-                          className="bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 p-1.5 rounded-xl text-[11px] font-semibold transition cursor-pointer"
+                          className="bg-white dark:bg-[#13283E] hover:bg-slate-100 dark:hover:bg-[#1A344D] text-slate-600 dark:text-slate-400 p-1.5 rounded-lg border border-slate-200 dark:border-[#1E354D] text-[11px] transition cursor-pointer"
                         >
                           <Archive className="w-3.5 h-3.5" />
                         </button>
@@ -485,7 +465,7 @@ export function AppointmentAgendaView({
                         <button
                           onClick={() => handleConfirm(lead.id, aptDate, aptTime)}
                           title="Confirmar cita"
-                          className="bg-emerald-600 hover:bg-emerald-700 text-white px-2 py-1.5 rounded-xl text-[11px] font-bold transition flex items-center gap-1 cursor-pointer shadow-sm"
+                          className="bg-emerald-700 hover:bg-emerald-800 text-white px-2.5 py-1.5 rounded-lg text-[11px] font-semibold transition flex items-center gap-1 cursor-pointer shadow-xs"
                         >
                           <CheckCircle2 className="w-3 h-3" />
                           <span>Confirmar</span>
@@ -493,16 +473,16 @@ export function AppointmentAgendaView({
                         <button
                           onClick={() => handleOpenReschedule(lead)}
                           title="Reagendar horario o fecha"
-                          className="bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 p-1.5 rounded-xl border border-slate-200 dark:border-slate-700 text-[11px] transition cursor-pointer"
+                          className="bg-white dark:bg-[#13283E] hover:bg-slate-100 dark:hover:bg-[#1A344D] text-slate-700 dark:text-slate-300 p-1.5 rounded-lg border border-slate-200 dark:border-[#1E354D] text-[11px] transition cursor-pointer"
                         >
                           <RotateCcw className="w-3 h-3 text-slate-500 dark:text-slate-400" />
                         </button>
                         <button
                           onClick={() => handleCancelAppointment(lead.id)}
                           title="Cancelar cita y enviar WhatsApp"
-                          className="bg-white dark:bg-slate-800 hover:bg-rose-50 dark:hover:bg-rose-950/40 text-rose-600 dark:text-rose-400 p-1.5 rounded-xl border border-rose-200 dark:border-rose-900/60 text-[11px] transition cursor-pointer"
+                          className="bg-white dark:bg-[#13283E] hover:bg-rose-50 dark:hover:bg-rose-950/40 text-rose-700 dark:text-rose-400 p-1.5 rounded-lg border border-slate-200 dark:border-[#1E354D] text-[11px] transition cursor-pointer"
                         >
-                          <CalendarX2 className="w-3 h-3 text-rose-600 dark:text-rose-400" />
+                          <CalendarX2 className="w-3 h-3" />
                         </button>
                       </>
                     ) : (
@@ -510,7 +490,7 @@ export function AppointmentAgendaView({
                         <button
                           onClick={() => handleOpenReschedule(lead)}
                           title="Reagendar horario o fecha"
-                          className="bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 px-2 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 text-[11px] font-semibold transition flex items-center gap-1 cursor-pointer"
+                          className="bg-white dark:bg-[#13283E] hover:bg-slate-100 dark:hover:bg-[#1A344D] text-slate-700 dark:text-slate-300 px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-[#1E354D] text-[11px] font-medium transition flex items-center gap-1 cursor-pointer"
                         >
                           <RotateCcw className="w-3 h-3 text-slate-500 dark:text-slate-400" />
                           <span>Reagendar</span>
@@ -518,9 +498,9 @@ export function AppointmentAgendaView({
                         <button
                           onClick={() => handleCancelAppointment(lead.id)}
                           title="Cancelar cita"
-                          className="bg-white dark:bg-slate-800 hover:bg-rose-50 dark:hover:bg-rose-950/40 text-rose-600 dark:text-rose-400 p-1.5 rounded-xl border border-rose-200 dark:border-rose-900/60 text-[11px] transition cursor-pointer"
+                          className="bg-white dark:bg-[#13283E] hover:bg-rose-50 dark:hover:bg-rose-950/40 text-rose-700 dark:text-rose-400 p-1.5 rounded-lg border border-slate-200 dark:border-[#1E354D] text-[11px] transition cursor-pointer"
                         >
-                          <CalendarX2 className="w-3 h-3 text-rose-600 dark:text-rose-400" />
+                          <CalendarX2 className="w-3 h-3" />
                         </button>
                       </>
                     )}
@@ -528,7 +508,7 @@ export function AppointmentAgendaView({
                     <button
                       onClick={() => onOpenLeadDetail(lead)}
                       title="Ver expediente"
-                      className="bg-[#0d233a] hover:bg-[#163b5c] dark:bg-slate-800 dark:hover:bg-slate-700 text-white p-1.5 rounded-xl transition text-[11px] font-semibold cursor-pointer border dark:border-slate-700"
+                      className="bg-[#0F2C40] hover:bg-[#163E5B] dark:bg-[#1E3E5E] dark:hover:bg-[#254F77] text-white p-1.5 rounded-lg transition text-[11px] font-medium cursor-pointer border border-[#0F2C40] dark:border-[#2D5A85]"
                     >
                       <Eye className="w-3 h-3" />
                     </button>
@@ -540,24 +520,24 @@ export function AppointmentAgendaView({
         </div>
       ) : (
         /* Estado Vacío de la Agenda */
-        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-8 text-center space-y-3">
-          <div className="w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500 flex items-center justify-center mx-auto">
+        <div className="bg-white dark:bg-[#102033] rounded-2xl border border-slate-200/80 dark:border-[#1E354D] p-8 text-center space-y-3">
+          <div className="w-12 h-12 rounded-full bg-slate-100 dark:bg-[#0B1522] text-slate-400 dark:text-slate-500 flex items-center justify-center mx-auto border border-slate-200/60 dark:border-[#1E354D]">
             <Calendar className="w-6 h-6" />
           </div>
           <div>
-            <h4 className="font-bold text-slate-800 dark:text-slate-100 text-sm">
-              No hay citas en este periodo seleccionado
+            <h4 className="font-serif font-bold text-slate-900 dark:text-white text-base">
+              No hay citas en el periodo seleccionado
             </h4>
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-sm mx-auto">
-              Utiliza el botón para registrar visitas de prospectos que te hayan contactado directamente por llamada o WhatsApp.
+              Utiliza el botón de agendamiento para registrar visitas pactadas directamente con interesados por llamada o WhatsApp.
             </p>
           </div>
           <button
             onClick={onOpenNewAppointment}
-            className="bg-[#0d233a] hover:bg-[#163b5c] dark:bg-amber-500 dark:hover:bg-amber-400 dark:text-slate-950 text-white font-bold px-4 py-2 rounded-xl text-xs transition inline-flex items-center gap-1.5 shadow-sm cursor-pointer"
+            className="bg-[#0F2C40] hover:bg-[#163E5B] dark:bg-[#C09B53] dark:hover:bg-[#D4AF37] text-white dark:text-[#0F2C40] font-semibold px-4 py-2 rounded-xl text-xs transition inline-flex items-center gap-1.5 shadow-xs cursor-pointer"
           >
-            <Plus className="w-4 h-4 text-amber-400 dark:text-slate-950" />
-            <span>Agendar Nueva Cita Ahora</span>
+            <Plus className="w-4 h-4 text-[#C09B53] dark:text-[#0F2C40]" />
+            <span>Agendar Nueva Cita</span>
           </button>
         </div>
       )}
@@ -565,9 +545,9 @@ export function AppointmentAgendaView({
       {/* Modal Rápido de Reprogramación */}
       {rescheduleLead && (
         <div className="fixed inset-0 z-60 flex items-center justify-center p-4 bg-black/65 backdrop-blur-sm">
-          <div className="bg-white dark:bg-slate-900 rounded-2xl max-w-md w-full p-5 shadow-2xl border border-slate-200 dark:border-slate-800 space-y-4 text-slate-900 dark:text-slate-100">
+          <div className="bg-white dark:bg-[#102033] rounded-2xl max-w-md w-full p-5 shadow-2xl border border-slate-200 dark:border-[#1E354D] space-y-4 text-slate-900 dark:text-slate-100">
             <div>
-              <h3 className="text-base font-bold text-slate-900 dark:text-white">
+              <h3 className="text-base font-serif font-bold text-slate-900 dark:text-white">
                 Reprogramar Visita para {rescheduleLead.fullName}
               </h3>
               <p className="text-xs text-slate-500 dark:text-slate-400">
@@ -584,7 +564,7 @@ export function AppointmentAgendaView({
                   type="date"
                   value={newDate}
                   onChange={(e) => setNewDate(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-xs focus:ring-2 focus:ring-[#0d233a] dark:focus:ring-amber-500"
+                  className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-[#1E354D] bg-white dark:bg-[#0B1522] text-slate-900 dark:text-slate-100 text-xs focus:ring-2 focus:ring-[#0F2C40] dark:focus:ring-[#C09B53]"
                 />
               </div>
 
@@ -595,7 +575,7 @@ export function AppointmentAgendaView({
                 <select
                   value={newTime}
                   onChange={(e) => setNewTime(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-xs focus:ring-2 focus:ring-[#0d233a] dark:focus:ring-amber-500"
+                  className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-[#1E354D] bg-white dark:bg-[#0B1522] text-slate-900 dark:text-slate-100 text-xs focus:ring-2 focus:ring-[#0F2C40] dark:focus:ring-[#C09B53]"
                 >
                   <option value="10:00 AM">10:00 AM</option>
                   <option value="11:00 AM">11:00 AM</option>
@@ -609,11 +589,11 @@ export function AppointmentAgendaView({
               </div>
             </div>
 
-            <div className="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-slate-800">
+            <div className="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-[#1A2E44]">
               <button
                 type="button"
                 onClick={() => handleCancelAppointment(rescheduleLead.id)}
-                className="text-rose-600 dark:text-rose-400 hover:text-rose-800 dark:hover:text-rose-300 text-xs font-semibold flex items-center gap-1 cursor-pointer"
+                className="text-rose-700 dark:text-rose-400 hover:underline text-xs font-medium flex items-center gap-1 cursor-pointer"
               >
                 <CalendarX2 className="w-3.5 h-3.5" />
                 <span>Cancelar Cita</span>
@@ -623,14 +603,14 @@ export function AppointmentAgendaView({
                 <button
                   type="button"
                   onClick={() => setRescheduleLead(null)}
-                  className="px-3 py-2 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer"
+                  className="px-3 py-2 rounded-xl text-xs font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer"
                 >
                   Regresar
                 </button>
                 <button
                   type="button"
                   onClick={handleSaveReschedule}
-                  className="bg-[#0d233a] hover:bg-[#163b5c] dark:bg-amber-500 dark:hover:bg-amber-400 dark:text-slate-950 text-white font-bold px-4 py-2 rounded-xl text-xs transition shadow-sm cursor-pointer"
+                  className="bg-[#0F2C40] hover:bg-[#163E5B] dark:bg-[#C09B53] dark:hover:bg-[#D4AF37] text-white dark:text-[#0F2C40] font-semibold px-4 py-2 rounded-xl text-xs transition shadow-xs cursor-pointer"
                 >
                   Guardar y Notificar
                 </button>
@@ -643,11 +623,11 @@ export function AppointmentAgendaView({
       {/* Modal de Notificación Rápida a WhatsApp tras Reagenda o Cancelación */}
       {whatsappActionModal?.isOpen && (
         <div className="fixed inset-0 z-60 flex items-center justify-center p-4 bg-black/65 backdrop-blur-sm">
-          <div className="bg-white dark:bg-slate-900 rounded-2xl max-w-md w-full p-5 sm:p-6 shadow-2xl border border-slate-200 dark:border-slate-800 space-y-4 text-slate-900 dark:text-slate-100">
+          <div className="bg-white dark:bg-[#102033] rounded-2xl max-w-md w-full p-5 sm:p-6 shadow-2xl border border-slate-200 dark:border-[#1E354D] space-y-4 text-slate-900 dark:text-slate-100">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400">
+              <div className="flex items-center gap-2 text-emerald-700 dark:text-emerald-400">
                 <WhatsAppIcon className="w-5 h-5" />
-                <h3 className="font-bold text-sm text-slate-900 dark:text-white">{whatsappActionModal.title}</h3>
+                <h3 className="font-semibold text-sm text-slate-900 dark:text-white">{whatsappActionModal.title}</h3>
               </div>
               <button
                 onClick={() => setWhatsappActionModal(null)}
@@ -659,18 +639,18 @@ export function AppointmentAgendaView({
 
             <p className="text-xs text-slate-600 dark:text-slate-400">{whatsappActionModal.subtitle}</p>
 
-            <div className="bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 rounded-xl p-3 text-xs text-slate-700 dark:text-slate-200 whitespace-pre-line leading-relaxed font-sans max-h-48 overflow-y-auto">
+            <div className="bg-slate-50 dark:bg-[#0B1522] border border-slate-200 dark:border-[#1E354D] rounded-xl p-3 text-xs text-slate-700 dark:text-slate-200 whitespace-pre-line leading-relaxed font-sans max-h-48 overflow-y-auto">
               {whatsappActionModal.message}
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
+            <div className="flex flex-col sm:flex-row gap-2 pt-2 border-t border-slate-100 dark:border-[#1A2E44]">
               <button
                 onClick={() => {
                   navigator.clipboard.writeText(whatsappActionModal.message);
                   setCopiedAction(true);
                   setTimeout(() => setCopiedAction(false), 2000);
                 }}
-                className="flex-1 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-semibold py-2.5 px-3 rounded-xl text-xs transition flex items-center justify-center gap-1.5 cursor-pointer"
+                className="flex-1 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-medium py-2.5 px-3 rounded-xl text-xs transition flex items-center justify-center gap-1.5 cursor-pointer"
               >
                 {copiedAction ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4" />}
                 <span>{copiedAction ? '¡Copiado!' : 'Copiar Texto'}</span>
@@ -681,7 +661,7 @@ export function AppointmentAgendaView({
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={() => setWhatsappActionModal(null)}
-                className="flex-1 bg-[#25D366] hover:bg-[#20bd5a] text-white font-bold py-2.5 px-3 rounded-xl text-xs transition flex items-center justify-center gap-2 shadow-md cursor-pointer"
+                className="flex-1 bg-[#25D366] hover:bg-[#20bd5a] text-white font-semibold py-2.5 px-3 rounded-xl text-xs transition flex items-center justify-center gap-2 shadow-xs cursor-pointer"
               >
                 <WhatsAppIcon className="w-4 h-4" />
                 <span>Abrir WhatsApp</span>

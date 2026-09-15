@@ -367,18 +367,11 @@ export function PrequalificationForm({
               );
             })()}
 
-            {/* Enlace al panel y botón de cerrar */}
-            <div className="space-y-2 pt-2 border-t border-[var(--color-border)]">
-              <a
-                href="/panel"
-                className="w-full bg-[var(--color-navy)] hover:bg-[var(--color-navy-light)] text-white font-medium py-2.5 px-4 rounded text-xs transition flex items-center justify-center gap-2 cursor-pointer shadow-sm"
-              >
-                <span>Ver seguimiento de atribución en el Panel del Asesor (Demo)</span>
-                <ExternalLink className="w-3.5 h-3.5 text-[var(--color-accent)]" />
-              </a>
+            {/* Botón de cerrar */}
+            <div className="pt-2 border-t border-[var(--color-border)]">
               <button
                 onClick={resetFormAndClose}
-                className="w-full bg-[var(--color-surface-alt)] hover:bg-[var(--color-border)] text-[var(--color-text-secondary)] hover:text-[var(--color-text)] font-medium py-2 px-4 rounded text-xs transition cursor-pointer"
+                className="w-full bg-[var(--color-surface-alt)] hover:bg-[var(--color-border)] text-[var(--color-text)] font-semibold py-3 px-4 rounded text-sm transition cursor-pointer"
               >
                 Cerrar y volver a la página principal
               </button>
@@ -389,13 +382,13 @@ export function PrequalificationForm({
           <div className="space-y-6">
             {/* Header con progreso - pr-12 para evitar cualquier solapamiento con la X */}
             <div className="pr-12">
-              <div className="flex justify-between items-center text-xs text-[var(--color-text-muted)] mb-2">
-                <span className="label-caps text-[10px]">
+              <div className="flex justify-between items-center text-xs text-slate-700 dark:text-slate-300 font-medium mb-2">
+                <span className="font-semibold text-xs tracking-wider uppercase">
                   Paso {currentStepForProgress} de {totalSteps}
                 </span>
-                <span className="font-serif font-bold text-[var(--color-accent)] text-sm">{progressPercent}%</span>
+                <span className="font-serif font-bold text-[var(--color-accent)] text-base">{progressPercent}%</span>
               </div>
-              <div className="w-full h-1.5 bg-[var(--color-surface-alt)] rounded-full overflow-hidden border border-[var(--color-border-subtle)]">
+              <div className="w-full h-2 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
                 <div
                   className="h-full bg-[var(--color-accent)] transition-all duration-300 rounded-full"
                   style={{ width: `${progressPercent}%` }}
@@ -405,42 +398,42 @@ export function PrequalificationForm({
 
             {/* PASO 1: QUÉ BUSCA (Zona, Propiedad, Presupuesto, Forma de compra, Plazo) */}
             {step === 1 && (
-              <div className="space-y-4">
+              <div className="space-y-5">
                 <div>
-                  <span className="label-caps text-[var(--color-accent)] text-[10px] block mb-1">
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-[var(--color-accent)] block mb-1">
                     Preferencia inicial
                   </span>
-                  <h2 id="form-modal-title" className="font-serif text-xl sm:text-2xl font-bold text-[var(--color-navy)] dark:text-[var(--color-text)] leading-tight">
+                  <h2 id="form-modal-title" className="font-serif text-xl sm:text-2xl font-bold text-slate-900 dark:text-white leading-tight">
                     ¿Qué buscas y cómo planeas comprar?
                   </h2>
-                  <p className="text-xs text-[var(--color-text-secondary)] mt-1">
+                  <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 mt-1">
                     Comparte tus preferencias para coordinar opciones acordes a tus planes.
                   </p>
                 </div>
 
                 {/* Zona o Propiedad */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div className="space-y-1">
-                    <label className="label-caps text-[var(--color-text-secondary)] text-[10px] block">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                  <div className="space-y-1.5">
+                    <label className="block text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-100">
                       Ubicación y Fraccionamiento <span className="text-red-500">*</span>
                     </label>
                     <select
                       value={zone}
                       onChange={(e) => setZone(e.target.value)}
-                      className="w-full px-3 py-2.5 rounded border border-[var(--color-border)] text-xs bg-[var(--color-surface)] text-[var(--color-text)] focus:border-[var(--color-accent)] focus:ring-1 focus:ring-[var(--color-accent)] focus:outline-none"
+                      className="w-full px-3.5 py-2.5 rounded border border-slate-300 dark:border-slate-600 text-xs sm:text-sm bg-white dark:bg-[#0B1E30] text-slate-900 dark:text-white font-medium focus:border-[var(--color-accent)] focus:ring-2 focus:ring-[var(--color-accent)]/20 focus:outline-none"
                     >
                       <option value="Salinas Victoria, N.L. (Valle de los Encinos)">Salinas Victoria, N.L. (Valle de los Encinos)</option>
                     </select>
                   </div>
 
-                  <div className="space-y-1">
-                    <label className="label-caps text-[var(--color-text-secondary)] text-[10px] block">
+                  <div className="space-y-1.5">
+                    <label className="block text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-100">
                       Modelo seleccionado
                     </label>
                     <select
                       value={propertyId}
                       onChange={(e) => setPropertyId(e.target.value)}
-                      className="w-full px-3 py-2.5 rounded border border-[var(--color-border)] text-xs bg-[var(--color-surface)] text-[var(--color-text)] focus:border-[var(--color-accent)] focus:ring-1 focus:ring-[var(--color-accent)] focus:outline-none"
+                      className="w-full px-3.5 py-2.5 rounded border border-slate-300 dark:border-slate-600 text-xs sm:text-sm bg-white dark:bg-[#0B1E30] text-slate-900 dark:text-white font-medium focus:border-[var(--color-accent)] focus:ring-2 focus:ring-[var(--color-accent)]/20 focus:outline-none"
                     >
                       {PROPERTIES_DATA.map((p) => (
                         <option key={p.id} value={p.id}>
@@ -452,11 +445,11 @@ export function PrequalificationForm({
                 </div>
 
                 {/* Forma de compra */}
-                <div className="space-y-1.5">
-                  <label className="label-caps text-[var(--color-text-secondary)] text-[10px] block">
+                <div className="space-y-2">
+                  <label className="block text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-100">
                     Forma de compra prevista <span className="text-red-500">*</span>
                   </label>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                     {[
                       { id: 'infonavit', label: 'Crédito Infonavit' },
                       { id: 'bancario', label: 'Crédito Hipotecario Bancario' },
@@ -474,10 +467,10 @@ export function PrequalificationForm({
                             setNeedsOrientation(false);
                           }
                         }}
-                        className={`p-2.5 rounded text-xs border text-left transition cursor-pointer ${
+                        className={`p-3 rounded text-xs sm:text-sm text-left transition cursor-pointer border ${
                           financingType === f.id
-                            ? 'bg-[var(--color-surface-alt)] border-[var(--color-navy)] dark:border-[var(--color-accent)] text-[var(--color-navy)] dark:text-[var(--color-accent)] font-bold'
-                            : 'bg-[var(--color-surface)] border-[var(--color-border)] text-[var(--color-text-secondary)] hover:border-[var(--color-border-subtle)]'
+                            ? 'border-2 border-[var(--color-navy)] dark:border-[var(--color-accent)] bg-slate-100 dark:bg-[#16324D] text-slate-900 dark:text-[var(--color-accent)] font-bold shadow-xs'
+                            : 'border-slate-300 dark:border-slate-700 bg-white dark:bg-[#0E2236] text-slate-800 dark:text-slate-200 hover:border-slate-400 dark:hover:border-slate-500 font-medium'
                         }`}
                       >
                         {f.label}
@@ -485,13 +478,13 @@ export function PrequalificationForm({
                     ))}
                   </div>
                   {errors.financingType && (
-                    <p className="text-[11px] text-red-600">{errors.financingType}</p>
+                    <p className="text-xs font-semibold text-red-600 dark:text-red-400">{errors.financingType}</p>
                   )}
                 </div>
 
                 {/* Presupuesto */}
-                <div className="space-y-1">
-                  <label className="label-caps text-[var(--color-text-secondary)] text-[10px] block">
+                <div className="space-y-2">
+                  <label className="block text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-100">
                     Rango de presupuesto aproximado
                   </label>
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
@@ -506,10 +499,10 @@ export function PrequalificationForm({
                         key={b.id}
                         type="button"
                         onClick={() => setBudgetRange(b.id as BudgetRange)}
-                        className={`p-2 rounded text-xs border text-center transition cursor-pointer ${
+                        className={`p-2.5 rounded text-xs sm:text-sm text-center transition cursor-pointer border ${
                           budgetRange === b.id
-                            ? 'bg-[var(--color-surface-alt)] border-[var(--color-navy)] dark:border-[var(--color-accent)] text-[var(--color-navy)] dark:text-[var(--color-accent)] font-bold'
-                            : 'bg-[var(--color-surface)] border-[var(--color-border)] text-[var(--color-text-secondary)] hover:border-[var(--color-border-subtle)]'
+                            ? 'border-2 border-[var(--color-navy)] dark:border-[var(--color-accent)] bg-slate-100 dark:bg-[#16324D] text-slate-900 dark:text-[var(--color-accent)] font-bold shadow-xs'
+                            : 'border-slate-300 dark:border-slate-700 bg-white dark:bg-[#0E2236] text-slate-800 dark:text-slate-200 hover:border-slate-400 dark:hover:border-slate-500 font-medium'
                         }`}
                       >
                         {b.label}
@@ -519,8 +512,8 @@ export function PrequalificationForm({
                 </div>
 
                 {/* Plazo aproximado */}
-                <div className="space-y-1">
-                  <label className="label-caps text-[var(--color-text-secondary)] text-[10px] block">
+                <div className="space-y-2">
+                  <label className="block text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-100">
                     Plazo aproximado de compra
                   </label>
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
@@ -534,10 +527,10 @@ export function PrequalificationForm({
                         key={t.id}
                         type="button"
                         onClick={() => setPurchaseTimeline(t.id as PurchaseTimeline)}
-                        className={`py-2 px-2 rounded text-xs border text-center transition cursor-pointer ${
+                        className={`py-2.5 px-2 rounded text-xs sm:text-sm text-center transition cursor-pointer border ${
                           purchaseTimeline === t.id
-                            ? 'bg-[var(--color-surface-alt)] border-[var(--color-navy)] dark:border-[var(--color-accent)] text-[var(--color-navy)] dark:text-[var(--color-accent)] font-bold'
-                            : 'bg-[var(--color-surface)] border-[var(--color-border)] text-[var(--color-text-secondary)] hover:border-[var(--color-border-subtle)]'
+                            ? 'border-2 border-[var(--color-navy)] dark:border-[var(--color-accent)] bg-slate-100 dark:bg-[#16324D] text-slate-900 dark:text-[var(--color-accent)] font-bold shadow-xs'
+                            : 'border-slate-300 dark:border-slate-700 bg-white dark:bg-[#0E2236] text-slate-800 dark:text-slate-200 hover:border-slate-400 dark:hover:border-slate-500 font-medium'
                         }`}
                       >
                         {t.label}
@@ -550,22 +543,22 @@ export function PrequalificationForm({
 
             {/* PASO 2: DATOS DE CONTACTO */}
             {step === 2 && (
-              <div className="space-y-4">
+              <div className="space-y-5">
                 <div>
-                  <span className="label-caps text-[var(--color-accent)] text-[10px] block mb-1">
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-[var(--color-accent)] block mb-1">
                     Contacto directo
                   </span>
-                  <h2 className="font-serif text-xl sm:text-2xl font-bold text-[var(--color-navy)] dark:text-[var(--color-text)] leading-tight">
+                  <h2 className="font-serif text-xl sm:text-2xl font-bold text-slate-900 dark:text-white leading-tight">
                     Datos para coordinar tu atención
                   </h2>
-                  <p className="text-xs text-[var(--color-text-secondary)] mt-1">
+                  <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 mt-1">
                     Utilizaremos estos datos para atender tu solicitud y confirmar tu cita directamente por WhatsApp.
                   </p>
                 </div>
 
                 {/* Nombre */}
-                <div className="space-y-1">
-                  <label className="label-caps text-[var(--color-text-secondary)] text-[10px] block">
+                <div className="space-y-1.5">
+                  <label className="block text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-100">
                     Nombre y Apellidos <span className="text-red-500">*</span>
                   </label>
                   <input
@@ -573,16 +566,16 @@ export function PrequalificationForm({
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
                     placeholder="Ej. Alejandro Morales"
-                    className={`w-full px-3.5 py-2.5 rounded border text-sm bg-[var(--color-surface)] text-[var(--color-text)] focus:border-[var(--color-accent)] focus:ring-1 focus:ring-[var(--color-accent)] focus:outline-none ${
-                      errors.fullName ? 'border-red-500 bg-red-50/10' : 'border-[var(--color-border)]'
+                    className={`w-full px-4 py-3 rounded border text-sm sm:text-base bg-white dark:bg-[#0B1E30] text-slate-900 dark:text-white font-medium focus:border-[var(--color-accent)] focus:ring-2 focus:ring-[var(--color-accent)]/20 focus:outline-none shadow-xs ${
+                      errors.fullName ? 'border-red-500 bg-red-50/10' : 'border-slate-300 dark:border-slate-600'
                     }`}
                   />
-                  {errors.fullName && <p className="text-[11px] text-red-600 dark:text-red-400">{errors.fullName}</p>}
+                  {errors.fullName && <p className="text-xs font-semibold text-red-600 dark:text-red-400">{errors.fullName}</p>}
                 </div>
 
                 {/* Teléfono */}
-                <div className="space-y-1">
-                  <label className="label-caps text-[var(--color-text-secondary)] text-[10px] block">
+                <div className="space-y-1.5">
+                  <label className="block text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-100">
                     Teléfono Celular / WhatsApp <span className="text-red-500">*</span>
                   </label>
                   <input
@@ -592,23 +585,23 @@ export function PrequalificationForm({
                     value={phone}
                     onChange={(e) => setPhone(e.target.value.replace(/\D/g, ''))}
                     placeholder="10 dígitos (Ej. 5512345678)"
-                    className={`w-full px-3.5 py-2.5 rounded border text-sm bg-[var(--color-surface)] text-[var(--color-text)] focus:border-[var(--color-accent)] focus:ring-1 focus:ring-[var(--color-accent)] focus:outline-none ${
-                      errors.phone ? 'border-red-500 bg-red-50/10' : 'border-[var(--color-border)]'
+                    className={`w-full px-4 py-3 rounded border text-sm sm:text-base bg-white dark:bg-[#0B1E30] text-slate-900 dark:text-white font-medium focus:border-[var(--color-accent)] focus:ring-2 focus:ring-[var(--color-accent)]/20 focus:outline-none shadow-xs ${
+                      errors.phone ? 'border-red-500 bg-red-50/10' : 'border-slate-300 dark:border-slate-600'
                     }`}
                   />
-                  {errors.phone && <p className="text-[11px] text-red-600 dark:text-red-400">{errors.phone}</p>}
+                  {errors.phone && <p className="text-xs font-semibold text-red-600 dark:text-red-400">{errors.phone}</p>}
                 </div>
 
                 {/* Canal de confirmación y Correo */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div className="space-y-1">
-                    <label className="label-caps text-[var(--color-text-secondary)] text-[10px] block">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                  <div className="space-y-1.5">
+                    <label className="block text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-100">
                       Canal de confirmación
                     </label>
                     <select
                       value={preferredChannel}
                       onChange={(e) => setPreferredChannel(e.target.value as ContactChannel)}
-                      className="w-full px-3 py-2.5 rounded border border-[var(--color-border)] text-xs bg-[var(--color-surface)] text-[var(--color-text)] focus:border-[var(--color-accent)] focus:ring-1 focus:ring-[var(--color-accent)] focus:outline-none"
+                      className="w-full px-3.5 py-3 rounded border border-slate-300 dark:border-slate-600 text-xs sm:text-sm bg-white dark:bg-[#0B1E30] text-slate-900 dark:text-white font-medium focus:border-[var(--color-accent)] focus:ring-2 focus:ring-[var(--color-accent)]/20 focus:outline-none"
                     >
                       <option value="whatsapp">Mensaje por WhatsApp (Recomendado)</option>
                       <option value="llamada">Llamada telefónica</option>
@@ -616,49 +609,49 @@ export function PrequalificationForm({
                     </select>
                   </div>
 
-                  <div className="space-y-1">
-                    <label className="label-caps text-[var(--color-text-secondary)] text-[10px] block">
-                      Correo Electrónico <span className="text-[var(--color-text-muted)] font-normal normal-case">(Opcional)</span>
+                  <div className="space-y-1.5">
+                    <label className="block text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-100">
+                      Correo Electrónico <span className="text-slate-500 dark:text-slate-400 font-normal text-xs">(Opcional)</span>
                     </label>
                     <input
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="tucorreo@ejemplo.com"
-                      className="w-full px-3.5 py-2.5 rounded border border-[var(--color-border)] text-xs bg-[var(--color-surface)] text-[var(--color-text)] focus:border-[var(--color-accent)] focus:ring-1 focus:ring-[var(--color-accent)] focus:outline-none"
+                      className="w-full px-3.5 py-3 rounded border border-slate-300 dark:border-slate-600 text-xs sm:text-sm bg-white dark:bg-[#0B1E30] text-slate-900 dark:text-white font-medium focus:border-[var(--color-accent)] focus:ring-2 focus:ring-[var(--color-accent)]/20 focus:outline-none"
                     />
                   </div>
                 </div>
 
                 {/* Consentimientos */}
-                <div className="space-y-2 pt-2 border-t border-[var(--color-border)]">
-                  <label className="flex items-start gap-2.5 cursor-pointer text-xs text-[var(--color-text)]">
+                <div className="space-y-2.5 pt-3 border-t border-slate-200 dark:border-slate-700">
+                  <label className="flex items-start gap-2.5 cursor-pointer text-xs sm:text-sm text-slate-800 dark:text-slate-200">
                     <input
                       type="checkbox"
                       checked={privacyConsentAccepted}
                       onChange={(e) => setPrivacyConsentAccepted(e.target.checked)}
-                      className="mt-0.5 h-4 w-4 rounded border-[var(--color-border)] text-[var(--color-navy)] focus:ring-[var(--color-accent)]"
+                      className="mt-0.5 h-4 w-4 rounded border-slate-300 text-[var(--color-navy)] focus:ring-[var(--color-accent)]"
                     />
                     <span>
                       Autorizo el tratamiento de mis datos para atender esta solicitud conforme al{' '}
                       <button
                         type="button"
                         onClick={onOpenPrivacyNotice}
-                        className="underline text-[var(--color-accent)] font-semibold inline hover:text-[var(--color-accent-hover)] cursor-pointer"
+                        className="underline text-[var(--color-navy)] dark:text-[var(--color-accent)] font-bold inline hover:opacity-80 cursor-pointer"
                       >
                         Aviso de Privacidad
                       </button>
-                      . <span className="text-red-500">*</span>
+                      . <span className="text-red-500 font-bold">*</span>
                     </span>
                   </label>
-                  {errors.privacy && <p className="text-[11px] text-red-600 dark:text-red-400 pl-6">{errors.privacy}</p>}
+                  {errors.privacy && <p className="text-xs font-semibold text-red-600 dark:text-red-400 pl-6">{errors.privacy}</p>}
 
-                  <label className="flex items-start gap-2.5 cursor-pointer text-xs text-[var(--color-text-muted)]">
+                  <label className="flex items-start gap-2.5 cursor-pointer text-xs text-slate-600 dark:text-slate-400">
                     <input
                       type="checkbox"
                       checked={marketingConsentAccepted}
                       onChange={(e) => setMarketingConsentAccepted(e.target.checked)}
-                      className="mt-0.5 h-4 w-4 rounded border-[var(--color-border)] text-[var(--color-navy)] focus:ring-[var(--color-accent)]"
+                      className="mt-0.5 h-4 w-4 rounded border-slate-300 text-[var(--color-navy)] focus:ring-[var(--color-accent)]"
                     />
                     <span>
                       (Opcional) Acepto recibir novedades sobre nuevos modelos o promociones futuras.
@@ -670,33 +663,33 @@ export function PrequalificationForm({
 
             {/* PASO 3: REGISTRO INTERNO CON NSS */}
             {step === 3 && requiresNssStep && (
-              <div className="space-y-4">
+              <div className="space-y-5">
                 <div>
-                  <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded text-xs font-medium bg-[var(--color-surface-alt)] text-[var(--color-accent)] mb-1.5 border border-[var(--color-border)]">
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded text-xs font-bold bg-slate-100 dark:bg-[#16324D] text-slate-900 dark:text-[var(--color-accent)] mb-2 border border-slate-200 dark:border-slate-700">
                     <Lock className="w-3.5 h-3.5 text-[var(--color-accent)]" />
                     <span>Registro interno de atención (Infonavit)</span>
                   </div>
-                  <h2 className="font-serif text-xl sm:text-2xl font-bold text-[var(--color-navy)] dark:text-[var(--color-text)] leading-tight">
+                  <h2 className="font-serif text-xl sm:text-2xl font-bold text-slate-900 dark:text-white leading-tight">
                     Registro de atención con tu asesor
                   </h2>
                 </div>
 
                 {/* TEXTO EXACTO PROPUESTO PARA LA FINALIDAD DEL NSS */}
-                <div className="bg-[var(--color-surface-alt)] border border-[var(--color-border)] rounded-lg p-4 text-xs text-[var(--color-text-secondary)] space-y-2">
-                  <p className="leading-relaxed font-medium text-[var(--color-text)]">
+                <div className="bg-slate-100 dark:bg-[#0E2236] border border-slate-200 dark:border-slate-700 rounded-lg p-4 text-xs sm:text-sm text-slate-800 dark:text-slate-200 space-y-2">
+                  <p className="leading-relaxed font-semibold text-slate-900 dark:text-white">
                     Utilizaremos tu NSS para solicitar tu registro en el sistema interno de{' '}
                     <strong>{COMMERCIAL_CONFIG.agencyName}</strong> y asignar a{' '}
                     <strong>{COMMERCIAL_CONFIG.advisorName}</strong> la atribución comercial de tu atención durante 15 días, conforme a sus reglas.
                   </p>
-                  <p className="text-[11px] text-[var(--color-text-muted)] leading-relaxed">
+                  <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
                     Este registro se utiliza para la asignación interna de comisión; <strong>no inicia un trámite ni una consulta de crédito y no te obliga a comprar</strong>.
                   </p>
                 </div>
 
                 {!skipNssForOrientation ? (
-                  <div className="space-y-3">
-                    <div className="space-y-1">
-                      <label className="label-caps text-[var(--color-text-secondary)] text-[10px] block">
+                  <div className="space-y-3.5">
+                    <div className="space-y-1.5">
+                      <label className="block text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-100">
                         Número de Seguridad Social (NSS - 11 dígitos)
                       </label>
                       <input
@@ -705,46 +698,48 @@ export function PrequalificationForm({
                         maxLength={11}
                         value={nssInput}
                         onChange={(e) => setNssInput(e.target.value.replace(/\D/g, ''))}
-                        placeholder="Ej. 02894711823 (11 dígitos)"
-                        className={`w-full px-4 py-3 rounded border text-base tracking-widest font-mono font-semibold focus:border-[var(--color-accent)] focus:ring-1 focus:ring-[var(--color-accent)] focus:outline-none ${
-                          errors.nss ? 'border-red-500 bg-red-50/10' : 'border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)]'
+                        placeholder="02894711823"
+                        className={`w-full px-4 py-3.5 rounded border-2 text-lg sm:text-xl tracking-widest font-mono font-bold focus:border-[var(--color-accent)] focus:outline-none shadow-xs ${
+                          errors.nss
+                            ? 'border-red-500 bg-red-50/10'
+                            : 'border-slate-300 dark:border-slate-600 bg-white dark:bg-[#0B1E30] text-slate-900 dark:text-white'
                         }`}
                       />
-                      <div className="flex justify-between text-[11px] text-[var(--color-text-muted)]">
+                      <div className="flex justify-between text-xs text-slate-600 dark:text-slate-400 font-medium">
                         <span>Conserva ceros iniciales como texto</span>
                         <span className={nssInput.length === 11 ? 'text-[var(--color-accent)] font-bold' : ''}>
                           {nssInput.length} / 11 dígitos
                         </span>
                       </div>
-                      {errors.nss && <p className="text-[11px] text-red-600 dark:text-red-400">{errors.nss}</p>}
+                      {errors.nss && <p className="text-xs font-semibold text-red-600 dark:text-red-400">{errors.nss}</p>}
                     </div>
 
                     {/* Alternativa visible obligatoria: Orientación previa */}
-                    <div className="pt-2 text-center border-t border-[var(--color-border)]">
+                    <div className="pt-2 text-center border-t border-slate-200 dark:border-slate-700">
                       <button
                         type="button"
                         onClick={() => {
                           setSkipNssForOrientation(true);
                           setErrors({});
                         }}
-                        className="text-xs text-[var(--color-text-secondary)] hover:text-[var(--color-text)] underline font-medium cursor-pointer"
+                        className="text-xs sm:text-sm text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white underline font-semibold cursor-pointer"
                       >
                         Prefiero recibir orientación antes de registrarme &rarr;
                       </button>
                     </div>
                   </div>
                 ) : (
-                  <div className="bg-[var(--color-surface-alt)] border border-[var(--color-border)] rounded-lg p-4 text-center space-y-2">
-                    <p className="text-xs font-bold text-[var(--color-text)]">
+                  <div className="bg-slate-100 dark:bg-[#0E2236] border border-slate-200 dark:border-slate-700 rounded-lg p-4 text-center space-y-2">
+                    <p className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white">
                       Has elegido recibir orientación antes de registrarte
                     </p>
-                    <p className="text-xs text-[var(--color-text-secondary)]">
+                    <p className="text-xs text-slate-600 dark:text-slate-300">
                       Tu solicitud se registrará como pendiente de orientación. El asesor te contactará para resolver tus dudas sin registrar aún tu NSS en la inmobiliaria.
                     </p>
                     <button
                       type="button"
                       onClick={() => setSkipNssForOrientation(false)}
-                      className="text-xs text-[var(--color-accent)] font-semibold underline cursor-pointer"
+                      className="text-xs sm:text-sm text-[var(--color-navy)] dark:text-[var(--color-accent)] font-bold underline cursor-pointer"
                     >
                       Deseo ingresar mi NSS para el registro de atención
                     </button>
@@ -755,33 +750,33 @@ export function PrequalificationForm({
 
             {/* PASO 4: PREFERENCIA DE VISITA */}
             {step === 4 && (
-              <div className="space-y-4">
+              <div className="space-y-5">
                 <div>
-                  <span className="label-caps text-[var(--color-accent)] text-[10px] block mb-1">
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-[var(--color-accent)] block mb-1">
                     Agenda preliminar
                   </span>
-                  <h2 className="font-serif text-xl sm:text-2xl font-bold text-[var(--color-navy)] dark:text-[var(--color-text)] leading-tight">
+                  <h2 className="font-serif text-xl sm:text-2xl font-bold text-slate-900 dark:text-white leading-tight">
                     Paso {requiresNssStep ? '4' : '3'}: Preferencia de Visita
                   </h2>
-                  <p className="text-xs text-[var(--color-text-secondary)] mt-1">
+                  <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 mt-1">
                     El asesor revisará la disponibilidad y te contactará por WhatsApp para confirmar la visita.
                   </p>
                 </div>
 
-                <div className="space-y-3">
+                <div className="space-y-4">
                   {/* Modalidad */}
-                  <div className="space-y-1">
-                    <label className="label-caps text-[var(--color-text-secondary)] text-[10px] block">
+                  <div className="space-y-1.5">
+                    <label className="block text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-100">
                       Modalidad de visita
                     </label>
-                    <div className="grid grid-cols-2 gap-2">
+                    <div className="grid grid-cols-2 gap-2.5">
                       <button
                         type="button"
                         onClick={() => setAppointmentModality('presencial')}
-                        className={`p-3 rounded text-xs font-medium border text-center transition cursor-pointer ${
+                        className={`p-3.5 rounded text-xs sm:text-sm font-semibold text-center transition cursor-pointer border ${
                           appointmentModality === 'presencial'
-                            ? 'bg-[var(--color-surface-alt)] border-[var(--color-navy)] dark:border-[var(--color-accent)] text-[var(--color-navy)] dark:text-[var(--color-accent)] font-bold'
-                            : 'bg-[var(--color-surface)] border-[var(--color-border)] text-[var(--color-text-secondary)] hover:border-[var(--color-border-subtle)]'
+                            ? 'border-2 border-[var(--color-navy)] dark:border-[var(--color-accent)] bg-slate-100 dark:bg-[#16324D] text-slate-900 dark:text-[var(--color-accent)] font-bold shadow-xs'
+                            : 'border-slate-300 dark:border-slate-700 bg-white dark:bg-[#0E2236] text-slate-800 dark:text-slate-200 hover:border-slate-400 dark:hover:border-slate-500'
                         }`}
                       >
                         🏡 Recorrido en Casa Muestra
@@ -789,10 +784,10 @@ export function PrequalificationForm({
                       <button
                         type="button"
                         onClick={() => setAppointmentModality('virtual')}
-                        className={`p-3 rounded text-xs font-medium border text-center transition cursor-pointer ${
+                        className={`p-3.5 rounded text-xs sm:text-sm font-semibold text-center transition cursor-pointer border ${
                           appointmentModality === 'virtual'
-                            ? 'bg-[var(--color-surface-alt)] border-[var(--color-navy)] dark:border-[var(--color-accent)] text-[var(--color-navy)] dark:text-[var(--color-accent)] font-bold'
-                            : 'bg-[var(--color-surface)] border-[var(--color-border)] text-[var(--color-text-secondary)] hover:border-[var(--color-border-subtle)]'
+                            ? 'border-2 border-[var(--color-navy)] dark:border-[var(--color-accent)] bg-slate-100 dark:bg-[#16324D] text-slate-900 dark:text-[var(--color-accent)] font-bold shadow-xs'
+                            : 'border-slate-300 dark:border-slate-700 bg-white dark:bg-[#0E2236] text-slate-800 dark:text-slate-200 hover:border-slate-400 dark:hover:border-slate-500'
                         }`}
                       >
                         💻 Asesoría Virtual por Video
@@ -801,12 +796,12 @@ export function PrequalificationForm({
                   </div>
 
                   {/* Día preferido */}
-                  <div className="space-y-1">
+                  <div className="space-y-1.5">
                     <div className="flex items-center justify-between">
-                      <label className="label-caps text-[var(--color-text-secondary)] text-[10px] block">
+                      <label className="block text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-100">
                         Día tentativo preferido <span className="text-red-500">*</span>
                       </label>
-                      <span className="text-[10px] text-[var(--color-text-muted)]">Acceso rápido:</span>
+                      <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">Acceso rápido:</span>
                     </div>
 
                     {/* Chips de 1 solo click */}
@@ -814,10 +809,10 @@ export function PrequalificationForm({
                       <button
                         type="button"
                         onClick={() => setPreferredDate(getTomorrowDateStr())}
-                        className={`px-3 py-1.5 rounded text-xs font-medium border transition cursor-pointer ${
+                        className={`px-3.5 py-2 rounded text-xs sm:text-sm font-bold border transition cursor-pointer ${
                           preferredDate === getTomorrowDateStr()
-                            ? 'bg-[var(--color-accent)] text-[var(--color-navy)] font-semibold border-[var(--color-accent)]'
-                            : 'bg-[var(--color-surface-alt)] text-[var(--color-text-secondary)] border-[var(--color-border)] hover:border-[var(--color-border-subtle)]'
+                            ? 'border-2 border-[var(--color-navy)] dark:border-[var(--color-accent)] bg-[var(--color-accent)] text-[var(--color-navy)] shadow-xs'
+                            : 'border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-[#0E2236] text-slate-800 dark:text-slate-200 hover:border-slate-400'
                         }`}
                       >
                         ⚡ Mañana
@@ -828,10 +823,10 @@ export function PrequalificationForm({
                           setPreferredDate(getUpcomingWeekendStr());
                           setTimeSlot('sabado_manana');
                         }}
-                        className={`px-3 py-1.5 rounded text-xs font-medium border transition cursor-pointer ${
+                        className={`px-3.5 py-2 rounded text-xs sm:text-sm font-bold border transition cursor-pointer ${
                           preferredDate === getUpcomingWeekendStr()
-                            ? 'bg-[var(--color-accent)] text-[var(--color-navy)] font-semibold border-[var(--color-accent)]'
-                            : 'bg-[var(--color-surface-alt)] text-[var(--color-text-secondary)] border-[var(--color-border)] hover:border-[var(--color-border-subtle)]'
+                            ? 'border-2 border-[var(--color-navy)] dark:border-[var(--color-accent)] bg-[var(--color-accent)] text-[var(--color-navy)] shadow-xs'
+                            : 'border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-[#0E2236] text-slate-800 dark:text-slate-200 hover:border-slate-400'
                         }`}
                       >
                         📅 Próximo Fin de Semana
@@ -843,24 +838,24 @@ export function PrequalificationForm({
                       value={preferredDate}
                       min={new Date().toISOString().split('T')[0]}
                       onChange={(e) => setPreferredDate(e.target.value)}
-                      className={`w-full px-3.5 py-2.5 rounded border text-sm bg-[var(--color-surface)] text-[var(--color-text)] focus:border-[var(--color-accent)] focus:ring-1 focus:ring-[var(--color-accent)] focus:outline-none ${
-                        errors.preferredDate ? 'border-red-500 bg-red-50/10' : 'border-[var(--color-border)]'
+                      className={`w-full px-4 py-3 rounded border text-sm sm:text-base font-medium bg-white dark:bg-[#0B1E30] text-slate-900 dark:text-white focus:border-[var(--color-accent)] focus:ring-2 focus:ring-[var(--color-accent)]/20 focus:outline-none shadow-xs ${
+                        errors.preferredDate ? 'border-red-500 bg-red-50/10' : 'border-slate-300 dark:border-slate-600'
                       }`}
                     />
                     {errors.preferredDate && (
-                      <p className="text-[11px] text-red-600 dark:text-red-400">{errors.preferredDate}</p>
+                      <p className="text-xs font-semibold text-red-600 dark:text-red-400">{errors.preferredDate}</p>
                     )}
                   </div>
 
                   {/* Franja horaria */}
-                  <div className="space-y-1">
-                    <label className="label-caps text-[var(--color-text-secondary)] text-[10px] block">
+                  <div className="space-y-1.5">
+                    <label className="block text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-100">
                       Franja horaria estimada
                     </label>
                     <select
                       value={timeSlot}
                       onChange={(e) => setTimeSlot(e.target.value as '10:00 - 13:00' | '14:00 - 17:00' | '17:00 - 19:00' | 'sabado_manana')}
-                      className="w-full px-3.5 py-2.5 rounded border border-[var(--color-border)] text-xs bg-[var(--color-surface)] text-[var(--color-text)] focus:border-[var(--color-accent)] focus:ring-1 focus:ring-[var(--color-accent)] focus:outline-none"
+                      className="w-full px-3.5 py-3 rounded border border-slate-300 dark:border-slate-600 text-xs sm:text-sm bg-white dark:bg-[#0B1E30] text-slate-900 dark:text-white font-medium focus:border-[var(--color-accent)] focus:ring-2 focus:ring-[var(--color-accent)]/20 focus:outline-none shadow-xs"
                     >
                       <option value="10:00 - 13:00">Por la mañana (10:00 AM - 1:00 PM)</option>
                       <option value="14:00 - 17:00">Por la tarde (2:00 PM - 5:00 PM)</option>
@@ -870,34 +865,34 @@ export function PrequalificationForm({
                   </div>
 
                   {/* Comentarios */}
-                  <div className="space-y-1">
-                    <label className="label-caps text-[var(--color-text-secondary)] text-[10px] block">
-                      Comentarios adicionales <span className="text-[var(--color-text-muted)] font-normal normal-case">(Opcional)</span>
+                  <div className="space-y-1.5">
+                    <label className="block text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-100">
+                      Comentarios adicionales <span className="text-slate-500 dark:text-slate-400 font-normal text-xs">(Opcional)</span>
                     </label>
                     <textarea
                       rows={2}
                       value={appointmentNotes}
                       onChange={(e) => setAppointmentNotes(e.target.value)}
-                      placeholder="Ej. Asistiré acompañado; busco orientación sobre transporte público."
-                      className="w-full px-3.5 py-2 rounded border border-[var(--color-border)] text-xs bg-[var(--color-surface)] text-[var(--color-text)] focus:border-[var(--color-accent)] focus:ring-1 focus:ring-[var(--color-accent)] focus:outline-none"
+                      placeholder="Ej. Asistiré acompañado; busco orientación sobre crédito conyugal."
+                      className="w-full px-3.5 py-2.5 rounded border border-slate-300 dark:border-slate-600 text-xs sm:text-sm bg-white dark:bg-[#0B1E30] text-slate-900 dark:text-white font-medium focus:border-[var(--color-accent)] focus:ring-2 focus:ring-[var(--color-accent)]/20 focus:outline-none shadow-xs"
                     ></textarea>
                   </div>
 
                   {/* Aclaración */}
-                  <div className="bg-[var(--color-surface-alt)] rounded-lg p-3 text-[11px] text-[var(--color-text-secondary)] leading-relaxed border border-[var(--color-border)]">
-                    <strong className="text-[var(--color-text)]">Importante:</strong> Esta solicitud no representa un bloqueo definitivo. Tu asesor revisará la agenda y se comunicará contigo vía WhatsApp para confirmar los detalles.
+                  <div className="bg-slate-100 dark:bg-[#0E2236] rounded-lg p-3.5 text-xs sm:text-sm text-slate-700 dark:text-slate-300 leading-relaxed border border-slate-200 dark:border-slate-700">
+                    <strong className="text-slate-900 dark:text-white font-bold">Importante:</strong> Esta solicitud no representa un bloqueo definitivo. Tu asesor revisará la agenda y se comunicará contigo vía WhatsApp para confirmar los detalles.
                   </div>
                 </div>
               </div>
             )}
 
             {/* BOTONES DE NAVEGACIÓN */}
-            <div className="pt-4 border-t border-[var(--color-border)] flex justify-between items-center gap-3">
+            <div className="pt-4 border-t border-slate-200 dark:border-slate-700 flex justify-between items-center gap-3">
               {step > 1 ? (
                 <button
                   type="button"
                   onClick={handleBack}
-                  className="px-4 py-2.5 rounded border border-[var(--color-border)] text-[var(--color-text-secondary)] hover:text-[var(--color-text)] hover:bg-[var(--color-surface-alt)] font-medium text-xs transition flex items-center gap-1.5 cursor-pointer"
+                  className="px-5 py-3 rounded border border-slate-300 dark:border-slate-600 text-slate-800 dark:text-slate-200 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 font-bold text-xs sm:text-sm transition flex items-center gap-1.5 cursor-pointer"
                 >
                   <ArrowLeft className="w-4 h-4" />
                   <span>Atrás</span>
@@ -909,7 +904,7 @@ export function PrequalificationForm({
               <button
                 type="button"
                 onClick={handleNext}
-                className="bg-[var(--color-accent)] hover:bg-[var(--color-accent-hover)] text-[var(--color-navy)] dark:text-[#0B1929] font-semibold py-2.5 px-6 rounded text-sm transition flex items-center gap-2 cursor-pointer shadow-sm"
+                className="bg-[var(--color-accent)] hover:bg-[var(--color-accent-hover)] text-[var(--color-navy)] dark:text-[#0B1929] font-bold py-3 px-7 rounded text-sm sm:text-base transition flex items-center gap-2 cursor-pointer shadow"
               >
                 <span>{step === 4 ? 'Enviar Solicitud' : 'Continuar'}</span>
                 <ArrowRight className="w-4 h-4" />
