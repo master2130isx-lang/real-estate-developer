@@ -1,0 +1,251 @@
+[
+  {
+    "id": "lead-001",
+    "folio": "LEAD-2026-089",
+    "createdAt": "2026-09-12 11:24",
+    "fullName": "Carlos Alberto Valenzuela Mendoza",
+    "phone": "5541982341",
+    "email": "carlos.valenzuela@example.com",
+    "preferredChannel": "whatsapp",
+    "preferredContactTime": "tarde",
+    "interestedZone": "Salinas Victoria, N.L. (Valle de los Encinos)",
+    "selectedPropertyId": "prop-aguila-premier",
+    "selectedPropertyTitle": "Modelo Águila Premier (Valle de los Encinos)",
+    "budgetRange": "1.2m_a_1.6m",
+    "purchaseTimeline": "corto",
+    "financingType": "infonavit",
+    "financingSubtype": "Infonavit Tradicional",
+    "needsOrientation": false,
+    "privacyConsentAccepted": true,
+    "marketingConsentAccepted": false,
+    "nssStatus": "recibido",
+    "nssValueEncryptedMock": "02894711823",
+    "nssLastFour": "1823",
+    "attributionStatus": "pendiente_inmobiliaria",
+    "commercialStatus": "cita_confirmada",
+    "compatibility": "alta",
+    "nextAction": "Registrar prospecto con NSS en sistema de la inmobiliaria y preparar mensaje de WhatsApp para coordinar visita",
+    "assignedAdvisor": "Asesor Asignado (Demostración)",
+    "appointmentRequest": {
+      "modality": "presencial",
+      "preferredDate": "2026-09-19",
+      "timeSlot": "10:00 - 13:00",
+      "status": "confirmada",
+      "confirmedDate": "2026-09-19",
+      "confirmedTime": "10:00 - 13:00",
+      "notes": "Solicitud de visita para conocer la casa muestra con mi familia."
+    },
+    "internalNotes": [
+      {
+        "id": "note-1789438910350",
+        "author": "Bot de Telegram / Sistema",
+        "createdAt": "2026-09-15 02:21",
+        "content": "Visita CONFIRMADA para el 2026-09-19 (10:00 - 13:00) desde interacción móvil."
+      },
+      {
+        "id": "note-1",
+        "author": "Sistema",
+        "createdAt": "2026-09-12 11:24",
+        "content": "NSS capturado en formulario web. Estado de atribución: Pendiente de registro en el mecanismo de la inmobiliaria (aún no cuenta con bloqueo de 15 días)."
+      }
+    ],
+    "auditHistory": [
+      {
+        "id": "aud-1",
+        "timestamp": "2026-09-12T11:24:18Z",
+        "actor": "Sistema",
+        "action": "Captura de formulario con NSS para solicitud de atribución comercial",
+        "ipMasked": "189.204.xx.xx (Demo)"
+      }
+    ]
+  },
+  {
+    "id": "lead-002",
+    "folio": "LEAD-2026-088",
+    "createdAt": "2026-09-11 16:40",
+    "fullName": "Mariana Sofia Garza Ríos",
+    "phone": "8115629401",
+    "email": "mariana.garza@techcorp.mx",
+    "preferredChannel": "whatsapp",
+    "preferredContactTime": "manana",
+    "interestedZone": "Salinas Victoria, N.L. (Valle de los Encinos)",
+    "selectedPropertyId": "prop-aguila-premier",
+    "selectedPropertyTitle": "Modelo Águila Premier (Valle de los Encinos)",
+    "budgetRange": "1.2m_a_1.6m",
+    "purchaseTimeline": "inmediato",
+    "financingType": "bancario",
+    "needsOrientation": false,
+    "privacyConsentAccepted": true,
+    "marketingConsentAccepted": false,
+    "nssStatus": "no_aplica",
+    "attributionStatus": "no_aplica",
+    "commercialStatus": "listo_revision",
+    "compatibility": "alta",
+    "nextAction": "Preparar mensaje de WhatsApp para coordinar visita a la casa muestra",
+    "assignedAdvisor": "Asesor Comercial Asignado",
+    "appointmentRequest": {
+      "modality": "presencial",
+      "preferredDate": "2026-09-15",
+      "timeSlot": "17:00 - 19:00",
+      "notes": "Deseo conocer la distribución y los acabados de vitropiso.",
+      "status": "solicitada"
+    },
+    "internalNotes": [
+      {
+        "id": "note-2",
+        "author": "Asesor Comercial Asignado",
+        "createdAt": "2026-09-11 17:05",
+        "content": "Esquema bancario no requiere NSS para registro interno."
+      }
+    ],
+    "auditHistory": [
+      {
+        "id": "aud-2",
+        "timestamp": "2026-09-11T16:40:02Z",
+        "actor": "Sistema",
+        "action": "Registro de prospecto con interés en crédito bancario",
+        "ipMasked": "201.144.xx.xx"
+      }
+    ]
+  },
+  {
+    "id": "lead-003",
+    "folio": "LEAD-2026-087",
+    "createdAt": "2026-09-10 19:15",
+    "fullName": "Héctor Manuel Pineda Cruz",
+    "phone": "5539810044",
+    "preferredChannel": "whatsapp",
+    "preferredContactTime": "noche",
+    "interestedZone": "Salinas Victoria, N.L. (Valle de los Encinos)",
+    "selectedPropertyId": "prop-aguila-premier",
+    "selectedPropertyTitle": "Modelo Águila Premier (Valle de los Encinos)",
+    "budgetRange": "1.2m_a_1.6m",
+    "purchaseTimeline": "medio",
+    "financingType": "infonavit",
+    "needsOrientation": true,
+    "privacyConsentAccepted": true,
+    "marketingConsentAccepted": false,
+    "nssStatus": "pendiente",
+    "attributionStatus": "pendiente_nss",
+    "commercialStatus": "pendiente_info",
+    "compatibility": "requiere_orientacion",
+    "nextAction": "Contactar por WhatsApp para brindar orientación previa sobre crédito Infonavit",
+    "assignedAdvisor": "Asesor Comercial Asignado",
+    "internalNotes": [
+      {
+        "id": "note-3",
+        "author": "Sistema",
+        "createdAt": "2026-09-10 19:15",
+        "content": "El interesado eligió \"Prefiero recibir orientación antes de registrarme\". No cuenta con atribución comercial activa."
+      }
+    ],
+    "auditHistory": [
+      {
+        "id": "aud-3",
+        "timestamp": "2026-09-10T19:15:40Z",
+        "actor": "Sistema",
+        "action": "Prospecto guardado en ruta de orientación voluntaria",
+        "ipMasked": "187.190.xx.xx"
+      }
+    ]
+  },
+  {
+    "id": "lead-004",
+    "folio": "LEAD-2026-086",
+    "createdAt": "2026-09-09 14:10",
+    "fullName": "Guillermo Estrada Lozano",
+    "phone": "4421903322",
+    "email": "gestrada@constructora.com",
+    "preferredChannel": "llamada",
+    "preferredContactTime": "tarde",
+    "interestedZone": "Salinas Victoria, N.L. (Valle de los Encinos)",
+    "selectedPropertyId": "prop-aguila-premier",
+    "selectedPropertyTitle": "Modelo Águila Premier (Valle de los Encinos)",
+    "budgetRange": "hasta_1.2m",
+    "purchaseTimeline": "corto",
+    "financingType": "contado",
+    "needsOrientation": false,
+    "privacyConsentAccepted": true,
+    "marketingConsentAccepted": false,
+    "nssStatus": "no_aplica",
+    "attributionStatus": "no_aplica",
+    "commercialStatus": "cita_confirmada",
+    "compatibility": "alta",
+    "nextAction": "Recibir en caseta de Valle de los Encinos el viernes a las 11:00",
+    "assignedAdvisor": "Asesor Comercial Asignado",
+    "appointmentRequest": {
+      "modality": "presencial",
+      "preferredDate": "2026-09-18",
+      "timeSlot": "10:00 - 13:00",
+      "status": "confirmada",
+      "confirmedDate": "2026-09-18",
+      "confirmedTime": "11:00 AM",
+      "notes": "Visita confirmada en caseta principal de Valle de los Encinos."
+    },
+    "internalNotes": [
+      {
+        "id": "note-4",
+        "author": "Asesor Comercial Asignado",
+        "createdAt": "2026-09-10 10:15",
+        "content": "Acuerdo de visita pactado directamente por llamada."
+      }
+    ],
+    "auditHistory": [
+      {
+        "id": "aud-4",
+        "timestamp": "2026-09-09T14:10:00Z",
+        "actor": "Sistema",
+        "action": "Registro de prospecto de contado",
+        "ipMasked": "189.155.xx.xx"
+      }
+    ]
+  },
+  {
+    "id": "lead-005",
+    "folio": "LEAD-2026-085",
+    "createdAt": "2026-09-08 09:30",
+    "fullName": "Jorge Eduardo Morales Tovar",
+    "phone": "5588771122",
+    "preferredChannel": "whatsapp",
+    "preferredContactTime": "tarde",
+    "interestedZone": "Salinas Victoria, N.L. (Valle de los Encinos)",
+    "selectedPropertyId": "prop-aguila-premier",
+    "selectedPropertyTitle": "Modelo Águila Premier (Valle de los Encinos)",
+    "budgetRange": "1.2m_a_1.6m",
+    "purchaseTimeline": "inmediato",
+    "financingType": "infonavit",
+    "needsOrientation": false,
+    "privacyConsentAccepted": true,
+    "marketingConsentAccepted": false,
+    "nssStatus": "recibido",
+    "nssLastFour": "9921",
+    "nssValueEncryptedMock": "01928374992",
+    "attributionStatus": "confirmado",
+    "attributionAdvisor": "Asesor Comercial Asignado",
+    "attributionConfirmedAt": "2026-09-08 11:30",
+    "attributionExpiresAt": "2026-09-23 11:30",
+    "attributionReference": "INM-FOL-2026-441",
+    "attributionConfirmedBy": "Asesor Comercial Asignado",
+    "attributionNotes": "Confirmado en sistema de la inmobiliaria; plazo de 15 días corriendo.",
+    "commercialStatus": "en_seguimiento",
+    "compatibility": "alta",
+    "nextAction": "Dar seguimiento antes del vencimiento de la atribución el 23 de septiembre",
+    "assignedAdvisor": "Asesor Comercial Asignado",
+    "internalNotes": [
+      {
+        "id": "note-5",
+        "author": "Asesor Comercial Asignado",
+        "createdAt": "2026-09-08 11:30",
+        "content": "Registro interno confirmado con folio INM-FOL-2026-441. Vigencia de 15 días iniciada."
+      }
+    ],
+    "auditHistory": [
+      {
+        "id": "aud-5",
+        "timestamp": "2026-09-08T11:30:00Z",
+        "actor": "Asesor Comercial Asignado",
+        "action": "Confirmación de registro interno en inmobiliaria (Folio: INM-FOL-2026-441)"
+      }
+    ]
+  }
+]

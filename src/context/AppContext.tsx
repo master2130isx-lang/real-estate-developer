@@ -75,6 +75,29 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     return [];
   });
 
+  // Sincronización con el servidor para reflejar en tiempo real confirmaciones desde Telegram
+  useEffect(() => {
+    let isMounted = true;
+    const syncWithServer = async () => {
+      try {
+        const res = await fetch('/api/leads');
+        if (res.ok) {
+          const data = await res.json();
+          if (data.ok && Array.isArray(data.leads) && isMounted) {
+            setLeads(data.leads);
+          }
+        }
+      } catch {}
+    };
+
+    syncWithServer();
+    const interval = setInterval(syncWithServer, 10000);
+    return () => {
+      isMounted = false;
+      clearInterval(interval);
+    };
+  }, []);
+
   // Guardar en localStorage únicamente cuando el estado cambie
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -222,6 +245,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
     setLeads((prev) => [newLead, ...prev]);
 
+    // Sincronizar con servidor y disparar alerta instantánea a Telegram
+    if (typeof window !== 'undefined') {
+      fetch('/api/leads', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newLead),
+      }).catch(() => {});
+    }
+
     logFunnelEvent('solicitud_enviada', {
       folio: newLead.folio,
       forma_compra: newLead.financingType,
@@ -352,6 +384,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
     setLeads((prev) => [newLead, ...prev]);
 
+    // Sincronizar con servidor y disparar alerta instantánea a Telegram
+    if (typeof window !== 'undefined') {
+      fetch('/api/leads', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newLead),
+      }).catch(() => {});
+    }
+
     logFunnelEvent('cita_solicitada', {
       folio: newLead.folio,
       origen: 'panel_asesor',
@@ -415,6 +456,19 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         };
       })
     );
+
+    // Sincronizar actualización de cita con el servidor
+    if (typeof window !== 'undefined') {
+      fetch(`/api/leads/${leadId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          appointmentStatus,
+          confirmedDate,
+          confirmedTime,
+        }),
+      }).catch(() => {});
+    }
   };
 
   const addLeadNote = (leadId: string, content: string, author: string = 'Asesor Asignado (Demostración)') => {

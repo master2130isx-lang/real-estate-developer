@@ -15,10 +15,14 @@ import {
   ShieldCheck,
   CalendarCheck2,
   CalendarX2,
+  X,
+  Copy,
+  Check,
 } from 'lucide-react';
 import { Lead } from '@/types';
 import { useApp } from '@/context/AppContext';
 import { WhatsAppIcon } from '@/components/common/WhatsAppIcon';
+import { COMMERCIAL_CONFIG } from '@/config/commercialConfig';
 
 interface AppointmentAgendaViewProps {
   leads: Lead[];
@@ -39,6 +43,14 @@ export function AppointmentAgendaView({
   const [rescheduleLead, setRescheduleLead] = useState<Lead | null>(null);
   const [newDate, setNewDate] = useState('');
   const [newTime, setNewTime] = useState('11:00 AM');
+  const [whatsappActionModal, setWhatsappActionModal] = useState<{
+    isOpen: boolean;
+    title: string;
+    subtitle: string;
+    message: string;
+    phone: string;
+  } | null>(null);
+  const [copiedAction, setCopiedAction] = useState(false);
 
   // Filtrar solo los prospectos que tengan cita o solicitud de cita
   const appointmentLeads = leads.filter(
@@ -82,12 +94,53 @@ export function AppointmentAgendaView({
   const handleSaveReschedule = () => {
     if (!rescheduleLead || !newDate) return;
     updateAppointmentStatus(rescheduleLead.id, 'reprogramada', newDate, newTime);
+
+    const firstName = rescheduleLead.fullName.split(' ')[0];
+    const cleanPhone = rescheduleLead.phone.replace(/\D/g, '');
+    const message = `¡Hola ${firstName}! Te escribe ${COMMERCIAL_CONFIG.advisorName}, tu asesor comercial de ${COMMERCIAL_CONFIG.agencyName}.\n\nTe confirmo que tu visita para conocer el *Modelo Águila Premier* en *Valle de los Encinos (Salinas Victoria, N.L.)* ha sido reprogramada:\n\n• Nueva fecha: ${newDate}\n• Nuevo horario: ${newTime}\n• Punto de reunión: Caseta principal con acceso controlado 24/7 en Calzada del Sol\n\n¿Me confirmas de enterado? ¡Quedo a tus órdenes!`;
+
+    const waUrl = `https://wa.me/52${cleanPhone}?text=${encodeURIComponent(message)}`;
+
+    const currentLead = rescheduleLead;
     setRescheduleLead(null);
+    setWhatsappActionModal({
+      isOpen: true,
+      title: '¡Visita Reprogramada con Éxito!',
+      subtitle: 'Notifica al cliente por WhatsApp con 1 toque:',
+      message,
+      phone: currentLead.phone,
+    });
+
+    try {
+      window.open(waUrl, '_blank');
+    } catch {}
   };
 
   const handleCancelAppointment = (leadId: string) => {
-    if (confirm('¿Deseas cancelar esta cita de visita? El prospecto seguirá en tu cartera para seguimiento.')) {
-      updateAppointmentStatus(leadId, 'cancelada');
+    const lead = rescheduleLead || leads.find((l) => l.id === leadId);
+    if (!lead) return;
+
+    if (confirm(`¿Deseas cancelar la cita de ${lead.fullName}? El prospecto seguirá en tu cartera para seguimiento.`)) {
+      updateAppointmentStatus(lead.id, 'cancelada');
+
+      const firstName = lead.fullName.split(' ')[0];
+      const cleanPhone = lead.phone.replace(/\D/g, '');
+      const message = `¡Hola ${firstName}! Te escribe ${COMMERCIAL_CONFIG.advisorName} de Valle de los Encinos.\n\nTe confirmo la cancelación de tu visita para conocer el *Modelo Águila Premier*. Si más adelante deseas retomar tu asesoría o agendar un nuevo recorrido en las casas muestra, con mucho gusto estoy a tus órdenes por este medio. ¡Excelente día!`;
+
+      const waUrl = `https://wa.me/52${cleanPhone}?text=${encodeURIComponent(message)}`;
+
+      setRescheduleLead(null);
+      setWhatsappActionModal({
+        isOpen: true,
+        title: 'Cita Cancelada en el Sistema',
+        subtitle: 'Envía este mensaje formal de cortesía al cliente por WhatsApp:',
+        message,
+        phone: lead.phone,
+      });
+
+      try {
+        window.open(waUrl, '_blank');
+      } catch {}
     }
   };
 
@@ -446,6 +499,57 @@ export function AppointmentAgendaView({
                   Guardar Cambios
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Notificación Rápida a WhatsApp tras Reagenda o Cancelación */}
+      {whatsappActionModal?.isOpen && (
+        <div className="fixed inset-0 z-60 flex items-center justify-center p-4 bg-black/65 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl max-w-md w-full p-5 sm:p-6 shadow-2xl border border-slate-200 space-y-4 text-slate-900">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 text-emerald-600">
+                <WhatsAppIcon className="w-5 h-5" />
+                <h3 className="font-bold text-sm text-slate-900">{whatsappActionModal.title}</h3>
+              </div>
+              <button
+                onClick={() => setWhatsappActionModal(null)}
+                className="w-7 h-7 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center transition cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <p className="text-xs text-slate-600">{whatsappActionModal.subtitle}</p>
+
+            <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs text-slate-700 whitespace-pre-line leading-relaxed font-sans max-h-48 overflow-y-auto">
+              {whatsappActionModal.message}
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-2 pt-2 border-t border-slate-100">
+              <button
+                onClick={() => {
+                  navigator.clipboard.writeText(whatsappActionModal.message);
+                  setCopiedAction(true);
+                  setTimeout(() => setCopiedAction(false), 2000);
+                }}
+                className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-2.5 px-3 rounded-xl text-xs transition flex items-center justify-center gap-1.5 cursor-pointer"
+              >
+                {copiedAction ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4" />}
+                <span>{copiedAction ? '¡Copiado!' : 'Copiar Texto'}</span>
+              </button>
+
+              <a
+                href={`https://wa.me/52${whatsappActionModal.phone.replace(/\D/g, '')}?text=${encodeURIComponent(whatsappActionModal.message)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => setWhatsappActionModal(null)}
+                className="flex-1 bg-[#25D366] hover:bg-[#20bd5a] text-white font-bold py-2.5 px-3 rounded-xl text-xs transition flex items-center justify-center gap-2 shadow-md cursor-pointer"
+              >
+                <WhatsAppIcon className="w-4 h-4" />
+                <span>Abrir WhatsApp</span>
+              </a>
             </div>
           </div>
         </div>
