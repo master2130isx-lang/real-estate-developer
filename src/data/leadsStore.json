@@ -1,5 +1,173 @@
 [
   {
+    "id": "lead-1789442130658",
+    "folio": "LEAD-2026-984",
+    "createdAt": "2026-09-15 03:15",
+    "fullName": "ESTHELA GONZALEZ CHAVEZ",
+    "phone": "3342546271",
+    "email": "web.scraper.ift@gmail.com",
+    "preferredChannel": "whatsapp",
+    "preferredContactTime": "tarde",
+    "interestedZone": "Salinas Victoria, N.L. (Valle de los Encinos)",
+    "selectedPropertyId": "prop-aguila-premier",
+    "selectedPropertyTitle": "Modelo Águila Premier (Valle de los Encinos)",
+    "budgetRange": "aun_no_lo_se",
+    "purchaseTimeline": "corto",
+    "financingType": "infonavit",
+    "needsOrientation": false,
+    "privacyConsentAccepted": true,
+    "marketingConsentAccepted": false,
+    "nssStatus": "recibido",
+    "nssLastFour": "0000",
+    "nssValueEncryptedMock": "00000000000",
+    "attributionStatus": "pendiente_inmobiliaria",
+    "commercialStatus": "cita_confirmada",
+    "compatibility": "requiere_orientacion",
+    "nextAction": "Registrar NSS en sistema interno de la inmobiliaria y preparar mensaje de WhatsApp",
+    "assignedAdvisor": "Asesor Asignado (Demostración)",
+    "appointmentRequest": {
+      "modality": "presencial",
+      "preferredDate": "2026-09-16",
+      "timeSlot": "10:00 - 13:00",
+      "status": "confirmada",
+      "confirmedDate": "2026-09-16",
+      "confirmedTime": "10:00 - 13:00",
+      "notes": "213046840016igyyvdty"
+    },
+    "internalNotes": [
+      {
+        "id": "note-1789442154289",
+        "author": "Bot de Telegram / Sistema",
+        "createdAt": "2026-09-15 03:15",
+        "content": "Visita CONFIRMADA para el 2026-09-16 (10:00 - 13:00) desde interacción móvil."
+      },
+      {
+        "id": "note-1789442130658",
+        "author": "Sistema",
+        "createdAt": "2026-09-15 03:15",
+        "content": "Solicitud recibida vía web. Estado de atribución: Pendiente de registrar en inmobiliaria (NSS recibido; no constituye bloqueo confirmado)."
+      }
+    ],
+    "auditHistory": [
+      {
+        "id": "aud-1789442130658",
+        "timestamp": "2026-09-15T03:15:30.658Z",
+        "actor": "Sistema",
+        "action": "Registro web completado. Atribución: pendiente_inmobiliaria",
+        "ipMasked": "189.240.xx.xx (Demo)"
+      }
+    ]
+  },
+  {
+    "id": "lead-test-1789441917625",
+    "folio": "LEAD-2026-999",
+    "createdAt": "2026-09-15 03:11",
+    "fullName": "Prueba Notificación Asesor",
+    "phone": "3342546271",
+    "preferredChannel": "whatsapp",
+    "preferredContactTime": "tarde",
+    "interestedZone": "Salinas Victoria, N.L. (Valle de los Encinos)",
+    "selectedPropertyId": "prop-aguila-premier",
+    "selectedPropertyTitle": "Modelo Águila Premier (Valle de los Encinos)",
+    "budgetRange": "1.2m_a_1.6m",
+    "purchaseTimeline": "corto",
+    "financingType": "infonavit",
+    "needsOrientation": false,
+    "privacyConsentAccepted": true,
+    "marketingConsentAccepted": false,
+    "nssStatus": "recibido",
+    "nssValueEncryptedMock": "12345678901",
+    "nssLastFour": "8901",
+    "attributionStatus": "pendiente_inmobiliaria",
+    "commercialStatus": "cita_solicitada",
+    "compatibility": "alta",
+    "nextAction": "Atender visita y registrar NSS en sistema de inmobiliaria",
+    "assignedAdvisor": "Asesor Asignado (Demostración)",
+    "appointmentRequest": {
+      "modality": "presencial",
+      "preferredDate": "2026-09-17",
+      "timeSlot": "11:00 AM",
+      "notes": "Solicita informes y recorrido con NSS capturado",
+      "status": "solicitada"
+    },
+    "internalNotes": [
+      {
+        "id": "note-test-01",
+        "author": "Bot de Telegram / Sistema",
+        "createdAt": "2026-09-15 03:11",
+        "content": "Solicitud de cita y NSS capturado para prueba de flujo comercial."
+      }
+    ],
+    "auditHistory": [
+      {
+        "id": "aud-test-01",
+        "timestamp": "2026-09-15T03:11:00.000Z",
+        "actor": "Sistema",
+        "action": "Registro web de prueba con NSS y solicitud de cita.",
+        "ipMasked": "189.240.xx.xx (Demo)"
+      }
+    ]
+  },
+  {
+    "id": "lead-1789441445484",
+    "folio": "LEAD-2026-514",
+    "createdAt": "2026-09-15 03:04",
+    "fullName": "ESTHELA GONZALEZ CHAVEZ",
+    "phone": "3342546271",
+    "email": "web.scraper.ift@gmail.com",
+    "preferredChannel": "whatsapp",
+    "preferredContactTime": "manana",
+    "interestedZone": "Salinas Victoria, N.L. (Valle de los Encinos)",
+    "selectedPropertyId": "prop-aguila-premier",
+    "selectedPropertyTitle": "Modelo Águila Premier (Valle de los Encinos)",
+    "budgetRange": "aun_no_lo_se",
+    "purchaseTimeline": "corto",
+    "financingType": "infonavit",
+    "needsOrientation": false,
+    "privacyConsentAccepted": true,
+    "marketingConsentAccepted": false,
+    "nssStatus": "recibido",
+    "nssLastFour": "0000",
+    "nssValueEncryptedMock": "00000000000",
+    "attributionStatus": "pendiente_inmobiliaria",
+    "commercialStatus": "cita_confirmada",
+    "compatibility": "requiere_orientacion",
+    "nextAction": "Registrar NSS en sistema interno de la inmobiliaria y preparar mensaje de WhatsApp",
+    "assignedAdvisor": "Asesor Asignado (Demostración)",
+    "appointmentRequest": {
+      "modality": "presencial",
+      "preferredDate": "2026-09-16",
+      "timeSlot": "10:00 - 13:00",
+      "status": "confirmada",
+      "confirmedDate": "2026-09-16",
+      "confirmedTime": "10:00 - 13:00",
+      "notes": "test 123"
+    },
+    "internalNotes": [
+      {
+        "id": "note-1789441985621",
+        "author": "Bot de Telegram / Sistema",
+        "createdAt": "2026-09-15 03:13",
+        "content": "Visita CONFIRMADA para el 2026-09-16 (10:00 - 13:00) desde interacción móvil."
+      },
+      {
+        "id": "note-1789441445484",
+        "author": "Sistema",
+        "createdAt": "2026-09-15 03:04",
+        "content": "Solicitud recibida vía web. Estado de atribución: Pendiente de registrar en inmobiliaria (NSS recibido; no constituye bloqueo confirmado)."
+      }
+    ],
+    "auditHistory": [
+      {
+        "id": "aud-1789441445484",
+        "timestamp": "2026-09-15T03:04:05.484Z",
+        "actor": "Sistema",
+        "action": "Registro web completado. Atribución: pendiente_inmobiliaria",
+        "ipMasked": "189.240.xx.xx (Demo)"
+      }
+    ]
+  },
+  {
     "id": "lead-001",
     "folio": "LEAD-2026-089",
     "createdAt": "2026-09-12 11:24",
@@ -79,7 +247,7 @@
     "marketingConsentAccepted": false,
     "nssStatus": "no_aplica",
     "attributionStatus": "no_aplica",
-    "commercialStatus": "listo_revision",
+    "commercialStatus": "en_seguimiento",
     "compatibility": "alta",
     "nextAction": "Preparar mensaje de WhatsApp para coordinar visita a la casa muestra",
     "assignedAdvisor": "Asesor Comercial Asignado",
@@ -87,10 +255,24 @@
       "modality": "presencial",
       "preferredDate": "2026-09-15",
       "timeSlot": "17:00 - 19:00",
-      "notes": "Deseo conocer la distribución y los acabados de vitropiso.",
-      "status": "solicitada"
+      "status": "archivada",
+      "confirmedDate": "2026-09-15",
+      "confirmedTime": "17:00 - 19:00",
+      "notes": "Deseo conocer la distribución y los acabados de vitropiso."
     },
     "internalNotes": [
+      {
+        "id": "note-1789442190577",
+        "author": "Bot de Telegram / Sistema",
+        "createdAt": "2026-09-15 03:16",
+        "content": "Visita ARCHIVADA para el 2026-09-15 (17:00 - 19:00) desde interacción móvil."
+      },
+      {
+        "id": "note-1789442178822",
+        "author": "Bot de Telegram / Sistema",
+        "createdAt": "2026-09-15 03:16",
+        "content": "Visita CANCELADA para el 2026-09-15 (17:00 - 19:00) desde interacción móvil."
+      },
       {
         "id": "note-2",
         "author": "Asesor Comercial Asignado",
@@ -169,20 +351,38 @@
     "marketingConsentAccepted": false,
     "nssStatus": "no_aplica",
     "attributionStatus": "no_aplica",
-    "commercialStatus": "cita_confirmada",
+    "commercialStatus": "en_seguimiento",
     "compatibility": "alta",
     "nextAction": "Recibir en caseta de Valle de los Encinos el viernes a las 11:00",
     "assignedAdvisor": "Asesor Comercial Asignado",
     "appointmentRequest": {
       "modality": "presencial",
       "preferredDate": "2026-09-18",
-      "timeSlot": "10:00 - 13:00",
-      "status": "confirmada",
+      "timeSlot": "11:00 AM",
+      "status": "archivada",
       "confirmedDate": "2026-09-18",
       "confirmedTime": "11:00 AM",
       "notes": "Visita confirmada en caseta principal de Valle de los Encinos."
     },
     "internalNotes": [
+      {
+        "id": "note-1789442193893",
+        "author": "Bot de Telegram / Sistema",
+        "createdAt": "2026-09-15 03:16",
+        "content": "Visita ARCHIVADA para el 2026-09-18 (11:00 AM) desde interacción móvil."
+      },
+      {
+        "id": "note-1789439050904",
+        "author": "Bot de Telegram / Sistema",
+        "createdAt": "2026-09-15 02:24",
+        "content": "Visita CANCELADA para el 2026-09-18 (11:00 AM) desde interacción móvil."
+      },
+      {
+        "id": "note-1789439006038",
+        "author": "Bot de Telegram / Sistema",
+        "createdAt": "2026-09-15 02:23",
+        "content": "Visita CANCELADA para el 2026-09-18 (11:00 AM) desde interacción móvil."
+      },
       {
         "id": "note-4",
         "author": "Asesor Comercial Asignado",

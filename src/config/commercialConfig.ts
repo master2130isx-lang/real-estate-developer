@@ -18,6 +18,16 @@ export interface CommercialConfig {
     email: string;
     officeAddressNote: string;
   };
+  socialLinks: {
+    facebook?: string;
+    instagram?: string;
+    tiktok?: string;
+    youtube?: string;
+  };
+  telegramConfig?: {
+    botToken?: string;
+    advisorChatId?: string;
+  };
   featuredPrice: {
     amountFormatted: string;
     hasSupportingOffer: boolean;
@@ -45,6 +55,16 @@ export const COMMERCIAL_CONFIG: CommercialConfig = {
     email: 'atencion@valledelosencinos.com',
     officeAddressNote: 'Calzada del Sol, Salinas Victoria, N.L. Atención con cita previa.',
   },
+  socialLinks: {
+    facebook: 'https://facebook.com',
+    instagram: 'https://instagram.com',
+    tiktok: 'https://tiktok.com',
+    youtube: '',
+  },
+  telegramConfig: {
+    botToken: '8744099329:AAEKPsqni4ugVioOXYd7dMi3zZREBP0RrKc',
+    advisorChatId: '948786976',
+  },
   featuredPrice: {
     amountFormatted: '$1,180,000 MXN',
     hasSupportingOffer: true,
@@ -53,8 +73,8 @@ export const COMMERCIAL_CONFIG: CommercialConfig = {
   attributionRules: {
     durationDays: 15,
     requireNssForInfonavit: true,
-    requireNssForBancario: false, // Regla estricta: NO requerir NSS para bancario sin confirmación
-    requireNssForContado: false,  // Regla estricta: NO requerir NSS para contado sin confirmación
+    requireNssForBancario: false,
+    requireNssForContado: false,
   },
 };
 

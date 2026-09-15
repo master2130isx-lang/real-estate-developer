@@ -3,11 +3,14 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Lead, CommercialStatus, FunnelEvent, LeadNote, AuditEvent, AttributionStatus } from '../types';
 import { INITIAL_LEADS } from '../data/mockData';
-import { shouldRequestNss } from '../config/commercialConfig';
+import { COMMERCIAL_CONFIG, CommercialConfig, shouldRequestNss } from '../config/commercialConfig';
 
 interface AppContextType {
   leads: Lead[];
   funnelEvents: FunnelEvent[];
+  commercialConfig: CommercialConfig;
+  updateCommercialConfig: (configUpdate: Partial<CommercialConfig>) => Promise<void>;
+  archiveLead: (leadId: string, archive: boolean) => void;
   createLeadFromPrequalification: (leadData: Partial<Lead>, rawNss?: string) => Lead;
   scheduleNewAppointment: (appointmentData: {
     fullName: string;
@@ -22,7 +25,7 @@ interface AppContextType {
   updateLeadStatus: (leadId: string, status: CommercialStatus, noteText?: string) => void;
   updateAppointmentStatus: (
     leadId: string,
-    appointmentStatus: 'solicitada' | 'confirmada' | 'reprogramada' | 'cancelada',
+    appointmentStatus: 'solicitada' | 'confirmada' | 'reprogramada' | 'cancelada' | 'archivada',
     confirmedDate?: string,
     confirmedTime?: string
   ) => void;
@@ -44,36 +47,83 @@ const AppContext = createContext<AppContextType | undefined>(undefined);
 
 const STORAGE_KEY_LEADS = 'red_mvp_leads_v1.1';
 const STORAGE_KEY_FUNNEL = 'red_mvp_funnel_v1.1';
+const STORAGE_KEY_CONFIG = 'red_mvp_config_v1.1';
 
-export function AppProvider({ children }: { children: React.ReactNode }) {
-  // Inicializador perezoso (Lazy Initializer) que evita setState en useEffect
-  const [leads, setLeads] = useState<Lead[]>(() => {
+// Helper defensivo para garantizar que cualquier objeto Lead tenga todas sus propiedades
+function normalizeLead(lead: any): Lead {
+  return {
+    ...lead,
+    folio: lead.folio || `LEAD-${Date.now().toString().slice(-4)}`,
+    fullName: lead.fullName || 'Interesado',
+    phone: lead.phone || '',
+    preferredChannel: lead.preferredChannel || 'whatsapp',
+    preferredContactTime: lead.preferredContactTime || 'tarde',
+    interestedZone: lead.interestedZone || 'Salinas Victoria, N.L. (Valle de los Encinos)',
+    budgetRange: lead.budgetRange || 'aun_no_lo_se',
+    purchaseTimeline: lead.purchaseTimeline || 'corto',
+    financingType: lead.financingType || 'infonavit',
+    needsOrientation: !!lead.needsOrientation,
+    privacyConsentAccepted: lead.privacyConsentAccepted ?? true,
+    marketingConsentAccepted: !!lead.marketingConsentAccepted,
+    nssStatus: lead.nssStatus || 'no_aplica',
+    attributionStatus: lead.attributionStatus || 'no_aplica',
+    commercialStatus: lead.commercialStatus || 'nuevo',
+    compatibility: lead.compatibility || 'media',
+    nextAction: lead.nextAction || 'Contactar vía WhatsApp',
+    assignedAdvisor: lead.assignedAdvisor || 'Asesor Asignado (Demostración)',
+    internalNotes: Array.isArray(lead.internalNotes) ? lead.internalNotes : [],
+    auditHistory: Array.isArray(lead.auditHistory) ? lead.auditHistory : [],
+  };
+}
+
+export function AppProvider({
+  children,
+  initialConfig,
+}: {
+  children: React.ReactNode;
+  initialConfig?: CommercialConfig;
+}) {
+  const [commercialConfig, setCommercialConfig] = useState<CommercialConfig>(() => {
+    if (initialConfig) return initialConfig;
+    if (typeof window !== 'undefined') {
+      try {
+        const stored = localStorage.getItem(STORAGE_KEY_CONFIG);
+        if (stored) {
+          return JSON.parse(stored);
+        }
+      } catch {}
+    }
+    return COMMERCIAL_CONFIG;
+  });
+
+  const [leads, setLeads] = useState<Lead[]>(() => INITIAL_LEADS.map(normalizeLead));
+  const [funnelEvents, setFunnelEvents] = useState<FunnelEvent[]>([]);
+
+  // Hidratación controlada desde localStorage después del montaje inicial (evita errores de hidratación SSR)
+  useEffect(() => {
     if (typeof window !== 'undefined') {
       try {
         const storedLeads = localStorage.getItem(STORAGE_KEY_LEADS);
         if (storedLeads) {
-          return JSON.parse(storedLeads);
+          const parsed = JSON.parse(storedLeads);
+          if (Array.isArray(parsed)) {
+            setLeads(parsed.map(normalizeLead));
+          }
         }
       } catch (e) {
         console.error('Error al leer leads locales:', e);
       }
-    }
-    return INITIAL_LEADS;
-  });
 
-  const [funnelEvents, setFunnelEvents] = useState<FunnelEvent[]>(() => {
-    if (typeof window !== 'undefined') {
       try {
         const storedFunnel = localStorage.getItem(STORAGE_KEY_FUNNEL);
         if (storedFunnel) {
-          return JSON.parse(storedFunnel);
+          setFunnelEvents(JSON.parse(storedFunnel));
         }
       } catch (e) {
         console.error('Error al leer telemetría local:', e);
       }
     }
-    return [];
-  });
+  }, []);
 
   // Sincronización con el servidor para reflejar en tiempo real confirmaciones desde Telegram
   useEffect(() => {
@@ -84,7 +134,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         if (res.ok) {
           const data = await res.json();
           if (data.ok && Array.isArray(data.leads) && isMounted) {
-            setLeads(data.leads);
+            setLeads(data.leads.map(normalizeLead));
           }
         }
       } catch {}
@@ -95,6 +145,30 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     return () => {
       isMounted = false;
       clearInterval(interval);
+    };
+  }, []);
+
+  // Sincronizar configuración comercial desde el servidor
+  useEffect(() => {
+    let isMounted = true;
+    const syncConfig = async () => {
+      try {
+        const res = await fetch('/api/config');
+        if (res.ok) {
+          const data = await res.json();
+          if (data.ok && data.config && isMounted) {
+            setCommercialConfig(data.config);
+            try {
+              localStorage.setItem(STORAGE_KEY_CONFIG, JSON.stringify(data.config));
+            } catch {}
+          }
+        }
+      } catch {}
+    };
+
+    syncConfig();
+    return () => {
+      isMounted = false;
     };
   }, []);
 
@@ -269,7 +343,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       prev.map((lead) => {
         if (lead.id !== leadId) return lead;
 
-        const updatedNotes = [...lead.internalNotes];
+        const updatedNotes = [...(lead.internalNotes || [])];
         if (noteText && noteText.trim()) {
           updatedNotes.push({
             id: `note-${Date.now()}`,
@@ -290,7 +364,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           ...lead,
           commercialStatus: status,
           internalNotes: updatedNotes,
-          auditHistory: [auditEvent, ...lead.auditHistory],
+          auditHistory: [auditEvent, ...(lead.auditHistory || [])],
         };
       })
     );
@@ -404,7 +478,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const updateAppointmentStatus = (
     leadId: string,
-    appointmentStatus: 'solicitada' | 'confirmada' | 'reprogramada' | 'cancelada',
+    appointmentStatus: 'solicitada' | 'confirmada' | 'reprogramada' | 'cancelada' | 'archivada',
     confirmedDate?: string,
     confirmedTime?: string
   ) => {
@@ -420,13 +494,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           status: appointmentStatus,
           confirmedDate: confirmedDate || existingReq?.confirmedDate,
           confirmedTime: confirmedTime || existingReq?.confirmedTime,
+          cancelledAt: appointmentStatus === 'cancelada' ? new Date().toISOString() : existingReq?.cancelledAt,
+          archivedAt: appointmentStatus === 'archivada' ? new Date().toISOString() : existingReq?.archivedAt,
           notes: existingReq?.notes || 'Cita gestionada desde el panel del asesor.',
         };
 
         let newCommercialStatus = lead.commercialStatus;
         if (appointmentStatus === 'confirmada') {
           newCommercialStatus = 'cita_confirmada';
-        } else if (appointmentStatus === 'cancelada') {
+        } else if (appointmentStatus === 'cancelada' || appointmentStatus === 'archivada') {
           newCommercialStatus = 'en_seguimiento';
         } else if (appointmentStatus === 'reprogramada') {
           newCommercialStatus = 'cita_solicitada';
@@ -450,9 +526,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         return {
           ...lead,
           commercialStatus: newCommercialStatus,
+          isArchived: appointmentStatus === 'archivada' ? true : lead.isArchived,
           appointmentRequest: updatedReq,
-          internalNotes: [newNote, ...lead.internalNotes],
-          auditHistory: [auditEvent, ...lead.auditHistory],
+          internalNotes: [newNote, ...(lead.internalNotes || [])],
+          auditHistory: [auditEvent, ...(lead.auditHistory || [])],
         };
       })
     );
@@ -471,6 +548,64 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const archiveLead = (leadId: string, archive: boolean) => {
+    setLeads((prev) =>
+      prev.map((lead) => {
+        if (lead.id !== leadId) return lead;
+        const newStatus = archive ? 'archivada' : (lead.appointmentRequest?.status === 'archivada' ? 'cancelada' : (lead.appointmentRequest?.status || 'solicitada'));
+        return {
+          ...lead,
+          isArchived: archive,
+          appointmentRequest: lead.appointmentRequest
+            ? {
+                ...lead.appointmentRequest,
+                status: newStatus,
+                archivedAt: archive ? new Date().toISOString() : undefined,
+              }
+            : undefined,
+        };
+      })
+    );
+
+    if (typeof window !== 'undefined') {
+      fetch(`/api/leads/${leadId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          appointmentStatus: archive ? 'archivada' : 'cancelada',
+        }),
+      }).catch(() => {});
+    }
+  };
+
+  const updateCommercialConfig = async (update: Partial<CommercialConfig>) => {
+    setCommercialConfig((prev) => {
+      const merged: CommercialConfig = {
+        ...prev,
+        ...update,
+        contactChannels: { ...prev.contactChannels, ...(update.contactChannels || {}) },
+        socialLinks: { ...prev.socialLinks, ...(update.socialLinks || {}) },
+        telegramConfig: { ...prev.telegramConfig, ...(update.telegramConfig || {}) },
+      };
+      if (typeof window !== 'undefined') {
+        try {
+          localStorage.setItem(STORAGE_KEY_CONFIG, JSON.stringify(merged));
+        } catch {}
+      }
+      return merged;
+    });
+
+    try {
+      await fetch('/api/config', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(update),
+      });
+    } catch (e) {
+      console.warn('Error al guardar configuración en servidor:', e);
+    }
+  };
+
   const addLeadNote = (leadId: string, content: string, author: string = 'Asesor Asignado (Demostración)') => {
     setLeads((prev) =>
       prev.map((lead) => {
@@ -483,7 +618,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         };
         return {
           ...lead,
-          internalNotes: [newNote, ...lead.internalNotes],
+          internalNotes: [newNote, ...(lead.internalNotes || [])],
         };
       })
     );
@@ -518,7 +653,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           reason: notes || 'Confirmación manual en mecanismo interno de inmobiliaria',
         };
 
-        const updatedNotes = [...lead.internalNotes];
+        const updatedNotes = [...(lead.internalNotes || [])];
         updatedNotes.push({
           id: `note-${Date.now()}`,
           author: confirmedBy || 'Asesor Asignado (Demostración)',
@@ -535,7 +670,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           attributionConfirmedBy: confirmedBy,
           attributionNotes: notes,
           internalNotes: updatedNotes,
-          auditHistory: [auditEvent, ...lead.auditHistory],
+          auditHistory: [auditEvent, ...(lead.auditHistory || [])],
         };
       })
     );
@@ -554,7 +689,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           reason,
         };
 
-        const updatedNotes = [...lead.internalNotes];
+        const updatedNotes = [...(lead.internalNotes || [])];
         updatedNotes.push({
           id: `note-${Date.now()}`,
           author: 'Asesor Asignado (Demostración)',
@@ -566,7 +701,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           ...lead,
           attributionStatus: 'conflicto_rechazo',
           internalNotes: updatedNotes,
-          auditHistory: [auditEvent, ...lead.auditHistory],
+          auditHistory: [auditEvent, ...(lead.auditHistory || [])],
         };
       })
     );
@@ -602,7 +737,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         if (l.id !== leadId) return l;
         return {
           ...l,
-          auditHistory: [auditEvent, ...l.auditHistory],
+          auditHistory: [auditEvent, ...(l.auditHistory || [])],
         };
       })
     );
@@ -616,10 +751,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const resetToDemoDefaults = () => {
     setLeads(INITIAL_LEADS);
     setFunnelEvents([]);
+    setCommercialConfig(COMMERCIAL_CONFIG);
     if (typeof window !== 'undefined') {
       try {
         localStorage.removeItem(STORAGE_KEY_LEADS);
         localStorage.removeItem(STORAGE_KEY_FUNNEL);
+        localStorage.removeItem(STORAGE_KEY_CONFIG);
       } catch {}
     }
   };
@@ -629,6 +766,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       value={{
         leads,
         funnelEvents,
+        commercialConfig,
+        updateCommercialConfig,
+        archiveLead,
         createLeadFromPrequalification,
         scheduleNewAppointment,
         updateLeadStatus,

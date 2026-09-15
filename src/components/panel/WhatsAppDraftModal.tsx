@@ -26,7 +26,9 @@ interface WhatsAppDraftModalProps {
 type TemplateId = 'confirmar' | 'ubicacion' | 'recordatorio' | 'ficha' | 'credito' | 'personalizado';
 
 export function WhatsAppDraftModal({ lead, onClose }: WhatsAppDraftModalProps) {
-  const { updateLeadStatus } = useApp();
+  const { updateLeadStatus, commercialConfig } = useApp();
+  const cfg = commercialConfig || COMMERCIAL_CONFIG;
+
   const [selectedTemplate, setSelectedTemplate] = useState<TemplateId>('confirmar');
   const [customText, setCustomText] = useState<string>('');
   const [isEditing, setIsEditing] = useState(false);
@@ -34,8 +36,8 @@ export function WhatsAppDraftModal({ lead, onClose }: WhatsAppDraftModalProps) {
 
   if (!lead) return null;
 
-  const firstName = lead.fullName.split(' ')[0];
-  const cleanPhone = lead.phone.replace(/\D/g, '');
+  const firstName = (lead.fullName || 'Cliente').split(' ')[0];
+  const cleanPhone = (lead.phone || '').replace(/\D/g, '');
   const visitDay = lead.appointmentRequest?.confirmedDate || lead.appointmentRequest?.preferredDate || 'los próximos días';
   const visitTime = lead.appointmentRequest?.confirmedTime || lead.appointmentRequest?.timeSlot || 'en horario por convenir';
 
@@ -44,12 +46,12 @@ export function WhatsAppDraftModal({ lead, onClose }: WhatsAppDraftModalProps) {
     confirmar: {
       title: 'Confirmar Cita',
       icon: <Calendar className="w-3.5 h-3.5" />,
-      text: `¡Hola ${firstName}! Te escribe ${COMMERCIAL_CONFIG.advisorName}, tu asesor comercial de ${COMMERCIAL_CONFIG.agencyName}.\n\nTu visita para conocer el *Modelo Águila Premier* en *Valle de los Encinos (Salinas Victoria, N.L.)* ha quedado programada:\n\n• Día: ${visitDay}\n• Horario: ${visitTime}\n• Punto de reunión: Caseta principal con acceso controlado 24/7 en Calzada del Sol\n\n¿Me confirmas que recibiste estos datos para enviarte la ubicación exacta por GPS?`,
+      text: `¡Hola ${firstName}! Te escribe ${cfg.advisorName}, tu asesor comercial de ${cfg.agencyName}.\n\nTu visita para conocer el *Modelo Águila Premier* en *Valle de los Encinos (Salinas Victoria, N.L.)* ha quedado programada:\n\n• Día: ${visitDay}\n• Horario: ${visitTime}\n• Punto de reunión: Caseta principal con acceso controlado 24/7 en Calzada del Sol\n\n¿Me confirmas que recibiste estos datos para enviarte la ubicación exacta por GPS?`,
     },
     ubicacion: {
       title: 'Enviar Ubicación GPS',
       icon: <MapPin className="w-3.5 h-3.5" />,
-      text: `¡Hola ${firstName}! Te comparto las rutas GPS directas para llegar a la caseta principal de *Valle de los Encinos (Salinas Victoria, N.L.)*:\n\n• Google Maps: https://www.google.com/maps/search/?api=1&query=25.9620,-100.2940\n• Waze: https://waze.com/ul?ll=25.9620,-100.2940&navigate=yes\n\nAl llegar a la caseta de acceso, solo avisa a los guardias que tienes cita con ${COMMERCIAL_CONFIG.advisorName} para que te den acceso a las casas muestra. ¡Buen viaje!`,
+      text: `¡Hola ${firstName}! Te comparto las rutas GPS directas para llegar a la caseta principal de *Valle de los Encinos (Salinas Victoria, N.L.)*:\n\n• Google Maps: https://www.google.com/maps/search/?api=1&query=25.9620,-100.2940\n• Waze: https://waze.com/ul?ll=25.9620,-100.2940&navigate=yes\n\nAl llegar a la caseta de acceso, solo avisa a los guardias que tienes cita con ${cfg.advisorName} para que te den acceso a las casas muestra. ¡Buen viaje!`,
     },
     recordatorio: {
       title: 'Recordatorio Pre-Visita',
@@ -69,7 +71,7 @@ export function WhatsAppDraftModal({ lead, onClose }: WhatsAppDraftModalProps) {
     personalizado: {
       title: 'Mensaje Libre',
       icon: <Edit3 className="w-3.5 h-3.5" />,
-      text: `Hola ${firstName}, te escribe ${COMMERCIAL_CONFIG.advisorName} de Valle de los Encinos. `,
+      text: `Hola ${firstName}, te escribe ${cfg.advisorName} de Valle de los Encinos. `,
     },
   };
 

@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
 import { AppProvider } from '@/context/AppContext';
+import { getServerCommercialConfig } from '@/lib/commercialConfigStore';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -19,18 +20,20 @@ export const metadata: Metadata = {
     'Portal inmobiliario y precalificación transparente para compra de vivienda con Infonavit, crédito bancario o contado en la Zona Metropolitana.',
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const initialConfig = await getServerCommercialConfig();
+
   return (
     <html
       lang="es-MX"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-slate-50 text-slate-900 font-sans">
-        <AppProvider>{children}</AppProvider>
+        <AppProvider initialConfig={initialConfig}>{children}</AppProvider>
       </body>
     </html>
   );

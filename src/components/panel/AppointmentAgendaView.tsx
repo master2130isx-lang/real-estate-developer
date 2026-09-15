@@ -18,11 +18,13 @@ import {
   X,
   Copy,
   Check,
+  Archive,
+  ArchiveRestore,
+  MessageSquare,
 } from 'lucide-react';
 import { Lead } from '@/types';
 import { useApp } from '@/context/AppContext';
 import { WhatsAppIcon } from '@/components/common/WhatsAppIcon';
-import { COMMERCIAL_CONFIG } from '@/config/commercialConfig';
 
 interface AppointmentAgendaViewProps {
   leads: Lead[];
@@ -37,9 +39,12 @@ export function AppointmentAgendaView({
   onOpenWhatsApp,
   onOpenLeadDetail,
 }: AppointmentAgendaViewProps) {
-  const { updateAppointmentStatus } = useApp();
+  const { updateAppointmentStatus, archiveLead, commercialConfig } = useApp();
 
-  const [filterType, setFilterType] = useState<'todas' | 'pendientes' | 'confirmadas' | 'hoy'>('todas');
+  const [filterType, setFilterType] = useState<
+    'todas' | 'hoy' | 'pendientes' | 'confirmadas' | 'canceladas' | 'archivadas'
+  >('todas');
+
   const [rescheduleLead, setRescheduleLead] = useState<Lead | null>(null);
   const [newDate, setNewDate] = useState('');
   const [newTime, setNewTime] = useState('11:00 AM');
@@ -52,34 +57,85 @@ export function AppointmentAgendaView({
   } | null>(null);
   const [copiedAction, setCopiedAction] = useState(false);
 
-  // Filtrar solo los prospectos que tengan cita o solicitud de cita
+  // Fecha de hoy para comparar (YYYY-MM-DD)
+  const todayStr = new Date().toISOString().split('T')[0];
+
+  // Helper para verificar auto-archivado (canceladas con más de 14 días o archivadas explícitamente)
+  const isLeadArchived = (lead: Lead) => {
+    if (lead.isArchived || lead.appointmentRequest?.status === 'archivada') {
+      return true;
+    }
+    if (lead.appointmentRequest?.status === 'cancelada') {
+      const cancelDate =
+        lead.appointmentRequest.cancelledAt ||
+        lead.appointmentRequest.confirmedDate ||
+        lead.appointmentRequest.preferredDate;
+      if (cancelDate) {
+        const diffMs = Date.now() - new Date(cancelDate).getTime();
+        const diffDays = diffMs / (1000 * 60 * 60 * 24);
+        return diffDays >= 14;
+      }
+    }
+    return false;
+  };
+
+  // Filtrar solo los prospectos con registro de cita
   const appointmentLeads = leads.filter(
     (l) => l.appointmentRequest || l.commercialStatus === 'cita_solicitada' || l.commercialStatus === 'cita_confirmada'
   );
 
-  // Fecha de hoy para comparar (YYYY-MM-DD)
-  const todayStr = new Date().toISOString().split('T')[0];
+  // Contadores por categoría
+  const activeAppointments = appointmentLeads.filter((l) => !isLeadArchived(l));
+  const archivedAppointments = appointmentLeads.filter((l) => isLeadArchived(l));
 
-  const filteredAppointments = appointmentLeads.filter((lead) => {
-    const apt = lead.appointmentRequest;
-    const aptDate = apt?.confirmedDate || apt?.preferredDate || '';
+  const totalCount = activeAppointments.length;
+  const todayCount = activeAppointments.filter(
+    (l) => (l.appointmentRequest?.confirmedDate || l.appointmentRequest?.preferredDate) === todayStr
+  ).length;
+  const pendingCount = activeAppointments.filter(
+    (l) => l.appointmentRequest?.status === 'solicitada' || l.commercialStatus === 'cita_solicitada'
+  ).length;
+  const confirmedCount = activeAppointments.filter(
+    (l) => l.appointmentRequest?.status === 'confirmada' || l.commercialStatus === 'cita_confirmada'
+  ).length;
+  const cancelledCount = activeAppointments.filter(
+    (l) => l.appointmentRequest?.status === 'cancelada'
+  ).length;
+  const archivedCount = archivedAppointments.length;
 
-    if (filterType === 'hoy') {
-      return aptDate === todayStr;
-    }
-    if (filterType === 'pendientes') {
-      return apt?.status === 'solicitada' || lead.commercialStatus === 'cita_solicitada';
-    }
-    if (filterType === 'confirmadas') {
-      return apt?.status === 'confirmada' || lead.commercialStatus === 'cita_confirmada';
-    }
-    return true;
-  }).sort((a, b) => {
-    // Ordenar por fecha de cita más próxima
-    const dateA = a.appointmentRequest?.confirmedDate || a.appointmentRequest?.preferredDate || '9999';
-    const dateB = b.appointmentRequest?.confirmedDate || b.appointmentRequest?.preferredDate || '9999';
-    return dateA.localeCompare(dateB);
-  });
+  // Filtrado actual
+  const filteredAppointments = appointmentLeads
+    .filter((lead) => {
+      const isArchived = isLeadArchived(lead);
+      const apt = lead.appointmentRequest;
+      const aptDate = apt?.confirmedDate || apt?.preferredDate || '';
+
+      if (filterType === 'archivadas') {
+        return isArchived;
+      }
+
+      // Si no es pestaña de archivadas, excluimos las archivadas
+      if (isArchived) return false;
+
+      if (filterType === 'hoy') {
+        return aptDate === todayStr;
+      }
+      if (filterType === 'pendientes') {
+        return apt?.status === 'solicitada' || lead.commercialStatus === 'cita_solicitada';
+      }
+      if (filterType === 'confirmadas') {
+        return apt?.status === 'confirmada' || lead.commercialStatus === 'cita_confirmada';
+      }
+      if (filterType === 'canceladas') {
+        return apt?.status === 'cancelada';
+      }
+      return true; // 'todas'
+    })
+    .sort((a, b) => {
+      const dateA = a.appointmentRequest?.confirmedDate || a.appointmentRequest?.preferredDate || '9999';
+      const dateB = b.appointmentRequest?.confirmedDate || b.appointmentRequest?.preferredDate || '9999';
+      return dateA.localeCompare(dateB);
+    });
 
   const handleConfirm = (leadId: string, currentDate: string, currentTime: string) => {
     updateAppointmentStatus(leadId, 'confirmada', currentDate, currentTime);
@@ -97,7 +153,7 @@ export function AppointmentAgendaView({
 
     const firstName = rescheduleLead.fullName.split(' ')[0];
     const cleanPhone = rescheduleLead.phone.replace(/\D/g, '');
-    const message = `¡Hola ${firstName}! Te escribe ${COMMERCIAL_CONFIG.advisorName}, tu asesor comercial de ${COMMERCIAL_CONFIG.agencyName}.\n\nTe confirmo que tu visita para conocer el *Modelo Águila Premier* en *Valle de los Encinos (Salinas Victoria, N.L.)* ha sido reprogramada:\n\n• Nueva fecha: ${newDate}\n• Nuevo horario: ${newTime}\n• Punto de reunión: Caseta principal con acceso controlado 24/7 en Calzada del Sol\n\n¿Me confirmas de enterado? ¡Quedo a tus órdenes!`;
+    const message = `¡Hola ${firstName}! Te escribe ${commercialConfig.advisorName}, tu asesor comercial de ${commercialConfig.agencyName}.\n\nTe confirmo que tu visita para conocer las viviendas residenciales ha sido reprogramada:\n\n• Nueva fecha: ${newDate}\n• Nuevo horario: ${newTime}\n• Punto de reunión: Caseta principal con acceso controlado en ${commercialConfig.coverageZone}\n\n¿Me confirmas de enterado? ¡Quedo a tus órdenes!`;
 
     const waUrl = `https://wa.me/52${cleanPhone}?text=${encodeURIComponent(message)}`;
 
@@ -120,12 +176,16 @@ export function AppointmentAgendaView({
     const lead = rescheduleLead || leads.find((l) => l.id === leadId);
     if (!lead) return;
 
-    if (confirm(`¿Deseas cancelar la cita de ${lead.fullName}? El prospecto seguirá en tu cartera para seguimiento.`)) {
+    if (
+      confirm(
+        `¿Deseas marcar como cancelada la cita de ${lead.fullName}? Se mantendrá en el sistema y podrás reactivarla o archivarla cuando desees.`
+      )
+    ) {
       updateAppointmentStatus(lead.id, 'cancelada');
 
       const firstName = lead.fullName.split(' ')[0];
       const cleanPhone = lead.phone.replace(/\D/g, '');
-      const message = `¡Hola ${firstName}! Te escribe ${COMMERCIAL_CONFIG.advisorName} de Valle de los Encinos.\n\nTe confirmo la cancelación de tu visita para conocer el *Modelo Águila Premier*. Si más adelante deseas retomar tu asesoría o agendar un nuevo recorrido en las casas muestra, con mucho gusto estoy a tus órdenes por este medio. ¡Excelente día!`;
+      const message = `¡Hola ${firstName}! Te escribe ${commercialConfig.advisorName} de ${commercialConfig.agencyName}.\n\nTe confirmo la cancelación de tu visita para conocer el *Modelo Águila Premier*. Si más adelante deseas retomar tu asesoría o agendar un nuevo recorrido en las casas muestra, con mucho gusto estoy a tus órdenes por este medio. ¡Excelente día!`;
 
       const waUrl = `https://wa.me/52${cleanPhone}?text=${encodeURIComponent(message)}`;
 
@@ -144,26 +204,18 @@ export function AppointmentAgendaView({
     }
   };
 
-  // Contadores rápidos
-  const totalCount = appointmentLeads.length;
-  const pendingCount = appointmentLeads.filter(
-    (l) => l.appointmentRequest?.status === 'solicitada' || l.commercialStatus === 'cita_solicitada'
-  ).length;
-  const confirmedCount = appointmentLeads.filter(
-    (l) => l.appointmentRequest?.status === 'confirmada' || l.commercialStatus === 'cita_confirmada'
-  ).length;
-  const todayCount = appointmentLeads.filter(
-    (l) => (l.appointmentRequest?.confirmedDate || l.appointmentRequest?.preferredDate) === todayStr
-  ).length;
+  const handleToggleArchive = (leadId: string, archive: boolean) => {
+    archiveLead(leadId, archive);
+  };
 
   return (
-    <div className="space-y-4">
-      {/* Barra de Filtros y Acción Rápida de la Agenda */}
-      <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-        <div className="flex flex-wrap items-center gap-2">
+    <div className="space-y-3.5">
+      {/* Barra de Filtros Ejecutiva */}
+      <div className="bg-white p-3.5 rounded-2xl border border-slate-200 shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2.5">
+        <div className="flex flex-wrap items-center gap-1.5 text-xs">
           <button
             onClick={() => setFilterType('todas')}
-            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer ${
+            className={`px-3 py-1.5 rounded-xl font-bold transition cursor-pointer ${
               filterType === 'todas'
                 ? 'bg-[#0d233a] text-white shadow-sm'
                 : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
@@ -174,7 +226,7 @@ export function AppointmentAgendaView({
 
           <button
             onClick={() => setFilterType('hoy')}
-            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
+            className={`px-3 py-1.5 rounded-xl font-bold transition flex items-center gap-1.5 cursor-pointer ${
               filterType === 'hoy'
                 ? 'bg-rose-600 text-white shadow-sm'
                 : 'bg-rose-50 text-rose-800 border border-rose-200 hover:bg-rose-100'
@@ -186,7 +238,7 @@ export function AppointmentAgendaView({
 
           <button
             onClick={() => setFilterType('pendientes')}
-            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
+            className={`px-3 py-1.5 rounded-xl font-bold transition flex items-center gap-1.5 cursor-pointer ${
               filterType === 'pendientes'
                 ? 'bg-amber-600 text-white shadow-sm'
                 : 'bg-amber-50 text-amber-800 border border-amber-200 hover:bg-amber-100'
@@ -198,7 +250,7 @@ export function AppointmentAgendaView({
 
           <button
             onClick={() => setFilterType('confirmadas')}
-            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
+            className={`px-3 py-1.5 rounded-xl font-bold transition flex items-center gap-1.5 cursor-pointer ${
               filterType === 'confirmadas'
                 ? 'bg-emerald-600 text-white shadow-sm'
                 : 'bg-emerald-50 text-emerald-800 border border-emerald-200 hover:bg-emerald-100'
@@ -207,194 +259,278 @@ export function AppointmentAgendaView({
             <CheckCircle2 className="w-3.5 h-3.5" />
             <span>Confirmadas ({confirmedCount})</span>
           </button>
+
+          <button
+            onClick={() => setFilterType('canceladas')}
+            className={`px-3 py-1.5 rounded-xl font-bold transition flex items-center gap-1.5 cursor-pointer ${
+              filterType === 'canceladas'
+                ? 'bg-rose-700 text-white shadow-sm'
+                : 'bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100'
+            }`}
+          >
+            <CalendarX2 className="w-3.5 h-3.5" />
+            <span>Canceladas ({cancelledCount})</span>
+          </button>
+
+          <button
+            onClick={() => setFilterType('archivadas')}
+            className={`px-3 py-1.5 rounded-xl font-bold transition flex items-center gap-1.5 cursor-pointer ${
+              filterType === 'archivadas'
+                ? 'bg-slate-800 text-white shadow-sm'
+                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+            }`}
+            title="Citas canceladas hace más de 14 días o archivadas manualmente"
+          >
+            <Archive className="w-3.5 h-3.5" />
+            <span>Archivadas ({archivedCount})</span>
+          </button>
         </div>
 
         <button
           onClick={onOpenNewAppointment}
-          className="w-full sm:w-auto bg-[#0d233a] hover:bg-[#163b5c] text-white font-bold px-4 py-2 rounded-xl text-xs transition flex items-center justify-center gap-1.5 shadow-md cursor-pointer"
+          className="w-full sm:w-auto bg-[#0d233a] hover:bg-[#163b5c] text-white font-bold px-3.5 py-1.5 rounded-xl text-xs transition flex items-center justify-center gap-1.5 shadow-md cursor-pointer"
         >
           <Plus className="w-4 h-4 text-amber-400" />
-          <span>Agendar Nueva Cita</span>
+          <span>Agendar Cita</span>
         </button>
       </div>
 
-      {/* Grid de Tarjetas de Citas */}
+      {/* Grid de Tarjetas Compactas (~40% menos altura) */}
       {filteredAppointments.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
           {filteredAppointments.map((lead) => {
             const apt = lead.appointmentRequest;
             const aptDate = apt?.confirmedDate || apt?.preferredDate || 'Fecha por definir';
             const aptTime = apt?.confirmedTime || apt?.timeSlot || 'Horario por definir';
-            const isConfirmed = apt?.status === 'confirmada' || lead.commercialStatus === 'cita_confirmada';
-            const isToday = aptDate === todayStr;
+            const isCancelled = apt?.status === 'cancelada';
+            const isArchived = isLeadArchived(lead);
+            const isConfirmed = !isCancelled && !isArchived && (apt?.status === 'confirmada' || lead.commercialStatus === 'cita_confirmada');
+            const isPending = !isCancelled && !isArchived && !isConfirmed;
+            const isToday = !isCancelled && !isArchived && aptDate === todayStr;
             const cleanPhone = lead.phone.replace(/\D/g, '');
 
             return (
               <div
                 key={lead.id}
-                className={`bg-white rounded-2xl border transition shadow-sm hover:shadow-md flex flex-col justify-between overflow-hidden ${
-                  isToday
-                    ? 'border-rose-300 ring-2 ring-rose-200'
+                className={`bg-white rounded-2xl border transition shadow-sm hover:shadow-md flex flex-col justify-between overflow-hidden text-xs ${
+                  isArchived
+                    ? 'border-slate-300 opacity-80 bg-slate-50/50'
+                    : isCancelled
+                    ? 'border-rose-300 bg-rose-50/15'
+                    : isToday
+                    ? 'border-rose-400 ring-2 ring-rose-200'
                     : isConfirmed
-                    ? 'border-emerald-200'
-                    : 'border-amber-200'
+                    ? 'border-emerald-300'
+                    : 'border-amber-300'
                 }`}
               >
-                {/* Cabecera de la Cita */}
+                {/* Cabecera Compacta (Fecha, Hora y Estado) */}
                 <div
-                  className={`p-3.5 border-b flex items-center justify-between ${
-                    isToday
+                  className={`px-3 py-2 border-b flex items-center justify-between ${
+                    isArchived
+                      ? 'bg-slate-100 text-slate-700 border-slate-200'
+                      : isCancelled
+                      ? 'bg-rose-100/70 text-rose-900 border-rose-200'
+                      : isToday
                       ? 'bg-rose-50 text-rose-900 border-rose-100'
                       : isConfirmed
                       ? 'bg-emerald-50 text-emerald-950 border-emerald-100'
                       : 'bg-amber-50 text-amber-950 border-amber-100'
                   }`}
                 >
-                  <div className="flex items-center gap-2">
-                    <Calendar className="w-4 h-4 text-slate-700" />
-                    <div>
-                      <span className="font-bold text-xs block">
-                        {aptDate} {isToday && <span className="text-rose-600 font-extrabold ml-1">(¡HOY!)</span>}
+                  <div className="flex items-center gap-1.5 font-bold">
+                    <Calendar className="w-3.5 h-3.5 text-slate-600 flex-shrink-0" />
+                    <span>{aptDate}</span>
+                    <span className="text-slate-400">•</span>
+                    <span className="flex items-center gap-1 text-[11px] font-semibold text-slate-600">
+                      <Clock className="w-3 h-3" />
+                      {aptTime}
+                    </span>
+                    {isToday && (
+                      <span className="bg-rose-600 text-white text-[9px] font-black px-1.5 py-0.2 rounded-full uppercase ml-1 animate-pulse">
+                        Hoy
                       </span>
-                      <span className="text-[11px] text-slate-600 flex items-center gap-1">
-                        <Clock className="w-3 h-3" />
-                        {aptTime}
-                      </span>
-                    </div>
+                    )}
                   </div>
 
-                  <span
-                    className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                      isConfirmed
-                        ? 'bg-emerald-100 text-emerald-800'
-                        : 'bg-amber-100 text-amber-900'
-                    }`}
-                  >
-                    {isConfirmed ? 'Confirmada' : 'Por Confirmar'}
-                  </span>
-                </div>
-
-                {/* Cuerpo de la Cita */}
-                <div className="p-4 space-y-3 flex-1">
                   <div>
-                    <div className="flex items-center justify-between">
-                      <h4 className="font-bold text-sm text-slate-900 leading-tight">
-                        {lead.fullName}
+                    {isArchived ? (
+                      <span className="bg-slate-200 text-slate-700 text-[10px] font-bold px-2 py-0.5 rounded-full border border-slate-300">
+                        📦 Archivada
+                      </span>
+                    ) : isCancelled ? (
+                      <span className="bg-rose-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm">
+                        ❌ Cancelada
+                      </span>
+                    ) : isConfirmed ? (
+                      <span className="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded-full border border-emerald-200">
+                        ✅ Confirmada
+                      </span>
+                    ) : (
+                      <span className="bg-amber-100 text-amber-900 text-[10px] font-bold px-2 py-0.5 rounded-full border border-amber-200">
+                        ⏳ Por Confirmar
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Contenido Compacto */}
+                <div className="p-3 space-y-2 flex-1">
+                  {/* Fila 1: Nombre del Prospecto, Folio y Teléfono */}
+                  <div className="flex items-start justify-between gap-1">
+                    <div>
+                      <h4 className="font-bold text-slate-900 text-[13px] leading-snug">
+                        {lead.fullName || 'Prospecto'}
                       </h4>
-                      <span className="font-mono text-[10px] text-slate-400">{lead.folio}</span>
+                      <div className="flex items-center gap-2 text-[11px] mt-0.5">
+                        <a
+                          href={`tel:${cleanPhone}`}
+                          className="text-blue-700 hover:underline flex items-center gap-1 font-semibold"
+                        >
+                          <Phone className="w-3 h-3 text-blue-600" />
+                          <span>{lead.phone || 'Sin teléfono'}</span>
+                        </a>
+                        <span className="text-slate-300">•</span>
+                        <span className="text-slate-500 capitalize">{lead.preferredChannel || 'whatsapp'}</span>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-2 mt-1">
-                      <a
-                        href={`tel:${cleanPhone}`}
-                        className="text-xs text-blue-600 hover:underline flex items-center gap-1 font-semibold"
-                      >
-                        <Phone className="w-3 h-3" />
-                        <span>{lead.phone}</span>
-                      </a>
-                      <span className="text-slate-300">•</span>
-                      <span className="text-[11px] text-slate-500 capitalize">
-                        {lead.preferredChannel}
-                      </span>
-                    </div>
+                    <span className="font-mono text-[10px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded font-medium">
+                      {lead.folio || 'N/A'}
+                    </span>
                   </div>
 
-                  {/* Detalles del Inmueble y Esquema */}
-                  <div className="bg-slate-50 rounded-xl p-2.5 text-xs space-y-1.5 border border-slate-100">
-                    <div className="flex items-center justify-between">
-                      <span className="text-slate-500 text-[11px]">Vivienda:</span>
-                      <span className="font-bold text-slate-800 text-[11px]">
-                        Modelo Águila Premier
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-slate-500 text-[11px] flex items-center gap-1">
-                        <CreditCard className="w-3 h-3" />
-                        Forma de pago:
-                      </span>
-                      <span className="font-semibold text-slate-700 capitalize text-[11px]">
-                        {lead.financingType.replace('_', ' ')}
-                      </span>
-                    </div>
-                    <div className="flex items-start gap-1 pt-1 border-t border-slate-200/60 text-[11px] text-slate-600">
-                      <MapPin className="w-3.5 h-3.5 text-amber-600 flex-shrink-0 mt-0.5" />
-                      <span className="leading-tight">
-                        Caseta principal Valle de los Encinos (Calzada del Sol, Salinas Victoria)
-                      </span>
-                    </div>
+                  {/* Fila 2: Inmueble y Esquema de Compra en Tira Compacta */}
+                  <div className="bg-slate-50 border border-slate-100 rounded-xl px-2.5 py-1.5 flex flex-wrap items-center justify-between gap-1.5 text-[11px] text-slate-600">
+                    <span className="font-bold text-slate-800">Modelo Águila Premier</span>
+                    <span className="text-slate-300">•</span>
+                    <span className="capitalize font-semibold text-slate-700 flex items-center gap-1">
+                      <CreditCard className="w-3 h-3 text-slate-400" />
+                      {((lead.financingType || 'infonavit') as string).replace(/_/g, ' ')}
+                    </span>
+                    <span className="text-slate-300">•</span>
+                    <span className="text-slate-500 flex items-center gap-0.5">
+                      <MapPin className="w-3 h-3 text-amber-600" />
+                      Caseta Principal
+                    </span>
                   </div>
 
-                  {/* Notas o Requerimientos */}
+                  {/* Notas o comentarios del cliente si existen */}
                   {apt?.notes && (
-                    <div className="text-[11px] text-slate-600 bg-amber-50/40 p-2 rounded-lg border border-amber-100/60">
-                      <span className="font-semibold text-amber-900 block">Comentarios del cliente:</span>
-                      <p className="italic">{apt.notes}</p>
+                    <div className="text-[10px] text-slate-600 bg-amber-50/50 px-2 py-1 rounded-lg border border-amber-100 italic truncate" title={apt.notes}>
+                      💬 &quot;{apt.notes}&quot;
                     </div>
                   )}
 
-                  {/* Estado de Atribución 15 Días */}
+                  {/* Protección 15 Días */}
                   {lead.attributionStatus === 'confirmado' && lead.attributionExpiresAt && (
-                    <div className="flex items-center gap-1 text-[10px] text-emerald-800 bg-emerald-50 px-2 py-1 rounded-lg font-semibold">
-                      <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-                      <span>Exclusividad activa: vence {lead.attributionExpiresAt.split(' ')[0]}</span>
-                    </div>
-                  )}
-                  {lead.attributionStatus === 'pendiente_inmobiliaria' && (
-                    <div className="flex items-center gap-1 text-[10px] text-blue-800 bg-blue-50 px-2 py-1 rounded-lg font-semibold">
-                      <AlertTriangle className="w-3.5 h-3.5 text-blue-600" />
-                      <span>NSS capturado: Recuerda ingresarlo a constructora</span>
+                    <div className="flex items-center gap-1 text-[10px] text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-lg font-semibold">
+                      <ShieldCheck className="w-3 h-3 text-emerald-600" />
+                      <span>Exclusividad activa: {lead.attributionExpiresAt.split(' ')[0]}</span>
                     </div>
                   )}
                 </div>
 
-                {/* Acciones Rápidas para el Asesor */}
-                <div className="p-3 bg-slate-50/80 border-t border-slate-100 flex flex-wrap items-center gap-1.5 justify-between">
+                {/* Barra de Acciones Ejecutivas */}
+                <div className="px-3 py-2 bg-slate-50/80 border-t border-slate-100 flex items-center justify-between gap-1">
                   <div className="flex items-center gap-1">
                     <button
                       onClick={() => onOpenWhatsApp(lead)}
                       title="Enviar mensaje rápido de WhatsApp"
-                      className="bg-[#25D366] hover:bg-[#20bd5a] text-white p-2 rounded-xl transition shadow-sm flex items-center gap-1 text-xs font-bold cursor-pointer"
+                      className="bg-[#25D366] hover:bg-[#20bd5a] text-white p-1.5 rounded-xl transition shadow-sm flex items-center gap-1 font-bold text-[11px] cursor-pointer"
                     >
-                      <WhatsAppIcon className="w-4 h-4" />
+                      <WhatsAppIcon className="w-3.5 h-3.5" />
                       <span className="hidden sm:inline">WhatsApp</span>
                     </button>
 
                     <a
                       href={`tel:${cleanPhone}`}
                       title="Llamar directamente"
-                      className="bg-white hover:bg-slate-100 text-slate-700 p-2 rounded-xl border border-slate-200 transition text-xs font-semibold flex items-center gap-1 cursor-pointer"
+                      className="bg-white hover:bg-slate-100 text-slate-700 p-1.5 rounded-xl border border-slate-200 transition text-[11px] font-semibold flex items-center gap-1 cursor-pointer"
                     >
-                      <Phone className="w-3.5 h-3.5 text-blue-600" />
-                      <span className="hidden sm:inline">Llamar</span>
+                      <Phone className="w-3 h-3 text-blue-600" />
                     </a>
                   </div>
 
                   <div className="flex items-center gap-1">
-                    {!isConfirmed ? (
+                    {/* Botones según estado */}
+                    {isArchived ? (
                       <button
-                        onClick={() => handleConfirm(lead.id, aptDate, aptTime)}
-                        title="Marcar cita como confirmada"
-                        className="bg-emerald-600 hover:bg-emerald-700 text-white px-2.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1 cursor-pointer shadow-sm"
+                        onClick={() => handleToggleArchive(lead.id, false)}
+                        title="Restaurar cita a la agenda activa"
+                        className="bg-slate-700 hover:bg-slate-800 text-white px-2 py-1.5 rounded-xl text-[11px] font-bold transition flex items-center gap-1 cursor-pointer shadow-sm"
                       >
-                        <CalendarCheck2 className="w-3.5 h-3.5" />
-                        <span>Confirmar</span>
+                        <ArchiveRestore className="w-3 h-3" />
+                        <span>Restaurar</span>
                       </button>
+                    ) : isCancelled ? (
+                      <>
+                        <button
+                          onClick={() => handleOpenReschedule(lead)}
+                          title="Reactivar y reprogramar cita"
+                          className="bg-emerald-600 hover:bg-emerald-700 text-white px-2 py-1.5 rounded-xl text-[11px] font-bold transition flex items-center gap-1 cursor-pointer shadow-sm"
+                        >
+                          <RotateCcw className="w-3 h-3" />
+                          <span>Reagendar</span>
+                        </button>
+                        <button
+                          onClick={() => handleToggleArchive(lead.id, true)}
+                          title="Archivar de inmediato"
+                          className="bg-slate-200 hover:bg-slate-300 text-slate-700 p-1.5 rounded-xl text-[11px] font-semibold transition cursor-pointer"
+                        >
+                          <Archive className="w-3.5 h-3.5" />
+                        </button>
+                      </>
+                    ) : isPending ? (
+                      <>
+                        <button
+                          onClick={() => handleConfirm(lead.id, aptDate, aptTime)}
+                          title="Confirmar cita"
+                          className="bg-emerald-600 hover:bg-emerald-700 text-white px-2 py-1.5 rounded-xl text-[11px] font-bold transition flex items-center gap-1 cursor-pointer shadow-sm"
+                        >
+                          <CheckCircle2 className="w-3 h-3" />
+                          <span>Confirmar</span>
+                        </button>
+                        <button
+                          onClick={() => handleOpenReschedule(lead)}
+                          title="Reagendar horario o fecha"
+                          className="bg-white hover:bg-slate-100 text-slate-700 p-1.5 rounded-xl border border-slate-200 text-[11px] transition cursor-pointer"
+                        >
+                          <RotateCcw className="w-3 h-3 text-slate-500" />
+                        </button>
+                        <button
+                          onClick={() => handleCancelAppointment(lead.id)}
+                          title="Cancelar cita y enviar WhatsApp"
+                          className="bg-white hover:bg-rose-50 text-rose-600 p-1.5 rounded-xl border border-rose-200 text-[11px] transition cursor-pointer"
+                        >
+                          <CalendarX2 className="w-3 h-3 text-rose-600" />
+                        </button>
+                      </>
                     ) : (
-                      <button
-                        onClick={() => handleOpenReschedule(lead)}
-                        title="Reprogramar fecha u horario"
-                        className="bg-white hover:bg-slate-100 text-slate-700 px-2.5 py-2 rounded-xl border border-slate-200 text-xs font-semibold transition flex items-center gap-1 cursor-pointer"
-                      >
-                        <RotateCcw className="w-3 h-3 text-slate-500" />
-                        <span>Cambiar</span>
-                      </button>
+                      <>
+                        <button
+                          onClick={() => handleOpenReschedule(lead)}
+                          title="Reagendar horario o fecha"
+                          className="bg-white hover:bg-slate-100 text-slate-700 px-2 py-1.5 rounded-xl border border-slate-200 text-[11px] font-semibold transition flex items-center gap-1 cursor-pointer"
+                        >
+                          <RotateCcw className="w-3 h-3 text-slate-500" />
+                          <span>Reagendar</span>
+                        </button>
+                        <button
+                          onClick={() => handleCancelAppointment(lead.id)}
+                          title="Cancelar cita"
+                          className="bg-white hover:bg-rose-50 text-rose-600 p-1.5 rounded-xl border border-rose-200 text-[11px] transition cursor-pointer"
+                        >
+                          <CalendarX2 className="w-3 h-3 text-rose-600" />
+                        </button>
+                      </>
                     )}
 
                     <button
                       onClick={() => onOpenLeadDetail(lead)}
-                      title="Ver expediente completo"
-                      className="bg-[#0d233a] hover:bg-[#163b5c] text-white p-2 rounded-xl transition text-xs font-semibold cursor-pointer"
+                      title="Ver expediente"
+                      className="bg-[#0d233a] hover:bg-[#163b5c] text-white p-1.5 rounded-xl transition text-[11px] font-semibold cursor-pointer"
                     >
-                      <Eye className="w-3.5 h-3.5" />
+                      <Eye className="w-3 h-3" />
                     </button>
                   </div>
                 </div>
@@ -496,7 +632,7 @@ export function AppointmentAgendaView({
                   onClick={handleSaveReschedule}
                   className="bg-[#0d233a] hover:bg-[#163b5c] text-white font-bold px-4 py-2 rounded-xl text-xs transition shadow-sm cursor-pointer"
                 >
-                  Guardar Cambios
+                  Guardar y Notificar
                 </button>
               </div>
             </div>

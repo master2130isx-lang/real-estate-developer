@@ -1,17 +1,19 @@
 'use client';
 
 import React, { useState } from 'react';
-import { COMMERCIAL_CONFIG } from '@/config/commercialConfig';
+import { useApp } from '@/context/AppContext';
 import { WhatsAppIcon } from '@/components/common/WhatsAppIcon';
 import { X } from 'lucide-react';
 
 export function WhatsAppFloatingButton() {
   const [isOpen, setIsOpen] = useState(false);
+  const { commercialConfig } = useApp();
+  const cleanWa = commercialConfig.contactChannels.whatsapp.replace(/\D/g, '');
 
   const defaultMessage = encodeURIComponent(
-    '¡Hola! Me interesa conocer más sobre el Modelo Águila Premier en Valle de los Encinos (Salinas Victoria, N.L.). ¿Me podrían brindar información o agendar una visita?'
+    `¡Hola! Me interesa conocer más sobre las viviendas en ${commercialConfig.agencyName} (${commercialConfig.coverageZone}). ¿Me podrían brindar información o agendar una visita?`
   );
-  const waUrl = `https://wa.me/${COMMERCIAL_CONFIG.contactChannels.whatsapp}?text=${defaultMessage}`;
+  const waUrl = `https://wa.me/${cleanWa}?text=${defaultMessage}`;
 
   return (
     <div className="fixed bottom-[calc(5.25rem+env(safe-area-inset-bottom,0px))] md:bottom-6 right-4 md:right-6 z-50 flex flex-col items-end gap-2 pointer-events-auto">
@@ -24,7 +26,7 @@ export function WhatsAppFloatingButton() {
                 <WhatsAppIcon className="w-4 h-4" />
               </div>
               <div>
-                <p className="text-xs font-bold text-slate-900 leading-tight">Asesor Comercial</p>
+                <p className="text-xs font-bold text-slate-900 leading-tight">{commercialConfig.advisorName}</p>
                 <span className="flex items-center gap-1 text-[10px] text-emerald-600 font-semibold">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
                   En línea ahora

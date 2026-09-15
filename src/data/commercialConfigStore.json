@@ -1,0 +1,36 @@
+{
+  "isDemoMode": false,
+  "agencyName": "Valle de los Encinos - Salinas Victoria",
+  "agencyLegalStatus": "demostracion_pendiente_confirmacion",
+  "advisorName": "Ismael Zapata",
+  "advisorRole": "Asesor Certificado de Atención Inmobiliaria",
+  "advisorVerificationStatus": "verificado",
+  "coverageZone": "Valle de los Encinos, Salinas Victoria, N.L.",
+  "contactChannels": {
+    "phone": "+52 3143529773",
+    "whatsapp": "523143529773",
+    "email": "master2130.isx@gmail.com",
+    "officeAddressNote": "Calzada del Sol, Salinas Victoria, N.L. Atención con cita previa."
+  },
+  "socialLinks": {
+    "facebook": "https://facebook.com/valledelosencinos",
+    "instagram": "https://instagram.com/valledelosencinos",
+    "tiktok": "",
+    "youtube": ""
+  },
+  "telegramConfig": {
+    "botToken": "8744099329:AAEKPsqni4ugVioOXYd7dMi3zZREBP0RrKc",
+    "advisorChatId": "948786976"
+  },
+  "featuredPrice": {
+    "amountFormatted": "$1,180,000 MXN",
+    "hasSupportingOffer": true,
+    "referenceNote": "Precio para Modelo Águila Premier (98 m² terreno, 74.39 m² construcción) en Valle de los Encinos, Salinas Victoria, N.L."
+  },
+  "attributionRules": {
+    "durationDays": 15,
+    "requireNssForInfonavit": true,
+    "requireNssForBancario": false,
+    "requireNssForContado": false
+  }
+}

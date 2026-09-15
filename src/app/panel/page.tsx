@@ -19,6 +19,7 @@ import {
   Plus,
   ShieldCheck,
   Sparkles,
+  Settings,
 } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
 import { Lead, CommercialStatus, AttributionStatus } from '@/types';
@@ -27,9 +28,10 @@ import { WhatsAppDraftModal } from '@/components/panel/WhatsAppDraftModal';
 import { ConfirmRegistrationModal } from '@/components/panel/ConfirmRegistrationModal';
 import { NewAppointmentModal } from '@/components/panel/NewAppointmentModal';
 import { AppointmentAgendaView } from '@/components/panel/AppointmentAgendaView';
+import { CommercialSettingsModal } from '@/components/panel/CommercialSettingsModal';
 
 export default function AgentPanelPage() {
-  const { leads, resetToDemoDefaults } = useApp();
+  const { leads, resetToDemoDefaults, commercialConfig } = useApp();
 
   // Pestaña activa principal: Agenda o Cartera de Prospectos
   const [activeTab, setActiveTab] = useState<'agenda' | 'prospectos'>('agenda');
@@ -39,6 +41,7 @@ export default function AgentPanelPage() {
   const [waLead, setWaLead] = useState<Lead | null>(null);
   const [regLead, setRegLead] = useState<Lead | null>(null);
   const [isNewAppointmentOpen, setIsNewAppointmentOpen] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   // Filtros de tabla
   const [searchTerm, setSearchTerm] = useState('');
@@ -135,6 +138,15 @@ export default function AgentPanelPage() {
 
           <div className="flex items-center gap-2 text-xs">
             <button
+              onClick={() => setIsSettingsOpen(true)}
+              className="bg-slate-800 hover:bg-slate-700 text-amber-300 font-bold px-3 py-1.5 rounded-xl transition flex items-center gap-1.5 shadow-sm cursor-pointer border border-slate-700"
+              title="Personalizar datos del asesor, teléfonos, redes y bot de Telegram"
+            >
+              <Settings className="w-3.5 h-3.5 text-amber-400" />
+              <span>Configuración Comercial</span>
+            </button>
+
+            <button
               onClick={() => setIsNewAppointmentOpen(true)}
               className="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-3 py-1.5 rounded-xl transition flex items-center gap-1.5 shadow-md cursor-pointer"
             >
@@ -181,7 +193,7 @@ export default function AgentPanelPage() {
               <span>Visitas Hoy</span>
               <Calendar className="w-4 h-4 text-rose-600" />
             </div>
-            <p className="text-2xl font-black text-rose-600">{todayVisits}</p>
+            <p className="text-2xl font-black text-rose-600" suppressHydrationWarning>{todayVisits}</p>
             <p className="text-[10px] text-slate-500 mt-0.5">En caseta de acceso</p>
           </div>
 
@@ -193,7 +205,7 @@ export default function AgentPanelPage() {
               <span>Por Confirmar</span>
               <CalendarCheck className="w-4 h-4 text-amber-600" />
             </div>
-            <p className="text-2xl font-black text-amber-600">{pendingVisits}</p>
+            <p className="text-2xl font-black text-amber-600" suppressHydrationWarning>{pendingVisits}</p>
             <p className="text-[10px] text-slate-500 mt-0.5">Requieren WhatsApp</p>
           </div>
 
@@ -208,7 +220,7 @@ export default function AgentPanelPage() {
               <span>NSS por Registrar</span>
               <Flame className="w-4 h-4 text-blue-600" />
             </div>
-            <p className="text-2xl font-black text-blue-600">{pendingInAgency}</p>
+            <p className="text-2xl font-black text-blue-600" suppressHydrationWarning>{pendingInAgency}</p>
             <p className="text-[10px] text-slate-500 mt-0.5">Prioridad en constructora</p>
           </div>
 
@@ -223,7 +235,7 @@ export default function AgentPanelPage() {
               <span>15 Días Activos</span>
               <ShieldCheck className="w-4 h-4 text-emerald-600" />
             </div>
-            <p className="text-2xl font-black text-emerald-600">{confirmedAttributions}</p>
+            <p className="text-2xl font-black text-emerald-600" suppressHydrationWarning>{confirmedAttributions}</p>
             <p className="text-[10px] text-slate-500 mt-0.5">Exclusividad vigente</p>
           </div>
 
@@ -236,10 +248,10 @@ export default function AgentPanelPage() {
           >
             <div className="flex items-center justify-between text-slate-500 text-xs font-semibold mb-1">
               <span>Total Cartera</span>
-              <Users className="w-4 h-4 text-slate-700" />
+              <Users className="w-4 h-4 text-slate-600" />
             </div>
-            <p className="text-2xl font-black text-slate-900">{totalLeads}</p>
-            <p className="text-[10px] text-slate-500 mt-0.5">Prospectos registrados</p>
+            <p className="text-2xl font-black text-slate-800" suppressHydrationWarning>{totalLeads}</p>
+            <p className="text-[10px] text-slate-500 mt-0.5">Base acumulada</p>
           </div>
         </div>
 
@@ -375,22 +387,30 @@ export default function AgentPanelPage() {
                   <tbody className="divide-y divide-slate-100">
                     {filteredLeads.length > 0 ? (
                       filteredLeads.map((lead) => {
-                        const statusObj = statusBadgeStyle[lead.commercialStatus];
-                        const attribObj = attributionBadgeStyle[lead.attributionStatus];
+                        const statusObj = (lead.commercialStatus && statusBadgeStyle[lead.commercialStatus]) || {
+                          label: lead.commercialStatus || 'Nuevo',
+                          bg: 'bg-slate-100',
+                          text: 'text-slate-700',
+                        };
+                        const attribObj = (lead.attributionStatus && attributionBadgeStyle[lead.attributionStatus]) || {
+                          label: 'Sin asignar',
+                          bg: 'bg-slate-100',
+                          text: 'text-slate-600',
+                        };
 
                         return (
                           <tr key={lead.id} className="hover:bg-slate-50/80 transition">
                             {/* Folio y fecha */}
                             <td className="p-3.5 font-mono text-[11px] whitespace-nowrap">
-                              <span className="font-bold text-slate-900 block">{lead.folio}</span>
-                              <span className="text-slate-400">{lead.createdAt}</span>
+                              <span className="font-bold text-slate-900 block">{lead.folio || 'N/A'}</span>
+                              <span className="text-slate-400">{lead.createdAt || 'Reciente'}</span>
                             </td>
 
                             {/* Prospecto y contacto */}
                             <td className="p-3.5">
-                              <span className="font-bold text-slate-900 block">{lead.fullName}</span>
+                              <span className="font-bold text-slate-900 block">{lead.fullName || 'Prospecto'}</span>
                               <span className="text-slate-500 text-[11px] block">
-                                📞 {lead.phone} • {lead.preferredChannel}
+                                📞 {lead.phone || 'Sin tel'} • {lead.preferredChannel || 'whatsapp'}
                               </span>
                             </td>
 
@@ -406,7 +426,7 @@ export default function AgentPanelPage() {
 
                             {/* Forma de compra */}
                             <td className="p-3.5 capitalize text-slate-700 font-medium whitespace-nowrap">
-                              {lead.financingType.replace('_', ' ')}
+                              {((lead.financingType || 'infonavit') as string).replace(/_/g, ' ')}
                             </td>
 
                             {/* Atribución Comercial (15 Días) */}
@@ -507,6 +527,12 @@ export default function AgentPanelPage() {
 
       {/* Modal de Gestión de Atribución */}
       <ConfirmRegistrationModal lead={regLead} onClose={() => setRegLead(null)} />
+
+      {/* Modal de Configuración Comercial y Redes Sociales */}
+      <CommercialSettingsModal
+        isOpen={isSettingsOpen}
+        onClose={() => setIsSettingsOpen(false)}
+      />
     </div>
   );
 }

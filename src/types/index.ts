@@ -90,9 +90,11 @@ export interface AppointmentRequest {
   preferredDate: string;
   timeSlot: '10:00 - 13:00' | '14:00 - 17:00' | '17:00 - 19:00' | 'sabado_manana' | string;
   notes?: string;
-  status: 'solicitada' | 'confirmada' | 'reprogramada' | 'cancelada';
+  status: 'solicitada' | 'confirmada' | 'reprogramada' | 'cancelada' | 'archivada';
   confirmedDate?: string;
   confirmedTime?: string;
+  cancelledAt?: string;
+  archivedAt?: string;
 }
 
 export interface LeadNote {
@@ -152,6 +154,7 @@ export interface Lead {
   assignedAdvisor: string;
   
   appointmentRequest?: AppointmentRequest;
+  isArchived?: boolean;
   internalNotes: LeadNote[];
   auditHistory: AuditEvent[];
 }

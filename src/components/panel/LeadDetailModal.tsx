@@ -110,7 +110,11 @@ export function LeadDetailModal({ lead, onClose }: LeadDetailModalProps) {
     vencido: { label: 'Vencido (Plazo concluido)', bg: 'bg-slate-200', text: 'text-slate-700' },
   };
 
-  const currentAttribution = attributionLabels[lead.attributionStatus];
+  const currentAttribution = (lead.attributionStatus && attributionLabels[lead.attributionStatus]) || {
+    label: 'No aplica / Sin registro',
+    bg: 'bg-slate-100',
+    text: 'text-slate-600',
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/65 backdrop-blur-sm overflow-y-auto">
@@ -132,13 +136,13 @@ export function LeadDetailModal({ lead, onClose }: LeadDetailModalProps) {
         <div className="border-b border-slate-200 pb-4 mb-5">
           <div className="flex flex-wrap items-center justify-between gap-2 mb-1">
             <span className="text-xs font-mono font-bold text-slate-500 bg-slate-100 px-2.5 py-0.5 rounded">
-              {lead.folio}
+              {lead.folio || 'FOLIO-N/A'}
             </span>
-            <span className="text-xs text-slate-500">Registrado en web: {lead.createdAt}</span>
+            <span className="text-xs text-slate-500">Registrado en web: {lead.createdAt || 'Reciente'}</span>
           </div>
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <h2 id="lead-modal-title" className="text-xl sm:text-2xl font-extrabold text-slate-900">
-              {lead.fullName}
+              {lead.fullName || 'Interesado'}
             </h2>
             {/* Botón de acción rápida: WhatsApp */}
             <button
@@ -152,13 +156,13 @@ export function LeadDetailModal({ lead, onClose }: LeadDetailModalProps) {
 
           <div className="flex flex-wrap items-center gap-2 mt-3">
             <span className="text-xs font-semibold px-2.5 py-1 rounded-lg bg-[#0d233a] text-white">
-              Estado: {commercialStatusLabels[lead.commercialStatus]}
+              Estado: {commercialStatusLabels[lead.commercialStatus] || lead.commercialStatus || 'Nuevo'}
             </span>
             <span className={`text-xs font-semibold px-2.5 py-1 rounded-lg ${currentAttribution.bg} ${currentAttribution.text}`}>
               Atribución: {currentAttribution.label}
             </span>
             <span className="text-xs text-slate-600 bg-slate-100 px-2.5 py-1 rounded-lg">
-              Compatibilidad: <strong className="capitalize">{lead.compatibility.replace('_', ' ')}</strong>
+              Compatibilidad: <strong className="capitalize">{((lead.compatibility || 'media') as string).replace(/_/g, ' ')}</strong>
             </span>
           </div>
         </div>
@@ -169,8 +173,8 @@ export function LeadDetailModal({ lead, onClose }: LeadDetailModalProps) {
             { id: 'info', label: 'Resumen' },
             { id: 'atribucion', label: 'Registro Inmobiliaria (15 días)' },
             { id: 'cita', label: 'Visita Solicitada' },
-            { id: 'notas', label: `Notas (${lead.internalNotes.length})` },
-            { id: 'auditoria', label: `Auditoría (${lead.auditHistory.length})` },
+            { id: 'notas', label: `Notas (${(lead.internalNotes || []).length})` },
+            { id: 'auditoria', label: `Auditoría (${(lead.auditHistory || []).length})` },
           ].map((tab) => (
             <button
               key={tab.id}
@@ -197,7 +201,7 @@ export function LeadDetailModal({ lead, onClose }: LeadDetailModalProps) {
                 <div className="flex items-center gap-2 text-slate-700">
                   <Phone className="w-4 h-4 text-slate-500" />
                   <span>
-                    <strong>Teléfono:</strong> {lead.phone}
+                    <strong>Teléfono:</strong> {lead.phone || 'Sin teléfono'}
                   </span>
                 </div>
                 {lead.email && (
@@ -211,7 +215,7 @@ export function LeadDetailModal({ lead, onClose }: LeadDetailModalProps) {
                 <div className="flex items-center gap-2 text-slate-700">
                   <Clock className="w-4 h-4 text-slate-500" />
                   <span>
-                    <strong>Preferencia:</strong> {lead.preferredChannel} ({lead.preferredContactTime})
+                    <strong>Preferencia:</strong> {lead.preferredChannel || 'whatsapp'} ({lead.preferredContactTime || 'tarde'})
                   </span>
                 </div>
               </div>
@@ -223,17 +227,17 @@ export function LeadDetailModal({ lead, onClose }: LeadDetailModalProps) {
                 <div className="flex items-center gap-2 text-slate-700">
                   <MapPin className="w-4 h-4 text-slate-500" />
                   <span>
-                    <strong>Zona:</strong> {lead.interestedZone}
+                    <strong>Zona:</strong> {lead.interestedZone || 'Salinas Victoria, N.L. (Valle de los Encinos)'}
                   </span>
                 </div>
                 <div>
-                  <strong>Forma de compra:</strong> {lead.financingType.replace('_', ' ')}
+                  <strong>Forma de compra:</strong> {((lead.financingType || 'infonavit') as string).replace(/_/g, ' ')}
                 </div>
                 <div>
-                  <strong>Presupuesto:</strong> {lead.budgetRange.replace(/_/g, ' ')}
+                  <strong>Presupuesto:</strong> {((lead.budgetRange || 'Aún no lo sé') as string).replace(/_/g, ' ')}
                 </div>
                 <div>
-                  <strong>Plazo:</strong> {lead.purchaseTimeline}
+                  <strong>Plazo:</strong> {lead.purchaseTimeline || 'En evaluación'}
                 </div>
                 {lead.selectedPropertyTitle && (
                   <div className="text-amber-900 font-medium pt-1">
@@ -538,15 +542,19 @@ export function LeadDetailModal({ lead, onClose }: LeadDetailModalProps) {
             </form>
 
             <div className="space-y-2.5 pt-2">
-              {lead.internalNotes.map((note) => (
-                <div key={note.id} className="bg-slate-50 p-3.5 rounded-xl border border-slate-200 text-xs space-y-1">
-                  <div className="flex justify-between text-[11px] text-slate-500 font-medium">
-                    <span className="font-bold text-slate-700">{note.author}</span>
-                    <span>{note.createdAt}</span>
+              {(lead.internalNotes || []).length > 0 ? (
+                (lead.internalNotes || []).map((note) => (
+                  <div key={note.id} className="bg-slate-50 p-3.5 rounded-xl border border-slate-200 text-xs space-y-1">
+                    <div className="flex justify-between text-[11px] text-slate-500 font-medium">
+                      <span className="font-bold text-slate-700">{note.author}</span>
+                      <span>{note.createdAt}</span>
+                    </div>
+                    <p className="text-slate-800 leading-relaxed">{note.content}</p>
                   </div>
-                  <p className="text-slate-800 leading-relaxed">{note.content}</p>
-                </div>
-              ))}
+                ))
+              ) : (
+                <p className="text-xs text-slate-400 py-3 text-center italic">No hay notas registradas para este prospecto.</p>
+              )}
             </div>
           </div>
         )}
@@ -558,26 +566,30 @@ export function LeadDetailModal({ lead, onClose }: LeadDetailModalProps) {
               Historial de eventos y consultas de datos confidenciales (Simulación de bitácora en frontend).
             </p>
             <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
-              {lead.auditHistory.map((event) => (
-                <div
-                  key={event.id}
-                  className="bg-slate-50 p-3 rounded-xl border border-slate-200 text-xs flex items-start gap-2.5"
-                >
-                  <Shield className="w-4 h-4 text-slate-400 flex-shrink-0 mt-0.5" />
-                  <div className="space-y-0.5 flex-1">
-                    <div className="flex justify-between text-[10px] text-slate-400">
-                      <span>{event.actor}</span>
-                      <span>{new Date(event.timestamp).toLocaleString('es-MX')}</span>
+              {(lead.auditHistory || []).length > 0 ? (
+                (lead.auditHistory || []).map((event) => (
+                  <div
+                    key={event.id}
+                    className="bg-slate-50 p-3 rounded-xl border border-slate-200 text-xs flex items-start gap-2.5"
+                  >
+                    <Shield className="w-4 h-4 text-slate-400 flex-shrink-0 mt-0.5" />
+                    <div className="space-y-0.5 flex-1">
+                      <div className="flex justify-between text-[10px] text-slate-400">
+                        <span>{event.actor}</span>
+                        <span>{new Date(event.timestamp).toLocaleString('es-MX')}</span>
+                      </div>
+                      <p className="font-semibold text-slate-800">{event.action}</p>
+                      {event.reason && (
+                        <p className="text-amber-800 text-[11px]">
+                          <strong>Motivo:</strong> {event.reason}
+                        </p>
+                      )}
                     </div>
-                    <p className="font-semibold text-slate-800">{event.action}</p>
-                    {event.reason && (
-                      <p className="text-amber-800 text-[11px]">
-                        <strong>Motivo:</strong> {event.reason}
-                      </p>
-                    )}
                   </div>
-                </div>
-              ))}
+                ))
+              ) : (
+                <p className="text-xs text-slate-400 py-3 text-center italic">Sin registros de auditoría.</p>
+              )}
             </div>
           </div>
         )}

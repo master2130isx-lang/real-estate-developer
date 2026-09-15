@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "poll:telegram": "node scripts/telegram-local-poller.mjs",
     "build": "next build",
     "start": "next start",
     "lint": "eslint"

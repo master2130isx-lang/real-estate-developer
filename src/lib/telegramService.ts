@@ -2,14 +2,20 @@ import { Lead } from '@/types';
 import { COMMERCIAL_CONFIG } from '@/config/commercialConfig';
 import { getServerLeadById, updateServerLeadAppointment } from './leadsServerStore';
 
+import { getServerCommercialConfig } from './commercialConfigStore';
+
 const TELEGRAM_API_BASE = 'https://api.telegram.org';
 
-function getBotToken(): string | undefined {
-  return process.env.TELEGRAM_BOT_TOKEN;
+async function getBotToken(): Promise<string | undefined> {
+  if (process.env.TELEGRAM_BOT_TOKEN) return process.env.TELEGRAM_BOT_TOKEN;
+  const config = await getServerCommercialConfig();
+  return config.telegramConfig?.botToken;
 }
 
-function getAdvisorChatId(): string | undefined {
-  return process.env.TELEGRAM_ADVISOR_CHAT_ID;
+async function getAdvisorChatId(): Promise<string | undefined> {
+  if (process.env.TELEGRAM_ADVISOR_CHAT_ID) return process.env.TELEGRAM_ADVISOR_CHAT_ID;
+  const config = await getServerCommercialConfig();
+  return config.telegramConfig?.advisorChatId;
 }
 
 /**
@@ -42,8 +48,8 @@ export function buildClientWhatsAppCancelUrl(lead: Lead): string {
  * Envía una notificación instantánea al bot de Telegram del asesor cuando se solicita una nueva cita
  */
 export async function notifyNewAppointmentTelegram(lead: Lead): Promise<{ success: boolean; error?: string }> {
-  const token = getBotToken();
-  const chatId = getAdvisorChatId();
+  const token = await getBotToken();
+  const chatId = await getAdvisorChatId();
 
   if (!token || !chatId) {
     console.warn(
@@ -57,15 +63,23 @@ export async function notifyNewAppointmentTelegram(lead: Lead): Promise<{ succes
   const financingLabel = lead.financingType.replace('_', ' ').toUpperCase();
   const waUrl = buildClientWhatsAppConfirmUrl(lead);
 
+  // Formatear NSS visible para que el asesor pueda copiarlo de inmediato
+  const nssRaw = lead.nssValueEncryptedMock || (lead.nssLastFour ? `*******${lead.nssLastFour}` : null);
+  const nssDisplay = nssRaw ? `\`${nssRaw}\`` : 'No proporcionado';
+  const nssSection = nssRaw
+    ? `🔢 *NSS:* ${nssDisplay}\n⚡ _(Listo para registrar en constructora y activar 15 días de comisión)_\n`
+    : lead.financingType === 'infonavit'
+    ? `⚠️ *NSS:* Pendiente de solicitar al cliente\n`
+    : `ℹ️ *NSS:* No aplica (${financingLabel})\n`;
+
   const text = `🚨 *NUEVA SOLICITUD DE CITA*
 ━━━━━━━━━━━━━━━━━━━━
 👤 *Cliente:* ${lead.fullName}
 📱 *Teléfono:* \`${lead.phone}\`
 📅 *Fecha:* ${date} a las ${time}
 💳 *Forma de pago:* ${financingLabel}
-🏠 *Vivienda:* Modelo Águila Premier ($1,180,000 MXN)
+${nssSection}🏠 *Vivienda:* Modelo Águila Premier ($1,180,000 MXN)
 📍 *Ubicación:* Valle de los Encinos, Salinas Victoria
-${lead.attributionStatus === 'pendiente_inmobiliaria' ? '⚡ *NSS recibido:* Capturado para registrar en constructora\n' : ''}
 ${lead.appointmentRequest?.notes ? `📝 *Comentarios:* _${lead.appointmentRequest.notes}_\n` : ''}━━━━━━━━━━━━━━━━━━━━
 *¿Deseas confirmar o cancelar esta visita?*`;
 
@@ -110,7 +124,7 @@ ${lead.appointmentRequest?.notes ? `📝 *Comentarios:* _${lead.appointmentReque
  * Procesa la acción del asesor cuando pulsa un botón interactivo (Inline Keyboard) en Telegram
  */
 export async function handleTelegramCallbackQuery(callbackQuery: any): Promise<{ ok: boolean }> {
-  const token = getBotToken();
+  const token = await getBotToken();
   if (!token) return { ok: false };
 
   const callbackQueryId = callbackQuery.id;
@@ -124,19 +138,28 @@ export async function handleTelegramCallbackQuery(callbackQuery: any): Promise<{
   }
 
   const [action, leadId] = data.split(':');
+
+  // Responder de inmediato a Telegram para que el spinner de carga en el botón desaparezca al instante
+  await answerCallbackQuery(
+    token,
+    callbackQueryId,
+    action === 'confirm' ? '✅ ¡Cita confirmada en el sistema!' : '❌ Cita marcada como cancelada.'
+  );
+
   const lead = await getServerLeadById(leadId);
 
   if (!lead) {
-    await answerCallbackQuery(token, callbackQueryId, 'Prospecto no encontrado en el sistema');
     return { ok: false };
   }
+
+  const nssRaw = lead.nssValueEncryptedMock || (lead.nssLastFour ? `*******${lead.nssLastFour}` : null);
+  const nssLine = nssRaw ? `🔢 *NSS:* \`${nssRaw}\`\n` : '';
 
   if (action === 'confirm') {
     // 1. Actualizar el estatus en la base de datos compartida del servidor
     const updatedLead = await updateServerLeadAppointment(leadId, 'confirmada');
-    await answerCallbackQuery(token, callbackQueryId, '✅ ¡Cita confirmada en el sistema!');
 
-    // 2. Editar el mensaje en Telegram mostrando el estatus confirmado y el link directo a WhatsApp
+    // 2. Editar el mensaje en Telegram mostrando el estatus confirmado, el NSS y el link directo a WhatsApp
     if (updatedLead && messageId && chatId) {
       const waUrl = buildClientWhatsAppConfirmUrl(updatedLead);
       const date = updatedLead.appointmentRequest?.confirmedDate || updatedLead.appointmentRequest?.preferredDate;
@@ -146,7 +169,7 @@ export async function handleTelegramCallbackQuery(callbackQuery: any): Promise<{
 ━━━━━━━━━━━━━━━━━━━━
 👤 *Cliente:* ${updatedLead.fullName}
 📱 *Teléfono:* \`${updatedLead.phone}\`
-📅 *Cita confirmada:* ${date} a las ${time}
+${nssLine}📅 *Cita confirmada:* ${date} a las ${time}
 📍 *Punto de reunión:* Caseta principal Valle de los Encinos
 🏠 *Vivienda:* Modelo Águila Premier ($1.18M)
 ━━━━━━━━━━━━━━━━━━━━
@@ -164,7 +187,6 @@ El estado ha sido actualizado en la página web.
   if (action === 'cancel') {
     // 1. Actualizar a cancelada
     const updatedLead = await updateServerLeadAppointment(leadId, 'cancelada');
-    await answerCallbackQuery(token, callbackQueryId, '❌ Cita marcada como cancelada.');
 
     // 2. Editar el mensaje en Telegram con el enlace a WhatsApp con mensaje formal de cancelación
     if (updatedLead && messageId && chatId) {
@@ -174,7 +196,7 @@ El estado ha sido actualizado en la página web.
 ━━━━━━━━━━━━━━━━━━━━
 👤 *Cliente:* ${updatedLead.fullName}
 📱 *Teléfono:* \`${updatedLead.phone}\`
-━━━━━━━━━━━━━━━━━━━━
+${nssLine}━━━━━━━━━━━━━━━━━━━━
 El estado ha sido actualizado en la página web como cancelada.
 
 👉 [Toca aquí para enviar mensaje de cortesía por WhatsApp](${waCancelUrl})`;

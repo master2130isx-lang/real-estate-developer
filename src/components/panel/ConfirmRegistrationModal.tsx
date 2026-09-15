@@ -12,14 +12,15 @@ interface ConfirmRegistrationModalProps {
 }
 
 export function ConfirmRegistrationModal({ lead, onClose }: ConfirmRegistrationModalProps) {
-  const { confirmAttributionInAgency, markAttributionConflict } = useApp();
+  const { confirmAttributionInAgency, markAttributionConflict, commercialConfig } = useApp();
+  const cfg = commercialConfig || COMMERCIAL_CONFIG;
 
   const [mode, setMode] = useState<'confirmar' | 'conflicto'>('confirmar');
   const [reference, setReference] = useState('');
   const [confirmedAtDate, setConfirmedAtDate] = useState(() => new Date().toISOString().split('T')[0]);
   const [confirmedAtTime, setConfirmedAtTime] = useState(() => new Date().toTimeString().substring(0, 5));
-  const [advisorName, setAdvisorName] = useState(COMMERCIAL_CONFIG.advisorName);
-  const [operatorUser, setOperatorUser] = useState(COMMERCIAL_CONFIG.advisorName);
+  const [advisorName, setAdvisorName] = useState(cfg.advisorName);
+  const [operatorUser, setOperatorUser] = useState(cfg.advisorName);
   const [notes, setNotes] = useState('');
   const [conflictReason, setConflictReason] = useState('Prospecto ya registrado por otro asesor previamente.');
 
@@ -62,10 +63,10 @@ export function ConfirmRegistrationModal({ lead, onClose }: ConfirmRegistrationM
 
         <div>
           <h3 id="confirm-reg-title" className="text-lg font-bold text-slate-900">
-            Registro en Inmobiliaria: {lead.fullName}
+            Registro en Inmobiliaria: {lead.fullName || 'Prospecto'}
           </h3>
           <p className="text-xs text-slate-500">
-            Folio web: <strong>{lead.folio}</strong> • Estado actual: <strong>{lead.attributionStatus}</strong>
+            Folio web: <strong>{lead.folio || 'N/A'}</strong> • Estado actual: <strong>{lead.attributionStatus || 'Sin registro'}</strong>
           </p>
         </div>
 
