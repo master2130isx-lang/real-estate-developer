@@ -73,9 +73,9 @@ export function PropertiesSection({ onSelectPropertyForPrequalification }: Prope
         {/* Gran Tarjeta Destacada */}
         <div className="bg-white rounded-3xl border border-slate-200/90 shadow-lg overflow-hidden grid grid-cols-1 lg:grid-cols-12 gap-0">
           {/* Columna Izquierda: Galería Interactiva con Miniaturas */}
-          <div className="lg:col-span-7 bg-slate-950 flex flex-col justify-between relative">
-            {/* Foto Activa */}
-            <div className="relative w-full h-72 sm:h-96 lg:h-[480px]">
+          <div className="lg:col-span-7 bg-slate-950 flex flex-col relative h-full">
+            {/* Foto Activa - Ocupa todo el espacio vertical disponible eliminando cualquier hueco negro */}
+            <div className="relative w-full flex-1 min-h-[380px] sm:min-h-[460px] lg:min-h-[520px]">
               <Image
                 src={gallery[activePhotoIndex]}
                 alt={`${property.model} - Foto ${activePhotoIndex + 1}`}
@@ -119,7 +119,7 @@ export function PropertiesSection({ onSelectPropertyForPrequalification }: Prope
             </div>
 
             {/* Tira de Miniaturas */}
-            <div className="bg-slate-900/95 p-3 flex items-center gap-2 overflow-x-auto scrollbar-thin border-t border-slate-800">
+            <div className="bg-slate-900/95 p-3 flex items-center gap-2 overflow-x-auto scrollbar-thin border-t border-slate-800 flex-shrink-0">
               {gallery.map((img, idx) => (
                 <button
                   key={idx}

@@ -80,7 +80,7 @@ export function PropertyDetailModal({
         </button>
 
         {/* Visor de Galería Principal */}
-        <div className="relative w-full h-64 sm:h-80 md:h-96 bg-slate-900">
+        <div className="relative w-full h-72 sm:h-96 md:h-[420px] bg-slate-900">
           <Image
             src={currentImage}
             alt={`${property.model} - Foto ${activeImageIndex + 1}`}
