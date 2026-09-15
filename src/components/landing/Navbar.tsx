@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { Building2, Menu, X, ArrowRight, UserCheck, AlertCircle } from 'lucide-react';
 import { COMMERCIAL_CONFIG } from '@/config/commercialConfig';
+import { WhatsAppIcon } from '@/components/common/WhatsAppIcon';
 
 interface NavbarProps {
   onOpenPrequalification: () => void;
@@ -67,6 +68,16 @@ export function Navbar({ onOpenPrequalification, onOpenPrivacy }: NavbarProps) {
             Preguntas Frecuentes
           </a>
           
+          <a
+            href={`https://wa.me/${COMMERCIAL_CONFIG.contactChannels.whatsapp}?text=${encodeURIComponent('¡Hola! Me gustaría recibir información sobre el Modelo Águila Premier en Valle de los Encinos.')}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-1.5 text-emerald-700 hover:text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 px-3 py-2 rounded-xl text-xs font-bold transition"
+          >
+            <WhatsAppIcon className="w-4 h-4 text-emerald-600" />
+            <span>WhatsApp</span>
+          </a>
+
           <button
             onClick={onOpenPrequalification}
             className="bg-[#0d233a] text-white hover:bg-[#163b5c] px-4 py-2.5 rounded-xl font-semibold text-sm transition shadow-sm flex items-center gap-1.5 cursor-pointer"
@@ -135,6 +146,17 @@ export function Navbar({ onOpenPrequalification, onOpenPrivacy }: NavbarProps) {
             Aviso de Privacidad (Borrador)
           </button>
           <div className="pt-2 border-t border-slate-100 flex flex-col gap-2">
+            <a
+              href={`https://wa.me/${COMMERCIAL_CONFIG.contactChannels.whatsapp}?text=${encodeURIComponent('¡Hola! Me gustaría recibir información sobre el Modelo Águila Premier en Valle de los Encinos.')}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => setMobileMenuOpen(false)}
+              className="w-full bg-[#25D366] hover:bg-[#20bd5a] text-white py-3 rounded-xl font-bold text-center text-sm shadow flex items-center justify-center gap-2"
+            >
+              <WhatsAppIcon className="w-4 h-4" />
+              <span>Chatear por WhatsApp (+52 33 4254 6271)</span>
+            </a>
+
             <button
               onClick={() => {
                 setMobileMenuOpen(false);

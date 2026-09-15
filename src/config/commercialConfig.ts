@@ -40,8 +40,8 @@ export const COMMERCIAL_CONFIG: CommercialConfig = {
   advisorVerificationStatus: 'verificado',
   coverageZone: 'Valle de los Encinos, Salinas Victoria, N.L.',
   contactChannels: {
-    phone: '81 0000 0000',
-    whatsapp: '5218100000000',
+    phone: '+52 33 4254 6271',
+    whatsapp: '523342546271',
     email: 'atencion@valledelosencinos.com',
     officeAddressNote: 'Calzada del Sol, Salinas Victoria, N.L. Atención con cita previa.',
   },

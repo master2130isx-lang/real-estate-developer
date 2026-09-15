@@ -14,6 +14,7 @@ import { Property, FinancingType, PurchaseTimeline, BudgetRange, ContactChannel,
 import { PROPERTIES_DATA } from '@/data/mockData';
 import { useApp } from '@/context/AppContext';
 import { COMMERCIAL_CONFIG, shouldRequestNss } from '@/config/commercialConfig';
+import { WhatsAppIcon } from '@/components/common/WhatsAppIcon';
 
 interface PrequalificationFormProps {
   isOpen: boolean;
@@ -299,18 +300,62 @@ export function PrequalificationForm({
               </div>
             </div>
 
-            {/* Enlace al panel en modo demostración */}
-            <div className="space-y-2 pt-2">
+            {/* Botón Principal de WhatsApp Inmediato */}
+            {(() => {
+              const financingLabel = createdLead.financingType === 'infonavit'
+                ? 'Crédito Infonavit'
+                : createdLead.financingType === 'bancario'
+                ? 'Crédito Hipotecario Bancario'
+                : createdLead.financingType === 'contado'
+                ? 'Recursos Propios / Contado'
+                : 'Orientación personalizada';
+
+              const visitDetails = createdLead.appointmentRequest
+                ? `📅 *Visita propuesta:* ${createdLead.appointmentRequest.preferredDate} (${createdLead.appointmentRequest.timeSlot})\n`
+                : '';
+
+              const waMessage = encodeURIComponent(
+                `¡Hola! Acabo de registrar mi solicitud para conocer el *Modelo Águila Premier* en *Valle de los Encinos*.\n\n` +
+                `📋 *Folio de solicitud:* ${createdLead.folio}\n` +
+                `👤 *Nombre:* ${createdLead.fullName}\n` +
+                `📱 *Celular:* ${createdLead.phone}\n` +
+                `💳 *Forma de compra:* ${financingLabel}\n` +
+                visitDetails +
+                `\n¿Podrían confirmarme la disponibilidad para recibirme en la casa muestra? ¡Muchas gracias!`
+              );
+
+              const directWaUrl = `https://wa.me/${COMMERCIAL_CONFIG.contactChannels.whatsapp}?text=${waMessage}`;
+
+              return (
+                <div className="space-y-3 pt-2">
+                  <a
+                    href={directWaUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full bg-[#25D366] hover:bg-[#20bd5a] active:scale-[0.98] text-white font-extrabold py-3.5 px-4 rounded-2xl text-sm sm:text-base transition flex items-center justify-center gap-2.5 shadow-lg shadow-emerald-600/25 cursor-pointer"
+                  >
+                    <WhatsAppIcon className="w-5 h-5 flex-shrink-0" />
+                    <span>Enviar solicitud por WhatsApp a mi asesor</span>
+                  </a>
+                  <p className="text-[11px] text-slate-500">
+                    Tu mensaje se abrirá con el folio y tus datos para acordar la visita de inmediato.
+                  </p>
+                </div>
+              );
+            })()}
+
+            {/* Enlace al panel y botón de cerrar */}
+            <div className="space-y-2 pt-2 border-t border-slate-100">
               <a
                 href="/panel"
-                className="w-full bg-[#0d233a] hover:bg-[#163b5c] text-white font-bold py-3.5 px-4 rounded-xl text-sm transition flex items-center justify-center gap-2 cursor-pointer shadow"
+                className="w-full bg-[#0d233a] hover:bg-[#163b5c] text-white font-bold py-3 px-4 rounded-xl text-xs transition flex items-center justify-center gap-2 cursor-pointer shadow"
               >
                 <span>Ver seguimiento de atribución en el Panel del Asesor (Demo)</span>
-                <ExternalLink className="w-4 h-4 text-amber-400" />
+                <ExternalLink className="w-3.5 h-3.5 text-amber-400" />
               </a>
               <button
                 onClick={resetFormAndClose}
-                className="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-3 px-4 rounded-xl text-xs transition cursor-pointer"
+                className="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-2.5 px-4 rounded-xl text-xs transition cursor-pointer"
               >
                 Cerrar y volver a la página principal
               </button>

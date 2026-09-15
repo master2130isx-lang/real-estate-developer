@@ -13,6 +13,7 @@ import { PrivacyModal } from '@/components/landing/PrivacyModal';
 import { PrequalificationForm } from '@/components/prequalification/PrequalificationForm';
 import { Property } from '@/types';
 import { ArrowRight, Calendar } from 'lucide-react';
+import { WhatsAppFloatingButton } from '@/components/landing/WhatsAppFloatingButton';
 
 export default function Home() {
   const [isPrequalificationOpen, setIsPrequalificationOpen] = useState(() => {
@@ -101,6 +102,8 @@ export default function Home() {
 
       {/* Modal del aviso de privacidad */}
       <PrivacyModal isOpen={isPrivacyOpen} onClose={() => setIsPrivacyOpen(false)} />
+      {/* Botón flotante directo a WhatsApp */}
+      <WhatsAppFloatingButton />
     </main>
   );
 }

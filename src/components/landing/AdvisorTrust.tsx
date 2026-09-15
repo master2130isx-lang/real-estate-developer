@@ -3,6 +3,7 @@
 import React from 'react';
 import { UserCheck, MapPin, Phone, Mail, Clock, HelpCircle, Info } from 'lucide-react';
 import { COMMERCIAL_CONFIG } from '@/config/commercialConfig';
+import { WhatsAppIcon } from '@/components/common/WhatsAppIcon';
 
 export function AdvisorTrust() {
   return (
@@ -66,6 +67,18 @@ export function AdvisorTrust() {
                   <span>
                     <strong>Horario de visitas:</strong> Conforme a disponibilidad de casas muestra (previa cita confirmada por WhatsApp).
                   </span>
+                </div>
+
+                <div className="pt-2">
+                  <a
+                    href={`https://wa.me/${COMMERCIAL_CONFIG.contactChannels.whatsapp}?text=${encodeURIComponent('Hola, me gustaría platicar con un asesor sobre el Modelo Águila Premier en Valle de los Encinos.')}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full bg-[#25D366] hover:bg-[#20bd5a] text-white font-bold py-2.5 px-3 rounded-xl text-xs transition flex items-center justify-center gap-2 shadow-sm"
+                  >
+                    <WhatsAppIcon className="w-4 h-4" />
+                    <span>Contactar por WhatsApp (+52 33 4254 6271)</span>
+                  </a>
                 </div>
               </div>
             </div>
