@@ -14,10 +14,10 @@ export function WhatsAppFloatingButton() {
   const waUrl = `https://wa.me/${COMMERCIAL_CONFIG.contactChannels.whatsapp}?text=${defaultMessage}`;
 
   return (
-    <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-2 pointer-events-auto">
+    <div className="fixed bottom-[calc(5.25rem+env(safe-area-inset-bottom,0px))] md:bottom-6 right-4 md:right-6 z-50 flex flex-col items-end gap-2 pointer-events-auto">
       {/* Ventana flotante de saludo rápido */}
       {isOpen && (
-        <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 p-4 max-w-xs w-72 mb-1 animate-in fade-in slide-in-from-bottom-3 duration-200">
+        <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 p-4 max-w-[calc(100vw-2rem)] w-72 mb-1 animate-in fade-in slide-in-from-bottom-3 duration-200">
           <div className="flex items-center justify-between pb-2 border-b border-slate-100">
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-full bg-[#25D366] text-white flex items-center justify-center shadow-sm">
@@ -61,7 +61,7 @@ export function WhatsAppFloatingButton() {
         {!isOpen && (
           <button
             onClick={() => setIsOpen(true)}
-            className="hidden sm:flex items-center gap-2 bg-white text-slate-800 hover:text-emerald-700 text-xs font-bold px-3.5 py-2 rounded-full shadow-lg border border-slate-200 transition group cursor-pointer"
+            className="hidden md:flex items-center gap-2 bg-white text-slate-800 hover:text-emerald-700 text-xs font-bold px-3.5 py-2 rounded-full shadow-lg border border-slate-200 transition group cursor-pointer"
           >
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
             <span>¿Dudas? Chatea con un asesor</span>
