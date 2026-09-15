@@ -134,7 +134,22 @@ export function AppProvider({
         if (res.ok) {
           const data = await res.json();
           if (data.ok && Array.isArray(data.leads) && isMounted) {
-            setLeads(data.leads.map(normalizeLead));
+            setLeads((currentLeads) => {
+              const serverLeadsNormalized = data.leads.map(normalizeLead);
+              const serverMap = new Map(serverLeadsNormalized.map((l: Lead) => [l.id, l]));
+              
+              // Actualizar leads existentes con datos del servidor (ej. confirmación desde bot)
+              const updatedCurrent = currentLeads.map((cl) => {
+                const sl = serverMap.get(cl.id);
+                return sl ? sl : cl;
+              });
+
+              // Agregar nuevos leads del servidor que no estén en la sesión local
+              const currentIds = new Set(currentLeads.map((l) => l.id));
+              const newFromServer = serverLeadsNormalized.filter((sl: Lead) => !currentIds.has(sl.id));
+
+              return [...newFromServer, ...updatedCurrent];
+            });
           }
         }
       } catch {}

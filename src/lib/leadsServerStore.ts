@@ -5,12 +5,23 @@ import { INITIAL_LEADS } from '@/data/mockData';
 
 // Ruta del archivo local para persistencia de datos en servidor
 const DATA_FILE_PATH = path.join(process.cwd(), 'src', 'data', 'leadsStore.json');
+const TMP_DATA_FILE_PATH = path.join('/tmp', 'leadsStore.json');
 
 // Memoria caché para entornos donde el sistema de archivos sea de solo lectura
 let inMemoryLeads: Lead[] = [...INITIAL_LEADS];
 
 function readFromStorage(): Lead[] {
   try {
+    // 1. Intentar leer de /tmp (si estamos en entorno serverless Vercel)
+    if (fs.existsSync(TMP_DATA_FILE_PATH)) {
+      const tmpData = fs.readFileSync(TMP_DATA_FILE_PATH, 'utf-8');
+      const parsed = JSON.parse(tmpData);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        inMemoryLeads = parsed;
+        return parsed;
+      }
+    }
+    // 2. Intentar leer de archivo estático en src/data
     if (fs.existsSync(DATA_FILE_PATH)) {
       const fileData = fs.readFileSync(DATA_FILE_PATH, 'utf-8');
       const parsed = JSON.parse(fileData);
@@ -33,8 +44,13 @@ function writeToStorage(leads: Lead[]): void {
       fs.mkdirSync(dir, { recursive: true });
     }
     fs.writeFileSync(DATA_FILE_PATH, JSON.stringify(leads, null, 2), 'utf-8');
-  } catch (error) {
-    console.warn('Advertencia al escribir en leadsStore.json, persistiendo en memoria:', error);
+  } catch {
+    // En Vercel Serverless el sistema de archivos principal es de solo lectura; usamos /tmp
+    try {
+      fs.writeFileSync(TMP_DATA_FILE_PATH, JSON.stringify(leads, null, 2), 'utf-8');
+    } catch (tmpErr) {
+      console.warn('Persistiendo únicamente en memoria de la función serverless:', tmpErr);
+    }
   }
 }
 

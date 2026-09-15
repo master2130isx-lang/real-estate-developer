@@ -3,11 +3,20 @@ import path from 'path';
 import { COMMERCIAL_CONFIG, CommercialConfig } from '@/config/commercialConfig';
 
 const CONFIG_FILE_PATH = path.join(process.cwd(), 'src', 'data', 'commercialConfigStore.json');
+const TMP_CONFIG_FILE_PATH = path.join('/tmp', 'commercialConfigStore.json');
 
 let inMemoryConfig: CommercialConfig = { ...COMMERCIAL_CONFIG };
 
 function readConfigFromStorage(): CommercialConfig {
   try {
+    if (fs.existsSync(TMP_CONFIG_FILE_PATH)) {
+      const tmpData = fs.readFileSync(TMP_CONFIG_FILE_PATH, 'utf-8');
+      const parsed = JSON.parse(tmpData);
+      if (parsed && parsed.advisorName) {
+        inMemoryConfig = { ...COMMERCIAL_CONFIG, ...parsed };
+        return inMemoryConfig;
+      }
+    }
     if (fs.existsSync(CONFIG_FILE_PATH)) {
       const fileData = fs.readFileSync(CONFIG_FILE_PATH, 'utf-8');
       const parsed = JSON.parse(fileData);
@@ -30,8 +39,12 @@ function writeConfigToStorage(config: CommercialConfig): void {
       fs.mkdirSync(dir, { recursive: true });
     }
     fs.writeFileSync(CONFIG_FILE_PATH, JSON.stringify(config, null, 2), 'utf-8');
-  } catch (error) {
-    console.warn('Advertencia al escribir en commercialConfigStore.json:', error);
+  } catch {
+    try {
+      fs.writeFileSync(TMP_CONFIG_FILE_PATH, JSON.stringify(config, null, 2), 'utf-8');
+    } catch (tmpErr) {
+      console.warn('Persistiendo configuración únicamente en memoria:', tmpErr);
+    }
   }
 }
 

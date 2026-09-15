@@ -58,9 +58,10 @@ export async function notifyNewAppointmentTelegram(lead: Lead): Promise<{ succes
     return { success: false, error: 'Tokens no configurados en variables de entorno' };
   }
 
+  const hasAppointment = !!lead.appointmentRequest;
   const date = lead.appointmentRequest?.confirmedDate || lead.appointmentRequest?.preferredDate || 'Por acordar';
   const time = lead.appointmentRequest?.confirmedTime || lead.appointmentRequest?.timeSlot || 'Por acordar';
-  const financingLabel = lead.financingType.replace('_', ' ').toUpperCase();
+  const financingLabel = ((lead.financingType || 'infonavit') as string).replace(/_/g, ' ').toUpperCase();
   const waUrl = buildClientWhatsAppConfirmUrl(lead);
 
   // Formatear NSS visible para que el asesor pueda copiarlo de inmediato
@@ -72,28 +73,38 @@ export async function notifyNewAppointmentTelegram(lead: Lead): Promise<{ succes
     ? `⚠️ *NSS:* Pendiente de solicitar al cliente\n`
     : `ℹ️ *NSS:* No aplica (${financingLabel})\n`;
 
-  const text = `🚨 *NUEVA SOLICITUD DE CITA*
+  const title = hasAppointment ? '🚨 *NUEVA SOLICITUD DE CITA*' : '✨ *NUEVO PROSPECTO WEB REGISTRADO*';
+  const visitSection = hasAppointment
+    ? `📅 *Visita Solicitada:* ${date} a las ${time}\n`
+    : `⏰ *Horario de contacto:* ${lead.preferredContactTime || 'Tarde'} vía ${lead.preferredChannel || 'WhatsApp'}\n`;
+
+  const footerPrompt = hasAppointment
+    ? '*¿Deseas confirmar o cancelar esta visita?*'
+    : '*¿Deseas contactar a este prospecto?*';
+
+  const text = `${title}
 ━━━━━━━━━━━━━━━━━━━━
 👤 *Cliente:* ${lead.fullName}
 📱 *Teléfono:* \`${lead.phone}\`
-📅 *Fecha:* ${date} a las ${time}
-💳 *Forma de pago:* ${financingLabel}
+${visitSection}💳 *Forma de compra:* ${financingLabel}
 ${nssSection}🏠 *Vivienda:* Modelo Águila Premier ($1,180,000 MXN)
 📍 *Ubicación:* Valle de los Encinos, Salinas Victoria
 ${lead.appointmentRequest?.notes ? `📝 *Comentarios:* _${lead.appointmentRequest.notes}_\n` : ''}━━━━━━━━━━━━━━━━━━━━
-*¿Deseas confirmar o cancelar esta visita?*`;
+${footerPrompt}`;
 
-  const inlineKeyboard = {
-    inline_keyboard: [
-      [
-        { text: '✅ Confirmar Cita', callback_data: `confirm:${lead.id}` },
-        { text: '❌ Cancelar Cita', callback_data: `cancel:${lead.id}` },
-      ],
-      [
-        { text: '💬 Abrir WhatsApp del Cliente', url: waUrl },
-      ],
-    ],
-  };
+  const inlineKeyboard = hasAppointment
+    ? {
+        inline_keyboard: [
+          [
+            { text: '✅ Confirmar Cita', callback_data: `confirm:${lead.id}` },
+            { text: '❌ Cancelar Cita', callback_data: `cancel:${lead.id}` },
+          ],
+          [{ text: '💬 Abrir WhatsApp del Cliente', url: waUrl }],
+        ],
+      }
+    : {
+        inline_keyboard: [[{ text: '💬 Abrir WhatsApp del Cliente', url: waUrl }]],
+      };
 
   try {
     const response = await fetch(`${TELEGRAM_API_BASE}/bot${token}/sendMessage`, {

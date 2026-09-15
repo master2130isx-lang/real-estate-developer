@@ -23,12 +23,12 @@ export async function POST(req: NextRequest) {
 
     const savedLead = await saveServerLead(lead);
 
-    // Disparar la alerta instantánea al bot de Telegram del asesor si tiene cita solicitada o confirmada
-    if (savedLead.appointmentRequest || savedLead.commercialStatus.includes('cita')) {
-      // Se ejecuta en segundo plano sin bloquear la respuesta
-      notifyNewAppointmentTelegram(savedLead).catch((err) =>
-        console.error('Error al notificar por Telegram:', err)
-      );
+    // Disparar la alerta instantánea al bot de Telegram del asesor
+    // En Vercel Serverless es indispensable hacer await para que la ejecución no se cierre antes de enviar el HTTP request
+    try {
+      await notifyNewAppointmentTelegram(savedLead);
+    } catch (err) {
+      console.error('Error al notificar por Telegram:', err);
     }
 
     return NextResponse.json({ ok: true, lead: savedLead }, { status: 201 });

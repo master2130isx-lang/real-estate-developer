@@ -62,8 +62,8 @@ export const COMMERCIAL_CONFIG: CommercialConfig = {
     youtube: '',
   },
   telegramConfig: {
-    botToken: '8744099329:AAEKPsqni4ugVioOXYd7dMi3zZREBP0RrKc',
-    advisorChatId: '948786976',
+    botToken: process.env.TELEGRAM_BOT_TOKEN || '',
+    advisorChatId: process.env.TELEGRAM_ADVISOR_CHAT_ID || '948786976',
   },
   featuredPrice: {
     amountFormatted: '$1,180,000 MXN',
