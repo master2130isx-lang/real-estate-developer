@@ -64,36 +64,36 @@ function LoginForm() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative overflow-hidden">
-      {/* Elementos visuales de fondo */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-96 bg-gradient-to-b from-amber-500/10 via-transparent to-transparent pointer-events-none blur-3xl"></div>
-      <div className="absolute -top-24 -right-24 w-96 h-96 rounded-full bg-[#0d233a] opacity-60 blur-3xl pointer-events-none"></div>
+    <div className="min-h-screen bg-[#0B1522] flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative overflow-hidden">
+      {/* Elementos visuales de fondo arquitectónico */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-96 bg-gradient-to-b from-[#C09B53]/10 via-transparent to-transparent pointer-events-none blur-3xl"></div>
+      <div className="absolute -top-24 -right-24 w-96 h-96 rounded-full bg-[#0F2C40] opacity-50 blur-3xl pointer-events-none"></div>
 
       <div className="sm:mx-auto sm:w-full sm:max-w-md relative z-10 px-4">
         {/* Cabecera / Identidad */}
         <div className="text-center">
           <Link
             href="/"
-            className="inline-flex items-center gap-2.5 px-4 py-2 rounded-2xl bg-white/5 border border-white/10 hover:border-white/20 transition mb-6 backdrop-blur-md"
+            className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-2xl bg-[#102033] border border-[#1E354D] hover:border-[#C09B53]/50 transition mb-6 backdrop-blur-md"
           >
-            <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-amber-500 to-amber-400 text-slate-950 flex items-center justify-center font-black">
-              <Building2 className="w-4 h-4" />
+            <div className="w-6 h-6 rounded-lg bg-[#C09B53] text-[#0F2C40] flex items-center justify-center font-bold">
+              <Building2 className="w-3.5 h-3.5" />
             </div>
-            <span className="text-sm font-bold text-white tracking-wide">
+            <span className="text-xs font-semibold text-slate-200 tracking-wide">
               Valle de los Encinos
             </span>
           </Link>
 
-          <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+          <h1 className="text-2xl sm:text-3xl font-bold font-sans text-white tracking-tight">
             Portal Comercial del Asesor
           </h1>
-          <p className="mt-2 text-xs sm:text-sm text-slate-400">
+          <p className="mt-2 text-xs text-slate-400">
             Ingresa con tus credenciales de asesor para gestionar prospectos y citas
           </p>
         </div>
 
         {/* Tarjeta de Formulario */}
-        <div className="mt-8 bg-slate-900/90 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl backdrop-blur-xl">
+        <div className="mt-8 bg-[#102033] border border-[#1E354D] rounded-3xl p-6 sm:p-8 shadow-2xl backdrop-blur-md">
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Mensaje de Error */}
             {error && (
@@ -123,7 +123,7 @@ function LoginForm() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="master2130.isx@gmail.com"
-                className="w-full px-3.5 py-2.5 rounded-xl bg-slate-800/80 border border-slate-700 text-white placeholder-slate-500 text-xs focus:ring-2 focus:ring-amber-400 focus:outline-none focus:border-amber-400 font-medium"
+                className="w-full px-3.5 py-2.5 rounded-xl bg-[#0B1929] border border-[#1E354D] text-white placeholder-slate-500 text-xs focus:ring-2 focus:ring-[#C09B53] focus:border-[#C09B53] focus:outline-none font-medium transition"
               />
             </div>
 
@@ -142,7 +142,7 @@ function LoginForm() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Introduce tu contraseña"
-                  className="w-full px-3.5 py-2.5 pr-10 rounded-xl bg-slate-800/80 border border-slate-700 text-white placeholder-slate-500 text-xs focus:ring-2 focus:ring-amber-400 focus:outline-none focus:border-amber-400"
+                  className="w-full px-3.5 py-2.5 pr-10 rounded-xl bg-[#0B1929] border border-[#1E354D] text-white placeholder-slate-500 text-xs focus:ring-2 focus:ring-[#C09B53] focus:border-[#C09B53] focus:outline-none transition"
                 />
                 <button
                   type="button"
@@ -159,7 +159,7 @@ function LoginForm() {
               <button
                 type="submit"
                 disabled={loading || success}
-                className="w-full bg-gradient-to-r from-amber-500 to-amber-400 hover:from-amber-400 hover:to-amber-300 disabled:opacity-50 text-slate-950 font-black py-2.5 px-4 rounded-xl text-xs transition flex items-center justify-center gap-2 shadow-lg shadow-amber-500/20 cursor-pointer"
+                className="w-full bg-[#C09B53] hover:bg-[#D4AF37] disabled:opacity-50 text-[#0F2C40] font-bold py-2.5 px-4 rounded-xl text-xs transition flex items-center justify-center gap-2 shadow-xs cursor-pointer"
               >
                 {loading ? (
                   <span>Verificando credenciales...</span>
@@ -174,7 +174,7 @@ function LoginForm() {
           </form>
 
           {/* Pie de Seguridad */}
-          <div className="mt-6 pt-4 border-t border-slate-800/80 flex items-center justify-center gap-1.5 text-[11px] text-slate-400">
+          <div className="mt-6 pt-4 border-t border-[#1E354D] flex items-center justify-center gap-1.5 text-[11px] text-slate-400">
             <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
             <span>Autenticación protegida con cifrado SSL y Supabase Auth</span>
           </div>
@@ -184,7 +184,7 @@ function LoginForm() {
         <div className="text-center mt-6">
           <Link
             href="/"
-            className="text-xs text-slate-400 hover:text-white transition font-medium"
+            className="text-xs text-slate-400 hover:text-[#C09B53] transition font-medium"
           >
             ← Volver a la página principal
           </Link>
@@ -198,7 +198,7 @@ export default function LoginPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-slate-950 flex items-center justify-center text-white text-xs">
+        <div className="min-h-screen bg-[#0B1522] flex items-center justify-center text-slate-300 text-xs">
           Cargando portal...
         </div>
       }

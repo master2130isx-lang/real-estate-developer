@@ -23,10 +23,15 @@ export async function POST(req: NextRequest) {
 
     const savedLead = await saveServerLead(lead);
 
+    // Determinar origen del servidor para enlaces de acción y auto-registro de webhook
+    const proto = req.headers.get('x-forwarded-proto') || 'https';
+    const host = req.headers.get('x-forwarded-host') || req.headers.get('host') || '';
+    const origin = host ? `${proto}://${host}` : undefined;
+
     // Disparar la alerta instantánea al bot de Telegram del asesor
     // En Vercel Serverless es indispensable hacer await para que la ejecución no se cierre antes de enviar el HTTP request
     try {
-      await notifyNewAppointmentTelegram(savedLead);
+      await notifyNewAppointmentTelegram(savedLead, origin);
     } catch (err) {
       console.error('Error al notificar por Telegram:', err);
     }

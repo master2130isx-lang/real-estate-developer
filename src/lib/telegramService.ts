@@ -45,9 +45,42 @@ export function buildClientWhatsAppCancelUrl(lead: Lead): string {
 }
 
 /**
+ * Asegura de forma automática que el webhook de Telegram esté registrado en el dominio de producción
+ */
+export async function ensureTelegramWebhook(origin: string): Promise<{ ok: boolean; info?: any }> {
+  if (!origin || !origin.startsWith('https://')) return { ok: false };
+  try {
+    const token = await getBotToken();
+    if (!token) return { ok: false };
+
+    const targetUrl = `${origin.replace(/\/$/, '')}/api/telegram/webhook`;
+
+    // 1. Verificar si ya está apuntando a la URL correcta
+    const checkRes = await fetch(`${TELEGRAM_API_BASE}/bot${token}/getWebhookInfo`);
+    const checkData = await checkRes.json();
+    if (checkData.ok && checkData.result?.url === targetUrl) {
+      return { ok: true, info: checkData.result };
+    }
+
+    // 2. Registrar el webhook automáticamente
+    const setRes = await fetch(
+      `${TELEGRAM_API_BASE}/bot${token}/setWebhook?url=${encodeURIComponent(targetUrl)}`
+    );
+    const setData = await setRes.json();
+    return { ok: setData.ok, info: setData };
+  } catch (err: any) {
+    console.warn('Advertencia al registrar webhook automático en Telegram:', err.message);
+    return { ok: false };
+  }
+}
+
+/**
  * Envía una notificación instantánea al bot de Telegram del asesor cuando se solicita una nueva cita
  */
-export async function notifyNewAppointmentTelegram(lead: Lead): Promise<{ success: boolean; error?: string }> {
+export async function notifyNewAppointmentTelegram(
+  lead: Lead,
+  customOrigin?: string
+): Promise<{ success: boolean; error?: string }> {
   const token = await getBotToken();
   const chatId = await getAdvisorChatId();
 
@@ -56,6 +89,19 @@ export async function notifyNewAppointmentTelegram(lead: Lead): Promise<{ succes
       '⚠️ Telegram Bot no configurado (TELEGRAM_BOT_TOKEN o TELEGRAM_ADVISOR_CHAT_ID no definidos en .env). Modo simulación activo.'
     );
     return { success: false, error: 'Tokens no configurados en variables de entorno' };
+  }
+
+  // Resolver el dominio público para Webhook y Enlaces de Acción Directa
+  const resolvedOrigin =
+    customOrigin ||
+    (process.env.NEXT_PUBLIC_SITE_URL ? process.env.NEXT_PUBLIC_SITE_URL : '') ||
+    (process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : '') ||
+    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : '') ||
+    'https://www.encuentratucasa.online';
+
+  // Si estamos en un dominio HTTPS público, asegurar registro del webhook en segundo plano
+  if (resolvedOrigin.startsWith('https://')) {
+    ensureTelegramWebhook(resolvedOrigin).catch(() => {});
   }
 
   const hasAppointment = !!lead.appointmentRequest;
@@ -92,6 +138,9 @@ ${nssSection}🏠 *Vivienda:* Modelo Águila Premier ($1,180,000 MXN)
 ${lead.appointmentRequest?.notes ? `📝 *Comentarios:* _${lead.appointmentRequest.notes}_\n` : ''}━━━━━━━━━━━━━━━━━━━━
 ${footerPrompt}`;
 
+  // URL de acción directa web (funciona siempre al 100% en cualquier dispositivo)
+  const webConfirmUrl = `${resolvedOrigin}/api/telegram/action?action=confirm&leadId=${lead.id}`;
+
   const inlineKeyboard = hasAppointment
     ? {
         inline_keyboard: [
@@ -99,7 +148,12 @@ ${footerPrompt}`;
             { text: '✅ Confirmar Cita', callback_data: `confirm:${lead.id}` },
             { text: '❌ Cancelar Cita', callback_data: `cancel:${lead.id}` },
           ],
-          [{ text: '💬 Abrir WhatsApp del Cliente', url: waUrl }],
+          [
+            { text: '⚡ Confirmar en Web (1-Clic)', url: webConfirmUrl },
+          ],
+          [
+            { text: '💬 Abrir WhatsApp del Cliente', url: waUrl },
+          ],
         ],
       }
     : {
@@ -120,7 +174,7 @@ ${footerPrompt}`;
 
     const data = await response.json();
     if (!data.ok) {
-      console.error('Error de Telegram API:', data);
+      console.error('Error de Telegram API sendMessage:', data);
       return { success: false, error: data.description };
     }
 
@@ -144,22 +198,26 @@ export async function handleTelegramCallbackQuery(callbackQuery: any): Promise<{
   const chatId = callbackQuery.message?.chat?.id;
 
   if (!data.includes(':')) {
-    await answerCallbackQuery(token, callbackQueryId, 'Acción no reconocida');
+    await answerCallbackQuery(token, callbackQueryId, 'Acción no reconocida', true);
     return { ok: false };
   }
 
   const [action, leadId] = data.split(':');
 
-  // Responder de inmediato a Telegram para que el spinner de carga en el botón desaparezca al instante
+  // Responder de inmediato a Telegram con ventana emergente interactiva para feedback claro en pantalla
   await answerCallbackQuery(
     token,
     callbackQueryId,
-    action === 'confirm' ? '✅ ¡Cita confirmada en el sistema!' : '❌ Cita marcada como cancelada.'
+    action === 'confirm'
+      ? '✅ ¡Cita confirmada con éxito! Actualizada en el sistema.'
+      : '❌ Cita marcada como cancelada en el sistema.',
+    true
   );
 
   const lead = await getServerLeadById(leadId);
 
   if (!lead) {
+    console.warn(`Lead con ID ${leadId} no encontrado al procesar callback de Telegram`);
     return { ok: false };
   }
 
@@ -167,10 +225,10 @@ export async function handleTelegramCallbackQuery(callbackQuery: any): Promise<{
   const nssLine = nssRaw ? `🔢 *NSS:* \`${nssRaw}\`\n` : '';
 
   if (action === 'confirm') {
-    // 1. Actualizar el estatus en la base de datos compartida del servidor
+    // 1. Actualizar el estatus en la base de datos compartida del servidor / Supabase
     const updatedLead = await updateServerLeadAppointment(leadId, 'confirmada');
 
-    // 2. Editar el mensaje en Telegram mostrando el estatus confirmado, el NSS y el link directo a WhatsApp
+    // 2. Editar el mensaje en Telegram mostrando el estatus confirmado, el NSS y el botón limpio para WhatsApp
     if (updatedLead && messageId && chatId) {
       const waUrl = buildClientWhatsAppConfirmUrl(updatedLead);
       const date = updatedLead.appointmentRequest?.confirmedDate || updatedLead.appointmentRequest?.preferredDate;
@@ -184,9 +242,8 @@ ${nssLine}📅 *Cita confirmada:* ${date} a las ${time}
 📍 *Punto de reunión:* Caseta principal Valle de los Encinos
 🏠 *Vivienda:* Modelo Águila Premier ($1.18M)
 ━━━━━━━━━━━━━━━━━━━━
-El estado ha sido actualizado en la página web.
-
-👉 [Toca aquí para enviar confirmación por WhatsApp al cliente](${waUrl})`;
+✅ *Estado:* Confirmada en CRM y Base de Datos.
+💬 Toca el botón inferior para abrir WhatsApp con el mensaje pre-armado:`;
 
       await editTelegramMessage(token, chatId, messageId, updatedText, [
         [{ text: '💬 Enviar WhatsApp al Cliente', url: waUrl }],
@@ -199,7 +256,7 @@ El estado ha sido actualizado en la página web.
     // 1. Actualizar a cancelada
     const updatedLead = await updateServerLeadAppointment(leadId, 'cancelada');
 
-    // 2. Editar el mensaje en Telegram con el enlace a WhatsApp con mensaje formal de cancelación
+    // 2. Editar el mensaje en Telegram con el botón limpio para WhatsApp
     if (updatedLead && messageId && chatId) {
       const waCancelUrl = buildClientWhatsAppCancelUrl(updatedLead);
 
@@ -208,12 +265,11 @@ El estado ha sido actualizado en la página web.
 👤 *Cliente:* ${updatedLead.fullName}
 📱 *Teléfono:* \`${updatedLead.phone}\`
 ${nssLine}━━━━━━━━━━━━━━━━━━━━
-El estado ha sido actualizado en la página web como cancelada.
-
-👉 [Toca aquí para enviar mensaje de cortesía por WhatsApp](${waCancelUrl})`;
+❌ *Estado:* Cancelada en CRM y Base de Datos.
+💬 Puedes enviar un mensaje formal de cortesía con el botón inferior:`;
 
       await editTelegramMessage(token, chatId, messageId, updatedText, [
-        [{ text: '💬 Enviar Mensaje de Cancelación por WhatsApp', url: waCancelUrl }],
+        [{ text: '💬 Enviar Mensaje de Cortesía por WhatsApp', url: waCancelUrl }],
       ]);
     }
     return { ok: true };
@@ -222,7 +278,12 @@ El estado ha sido actualizado en la página web como cancelada.
   return { ok: false };
 }
 
-async function answerCallbackQuery(token: string, callbackQueryId: string, text: string): Promise<void> {
+async function answerCallbackQuery(
+  token: string,
+  callbackQueryId: string,
+  text: string,
+  showAlert: boolean = true
+): Promise<void> {
   try {
     await fetch(`${TELEGRAM_API_BASE}/bot${token}/answerCallbackQuery`, {
       method: 'POST',
@@ -230,7 +291,7 @@ async function answerCallbackQuery(token: string, callbackQueryId: string, text:
       body: JSON.stringify({
         callback_query_id: callbackQueryId,
         text,
-        show_alert: false,
+        show_alert: showAlert,
       }),
     });
   } catch (e) {
@@ -246,7 +307,7 @@ async function editTelegramMessage(
   inlineKeyboard: Array<Array<{ text: string; url?: string; callback_data?: string }>>
 ): Promise<void> {
   try {
-    await fetch(`${TELEGRAM_API_BASE}/bot${token}/editMessageText`, {
+    const res = await fetch(`${TELEGRAM_API_BASE}/bot${token}/editMessageText`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -257,6 +318,10 @@ async function editTelegramMessage(
         reply_markup: { inline_keyboard: inlineKeyboard },
       }),
     });
+    const data = await res.json();
+    if (!data.ok) {
+      console.warn('Aviso al editar mensaje de Telegram:', data.description);
+    }
   } catch (e) {
     console.error('Error al editar mensaje de Telegram:', e);
   }
