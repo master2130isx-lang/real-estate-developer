@@ -9,6 +9,16 @@ interface AppContextType {
   leads: Lead[];
   funnelEvents: FunnelEvent[];
   createLeadFromPrequalification: (leadData: Partial<Lead>, rawNss?: string) => Lead;
+  scheduleNewAppointment: (appointmentData: {
+    fullName: string;
+    phone: string;
+    email?: string;
+    financingType: Lead['financingType'];
+    preferredDate: string;
+    timeSlot: string;
+    notes?: string;
+    rawNss?: string;
+  }) => Lead;
   updateLeadStatus: (leadId: string, status: CommercialStatus, noteText?: string) => void;
   updateAppointmentStatus: (
     leadId: string,
@@ -254,6 +264,103 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     );
   };
 
+  const scheduleNewAppointment = (appointmentData: {
+    fullName: string;
+    phone: string;
+    email?: string;
+    financingType: Lead['financingType'];
+    preferredDate: string;
+    timeSlot: string;
+    notes?: string;
+    rawNss?: string;
+  }): Lead => {
+    const timestamp = new Date();
+    const formattedDate = timestamp.toISOString().replace('T', ' ').substring(0, 16);
+    const folioNumber = Math.floor(100 + Math.random() * 900);
+    const folio = `AGEND-2026-${folioNumber}`;
+
+    const isNssApplicable = shouldRequestNss(appointmentData.financingType);
+    let nssStatus: Lead['nssStatus'] = 'no_aplica';
+    let attributionStatus: AttributionStatus = 'no_aplica';
+    let nssLastFour: string | undefined = undefined;
+    let nssValueEncryptedMock: string | undefined = undefined;
+
+    if (isNssApplicable) {
+      if (appointmentData.rawNss && appointmentData.rawNss.trim().length === 11) {
+        nssStatus = 'recibido';
+        nssLastFour = appointmentData.rawNss.slice(-4);
+        nssValueEncryptedMock = appointmentData.rawNss.trim();
+        attributionStatus = 'pendiente_inmobiliaria';
+      } else {
+        nssStatus = 'pendiente';
+        attributionStatus = 'pendiente_nss';
+      }
+    }
+
+    const newLead: Lead = {
+      id: `lead-${Date.now()}`,
+      folio,
+      createdAt: formattedDate,
+      fullName: appointmentData.fullName.trim(),
+      phone: appointmentData.phone.trim(),
+      email: appointmentData.email?.trim() || undefined,
+      preferredChannel: 'whatsapp',
+      preferredContactTime: 'tarde',
+      interestedZone: 'Salinas Victoria, N.L. (Valle de los Encinos)',
+      selectedPropertyId: 'prop-aguila-premier',
+      selectedPropertyTitle: 'Modelo Águila Premier (Valle de los Encinos)',
+      budgetRange: '1.2m_a_1.6m',
+      purchaseTimeline: 'inmediato',
+      financingType: appointmentData.financingType,
+      needsOrientation: false,
+      privacyConsentAccepted: true,
+      marketingConsentAccepted: false,
+      nssStatus,
+      nssLastFour,
+      nssValueEncryptedMock,
+      attributionStatus,
+      commercialStatus: 'cita_confirmada',
+      compatibility: 'alta',
+      nextAction: `Recibir a ${appointmentData.fullName.trim()} en caseta de Valle de los Encinos el ${appointmentData.preferredDate} a las ${appointmentData.timeSlot}`,
+      assignedAdvisor: 'Asesor Comercial Asignado',
+      appointmentRequest: {
+        modality: 'presencial',
+        preferredDate: appointmentData.preferredDate,
+        timeSlot: appointmentData.timeSlot,
+        status: 'confirmada',
+        confirmedDate: appointmentData.preferredDate,
+        confirmedTime: appointmentData.timeSlot,
+        notes: appointmentData.notes || 'Cita agendada directamente por el asesor comercial.',
+      },
+      internalNotes: [
+        {
+          id: `note-${Date.now()}`,
+          author: 'Asesor Comercial',
+          createdAt: formattedDate,
+          content: `Cita registrada directamente en agenda. Visita programada para el ${appointmentData.preferredDate} (${appointmentData.timeSlot}).`,
+        },
+      ],
+      auditHistory: [
+        {
+          id: `aud-${Date.now()}`,
+          timestamp: new Date().toISOString(),
+          actor: 'Asesor Comercial',
+          action: `Cita agendada para ${appointmentData.preferredDate} a las ${appointmentData.timeSlot}`,
+        },
+      ],
+    };
+
+    setLeads((prev) => [newLead, ...prev]);
+
+    logFunnelEvent('cita_solicitada', {
+      folio: newLead.folio,
+      origen: 'panel_asesor',
+      fecha_cita: appointmentData.preferredDate,
+    });
+
+    return newLead;
+  };
+
   const updateAppointmentStatus = (
     leadId: string,
     appointmentStatus: 'solicitada' | 'confirmada' | 'reprogramada' | 'cancelada',
@@ -262,31 +369,48 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   ) => {
     setLeads((prev) =>
       prev.map((lead) => {
-        if (lead.id !== leadId || !lead.appointmentRequest) return lead;
+        if (lead.id !== leadId) return lead;
 
+        const existingReq = lead.appointmentRequest;
         const updatedReq = {
-          ...lead.appointmentRequest,
+          modality: existingReq?.modality || 'presencial',
+          preferredDate: confirmedDate || existingReq?.preferredDate || new Date().toISOString().split('T')[0],
+          timeSlot: confirmedTime || existingReq?.timeSlot || '11:00 AM',
           status: appointmentStatus,
-          confirmedDate: confirmedDate || lead.appointmentRequest.confirmedDate,
-          confirmedTime: confirmedTime || lead.appointmentRequest.confirmedTime,
+          confirmedDate: confirmedDate || existingReq?.confirmedDate,
+          confirmedTime: confirmedTime || existingReq?.confirmedTime,
+          notes: existingReq?.notes || 'Cita gestionada desde el panel del asesor.',
         };
 
         let newCommercialStatus = lead.commercialStatus;
         if (appointmentStatus === 'confirmada') {
           newCommercialStatus = 'cita_confirmada';
+        } else if (appointmentStatus === 'cancelada') {
+          newCommercialStatus = 'en_seguimiento';
+        } else if (appointmentStatus === 'reprogramada') {
+          newCommercialStatus = 'cita_solicitada';
         }
 
         const auditEvent: AuditEvent = {
           id: `aud-${Date.now()}`,
           timestamp: new Date().toISOString(),
-          actor: 'Asesor Asignado (Demostración)',
-          action: `Visita actualizada a '${appointmentStatus}'`,
+          actor: 'Asesor Comercial',
+          action: `Visita ${appointmentStatus}: ${confirmedDate || updatedReq.preferredDate} (${confirmedTime || updatedReq.timeSlot})`,
+        };
+
+        const noteText = `Cita de visita ${appointmentStatus.toUpperCase()}: ${confirmedDate || updatedReq.preferredDate} a las ${confirmedTime || updatedReq.timeSlot}`;
+        const newNote: LeadNote = {
+          id: `note-${Date.now()}`,
+          author: 'Asesor Comercial',
+          createdAt: new Date().toISOString().replace('T', ' ').substring(0, 16),
+          content: noteText,
         };
 
         return {
           ...lead,
           commercialStatus: newCommercialStatus,
           appointmentRequest: updatedReq,
+          internalNotes: [newNote, ...lead.internalNotes],
           auditHistory: [auditEvent, ...lead.auditHistory],
         };
       })
@@ -452,6 +576,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         leads,
         funnelEvents,
         createLeadFromPrequalification,
+        scheduleNewAppointment,
         updateLeadStatus,
         updateAppointmentStatus,
         addLeadNote,

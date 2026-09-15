@@ -88,7 +88,7 @@ export interface Property {
 export interface AppointmentRequest {
   modality: 'presencial' | 'virtual';
   preferredDate: string;
-  timeSlot: '10:00 - 13:00' | '14:00 - 17:00' | '17:00 - 19:00' | 'sabado_manana';
+  timeSlot: '10:00 - 13:00' | '14:00 - 17:00' | '17:00 - 19:00' | 'sabado_manana' | string;
   notes?: string;
   status: 'solicitada' | 'confirmada' | 'reprogramada' | 'cancelada';
   confirmedDate?: string;
@@ -165,7 +165,8 @@ export interface FunnelEvent {
     | 'paso_nss_presentado'
     | 'paso_nss_completado'
     | 'paso_nss_omitido'
-    | 'solicitud_enviada';
+    | 'solicitud_enviada'
+    | 'cita_solicitada';
   timestamp: string;
   metadata?: Record<string, string | number | boolean>;
 }
