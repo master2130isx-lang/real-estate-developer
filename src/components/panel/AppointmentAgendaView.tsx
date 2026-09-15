@@ -410,45 +410,47 @@ export function AppointmentAgendaView({
                   )}
                 </div>
 
-                {/* Barra de Acciones Armónica y Proporcional */}
-                <div className="px-3.5 py-3 bg-slate-50/70 dark:bg-[#0E1E2E]/80 border-t border-slate-100 dark:border-[#182C40] space-y-2">
-                  {/* Fila 1: Canales de Contacto Directo (50% y 50% con altura y etiquetas idénticas) */}
-                  <div className="grid grid-cols-2 gap-2">
+                {/* Barra de Acciones Compacta en 1 Sola Línea */}
+                <div className="px-3 py-2 bg-slate-50/70 dark:bg-[#0E1E2E]/80 border-t border-slate-100 dark:border-[#182C40] flex items-center justify-between gap-1.5">
+                  {/* Grupo 1: Contacto (WhatsApp y Llamar con misma altura y etiquetas) */}
+                  <div className="flex items-center gap-1.5">
                     <button
                       onClick={() => onOpenWhatsApp(lead)}
-                      className="h-8.5 rounded-xl bg-[#25D366] hover:bg-[#20bd5a] text-white flex items-center justify-center gap-1.5 text-xs font-semibold shadow-xs transition cursor-pointer"
+                      title="Enviar mensaje de WhatsApp"
+                      className="h-7.5 px-2.5 rounded-lg bg-[#25D366] hover:bg-[#20bd5a] text-white flex items-center gap-1.5 text-xs font-semibold shadow-xs transition cursor-pointer"
                     >
-                      <WhatsAppIcon className="w-4 h-4" />
+                      <WhatsAppIcon className="w-3.5 h-3.5" />
                       <span>WhatsApp</span>
                     </button>
 
                     <a
                       href={`tel:${cleanPhone}`}
-                      className="h-8.5 rounded-xl bg-white dark:bg-[#13283E] hover:bg-slate-100 dark:hover:bg-[#1A344D] text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-[#1E354D] flex items-center justify-center gap-1.5 text-xs font-semibold transition cursor-pointer shadow-xs"
+                      title="Llamar directamente"
+                      className="h-7.5 px-2.5 rounded-lg bg-white dark:bg-[#13283E] hover:bg-slate-100 dark:hover:bg-[#1A344D] text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-[#1E354D] flex items-center gap-1.5 text-xs font-medium transition cursor-pointer shadow-xs"
                     >
                       <Phone className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
                       <span>Llamar</span>
                     </a>
                   </div>
 
-                  {/* Fila 2: Gestión de Cita y Expediente (Misma altura h-8 y distribución armónica) */}
-                  <div className="flex items-center gap-1.5 pt-0.5">
+                  {/* Grupo 2: Acciones de Cita y Expediente (Misma altura h-7.5 compacta) */}
+                  <div className="flex items-center gap-1">
                     {/* Botones según estado */}
                     {isArchived ? (
                       <button
                         onClick={() => handleToggleArchive(lead.id, false)}
                         title="Restaurar cita a la agenda activa"
-                        className="flex-1 h-8 rounded-xl bg-slate-700 hover:bg-slate-800 text-white flex items-center justify-center gap-1.5 text-xs font-semibold transition cursor-pointer shadow-xs"
+                        className="h-7.5 px-2.5 rounded-lg bg-slate-700 hover:bg-slate-800 text-white flex items-center gap-1 text-xs font-medium transition cursor-pointer shadow-xs"
                       >
                         <ArchiveRestore className="w-3.5 h-3.5" />
-                        <span>Restaurar Cita</span>
+                        <span>Restaurar</span>
                       </button>
                     ) : isCancelled ? (
                       <>
                         <button
                           onClick={() => handleOpenReschedule(lead)}
                           title="Reactivar y reprogramar cita"
-                          className="flex-1 h-8 rounded-xl bg-[#0F2C40] hover:bg-[#163E5B] dark:bg-[#C09B53] dark:hover:bg-[#D4AF37] text-white dark:text-[#0F2C40] flex items-center justify-center gap-1.5 text-xs font-semibold transition cursor-pointer shadow-xs"
+                          className="h-7.5 px-2.5 rounded-lg bg-[#0F2C40] hover:bg-[#163E5B] dark:bg-[#C09B53] dark:hover:bg-[#D4AF37] text-white dark:text-[#0F2C40] flex items-center gap-1 text-xs font-semibold transition cursor-pointer shadow-xs"
                         >
                           <RotateCcw className="w-3.5 h-3.5" />
                           <span>Reagendar</span>
@@ -456,7 +458,7 @@ export function AppointmentAgendaView({
                         <button
                           onClick={() => handleToggleArchive(lead.id, true)}
                           title="Archivar cita"
-                          className="h-8 px-2.5 rounded-xl bg-white dark:bg-[#13283E] hover:bg-slate-100 dark:hover:bg-[#1A344D] text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-[#1E354D] flex items-center justify-center text-xs transition cursor-pointer"
+                          className="h-7.5 w-7.5 rounded-lg bg-white dark:bg-[#13283E] hover:bg-slate-100 dark:hover:bg-[#1A344D] text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-[#1E354D] flex items-center justify-center text-xs transition cursor-pointer"
                         >
                           <Archive className="w-3.5 h-3.5" />
                         </button>
@@ -466,22 +468,22 @@ export function AppointmentAgendaView({
                         <button
                           onClick={() => handleConfirm(lead.id, aptDate, aptTime)}
                           title="Confirmar cita"
-                          className="flex-1 h-8 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white flex items-center justify-center gap-1.5 text-xs font-semibold transition cursor-pointer shadow-xs"
+                          className="h-7.5 px-2.5 rounded-lg bg-emerald-700 hover:bg-emerald-800 text-white flex items-center gap-1 text-xs font-semibold transition cursor-pointer shadow-xs"
                         >
                           <CheckCircle2 className="w-3.5 h-3.5" />
-                          <span>Confirmar Cita</span>
+                          <span>Confirmar</span>
                         </button>
                         <button
                           onClick={() => handleOpenReschedule(lead)}
                           title="Reagendar horario o fecha"
-                          className="h-8 px-2.5 rounded-xl bg-white dark:bg-[#13283E] hover:bg-slate-100 dark:hover:bg-[#1A344D] text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-[#1E354D] flex items-center justify-center transition cursor-pointer"
+                          className="h-7.5 w-7.5 rounded-lg bg-white dark:bg-[#13283E] hover:bg-slate-100 dark:hover:bg-[#1A344D] text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-[#1E354D] flex items-center justify-center transition cursor-pointer"
                         >
                           <RotateCcw className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
                         </button>
                         <button
                           onClick={() => handleCancelAppointment(lead.id)}
                           title="Cancelar cita"
-                          className="h-8 px-2.5 rounded-xl bg-white dark:bg-[#13283E] hover:bg-rose-50 dark:hover:bg-rose-950/40 text-rose-700 dark:text-rose-400 border border-slate-200 dark:border-[#1E354D] flex items-center justify-center transition cursor-pointer"
+                          className="h-7.5 w-7.5 rounded-lg bg-white dark:bg-[#13283E] hover:bg-rose-50 dark:hover:bg-rose-950/40 text-rose-700 dark:text-rose-400 border border-slate-200 dark:border-[#1E354D] flex items-center justify-center transition cursor-pointer"
                         >
                           <CalendarX2 className="w-3.5 h-3.5" />
                         </button>
@@ -491,7 +493,7 @@ export function AppointmentAgendaView({
                         <button
                           onClick={() => handleOpenReschedule(lead)}
                           title="Reagendar horario o fecha"
-                          className="flex-1 h-8 rounded-xl bg-white dark:bg-[#13283E] hover:bg-slate-100 dark:hover:bg-[#1A344D] text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-[#1E354D] flex items-center justify-center gap-1.5 text-xs font-medium transition cursor-pointer"
+                          className="h-7.5 px-2.5 rounded-lg bg-white dark:bg-[#13283E] hover:bg-slate-100 dark:hover:bg-[#1A344D] text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-[#1E354D] flex items-center gap-1 text-xs font-medium transition cursor-pointer"
                         >
                           <RotateCcw className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
                           <span>Reagendar</span>
@@ -499,20 +501,20 @@ export function AppointmentAgendaView({
                         <button
                           onClick={() => handleCancelAppointment(lead.id)}
                           title="Cancelar cita"
-                          className="h-8 px-2.5 rounded-xl bg-white dark:bg-[#13283E] hover:bg-rose-50 dark:hover:bg-rose-950/40 text-rose-700 dark:text-rose-400 border border-slate-200 dark:border-[#1E354D] flex items-center justify-center transition cursor-pointer"
+                          className="h-7.5 w-7.5 rounded-lg bg-white dark:bg-[#13283E] hover:bg-rose-50 dark:hover:bg-rose-950/40 text-rose-700 dark:text-rose-400 border border-slate-200 dark:border-[#1E354D] flex items-center justify-center transition cursor-pointer"
                         >
                           <CalendarX2 className="w-3.5 h-3.5" />
                         </button>
                       </>
                     )}
 
+                    {/* Ver Ficha / Expediente */}
                     <button
                       onClick={() => onOpenLeadDetail(lead)}
                       title="Ver expediente completo"
-                      className="h-8 px-3 rounded-xl bg-[#0F2C40] hover:bg-[#163E5B] dark:bg-[#1E3E5E] dark:hover:bg-[#254F77] text-white flex items-center justify-center gap-1 text-xs font-semibold transition cursor-pointer border border-[#0F2C40] dark:border-[#2D5A85]"
+                      className="h-7.5 w-7.5 rounded-lg bg-[#0F2C40] hover:bg-[#163E5B] dark:bg-[#1E3E5E] dark:hover:bg-[#254F77] text-white flex items-center justify-center transition cursor-pointer border border-[#0F2C40] dark:border-[#2D5A85]"
                     >
                       <Eye className="w-3.5 h-3.5" />
-                      <span>Ficha</span>
                     </button>
                   </div>
                 </div>
