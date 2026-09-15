@@ -225,7 +225,7 @@ export default function AgentPanelPage() {
                 <Calendar className="w-3.5 h-3.5" />
               </div>
             </div>
-            <p className="text-3xl font-serif font-bold text-slate-900 dark:text-white tracking-tight" suppressHydrationWarning>{todayVisits}</p>
+            <p className="text-3xl font-extrabold font-sans tracking-tight tabular-nums text-slate-900 dark:text-white" suppressHydrationWarning>{todayVisits}</p>
             <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 flex items-center gap-1">
               {todayVisits > 0 ? (
                 <>
@@ -249,7 +249,7 @@ export default function AgentPanelPage() {
                 <CalendarCheck className="w-3.5 h-3.5" />
               </div>
             </div>
-            <p className="text-3xl font-serif font-bold text-slate-900 dark:text-white tracking-tight" suppressHydrationWarning>{pendingVisits}</p>
+            <p className="text-3xl font-extrabold font-sans tracking-tight tabular-nums text-slate-900 dark:text-white" suppressHydrationWarning>{pendingVisits}</p>
             <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">Requieren WhatsApp</p>
           </div>
 
@@ -267,7 +267,7 @@ export default function AgentPanelPage() {
                 <Flame className="w-3.5 h-3.5" />
               </div>
             </div>
-            <p className="text-3xl font-serif font-bold text-slate-900 dark:text-white tracking-tight" suppressHydrationWarning>{pendingInAgency}</p>
+            <p className="text-3xl font-extrabold font-sans tracking-tight tabular-nums text-slate-900 dark:text-white" suppressHydrationWarning>{pendingInAgency}</p>
             <p className="text-[11px] text-[#C09B53] dark:text-amber-400 font-medium mt-1">Prioridad constructora</p>
           </div>
 
@@ -285,7 +285,7 @@ export default function AgentPanelPage() {
                 <ShieldCheck className="w-3.5 h-3.5" />
               </div>
             </div>
-            <p className="text-3xl font-serif font-bold text-slate-900 dark:text-white tracking-tight" suppressHydrationWarning>{confirmedAttributions}</p>
+            <p className="text-3xl font-extrabold font-sans tracking-tight tabular-nums text-slate-900 dark:text-white" suppressHydrationWarning>{confirmedAttributions}</p>
             <p className="text-[11px] text-emerald-700 dark:text-emerald-400 font-medium mt-1">Exclusividad vigente</p>
           </div>
 
@@ -303,7 +303,7 @@ export default function AgentPanelPage() {
                 <Users className="w-3.5 h-3.5" />
               </div>
             </div>
-            <p className="text-3xl font-serif font-bold text-slate-900 dark:text-white tracking-tight" suppressHydrationWarning>{totalLeads}</p>
+            <p className="text-3xl font-extrabold font-sans tracking-tight tabular-nums text-slate-900 dark:text-white" suppressHydrationWarning>{totalLeads}</p>
             <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">Base acumulada</p>
           </div>
         </div>
