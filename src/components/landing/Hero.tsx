@@ -13,10 +13,10 @@ export function Hero({ onOpenPrequalification }: HeroProps) {
   return (
     <section className="relative bg-[#0d233a] text-white pt-8 pb-14 sm:pt-12 sm:pb-20 px-4 border-b border-slate-800">
       <div className="max-w-[1220px] mx-auto">
-        {/* Banner discreto de modo demostración */}
-        <div className="mb-6 inline-flex items-center gap-2 bg-slate-800/90 border border-slate-700 px-3 py-1 rounded-full text-xs text-amber-300">
-          <Info className="w-3.5 h-3.5 text-amber-400" />
-          <span>Prototipo interactivo (Fase 1.1) • Contenido e inmuebles ilustrativos para demostración</span>
+        {/* Distintivo de Fraccionamiento y Casa Muestra */}
+        <div className="mb-6 inline-flex items-center gap-2 bg-slate-800/90 border border-slate-700 px-3.5 py-1.5 rounded-full text-xs text-amber-300">
+          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span>Valle de los Encinos • Casa Muestra Abierta con Cita Previa</span>
         </div>
 
         {/* Estructura Desktop & Mobile Responsive */}

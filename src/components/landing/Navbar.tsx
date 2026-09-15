@@ -15,13 +15,13 @@ export function Navbar({ onOpenPrequalification, onOpenPrivacy }: NavbarProps) {
 
   return (
     <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200">
-      {/* Top bar de advertencia de demostración */}
+      {/* Top bar con información del fraccionamiento */}
       <div className="bg-[#0d233a] text-slate-200 text-xs py-1.5 px-4 border-b border-slate-800">
         <div className="max-w-[1220px] mx-auto flex flex-col sm:flex-row justify-between items-center gap-1.5">
           <div className="flex items-center gap-2 text-[11px]">
-            <AlertCircle className="w-3.5 h-3.5 text-amber-400 flex-shrink-0" />
+            <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
             <span>
-              <strong>Modo Demostración:</strong> Prototipo interactivo con datos e inmuebles ilustrativos. No ingreses datos personales reales.
+              <strong>Valle de los Encinos:</strong> Calzada del Sol, Salinas Victoria, N.L. • Casa muestra disponible previa cita
             </span>
           </div>
           <div className="flex items-center gap-4 text-xs font-medium">
@@ -30,8 +30,7 @@ export function Navbar({ onOpenPrequalification, onOpenPrivacy }: NavbarProps) {
               className="text-amber-300 hover:text-amber-200 transition flex items-center gap-1 font-semibold"
             >
               <UserCheck className="w-3.5 h-3.5" />
-              <span>Panel del Asesor</span>
-              <span className="bg-amber-400/20 text-amber-300 text-[10px] px-1.5 py-0.2 rounded font-bold">Demo</span>
+              <span>Panel de Asesoría</span>
             </Link>
           </div>
         </div>

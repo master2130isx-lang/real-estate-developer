@@ -351,7 +351,7 @@ export function PrequalificationForm({
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div className="space-y-1">
                     <label className="block text-xs font-bold text-slate-800">
-                      Zona de interés <span className="text-red-500">*</span>
+                      Ubicación y Fraccionamiento <span className="text-red-500">*</span>
                     </label>
                     <select
                       value={zone}
@@ -359,23 +359,18 @@ export function PrequalificationForm({
                       className="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-xs bg-white focus:ring-2 focus:ring-[#0d233a] focus:outline-none"
                     >
                       <option value="Salinas Victoria, N.L. (Valle de los Encinos)">Salinas Victoria, N.L. (Valle de los Encinos)</option>
-                      <option value="Poniente - Corredor Valle Real (Demostración)">Poniente - Corredor Valle Real</option>
-                      <option value="Norte - Zona Corporativa (Demostración)">Norte - Zona Corporativa</option>
-                      <option value="Sur - Eje Industrial (Demostración)">Sur - Eje Industrial</option>
-                      <option value="Sin preferencia fija / Explorando opciones">Sin preferencia fija aún</option>
                     </select>
                   </div>
 
                   <div className="space-y-1">
                     <label className="block text-xs font-bold text-slate-800">
-                      Propiedad específica (Opcional)
+                      Modelo seleccionado
                     </label>
                     <select
                       value={propertyId}
                       onChange={(e) => setPropertyId(e.target.value)}
                       className="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-xs bg-white focus:ring-2 focus:ring-[#0d233a] focus:outline-none"
                     >
-                      <option value="">Aún no elijo modelo (Atención general)</option>
                       {PROPERTIES_DATA.map((p) => (
                         <option key={p.id} value={p.id}>
                           {p.model} - {p.priceFormatted}

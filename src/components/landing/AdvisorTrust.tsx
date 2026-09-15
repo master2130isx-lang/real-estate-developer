@@ -36,8 +36,8 @@ export function AdvisorTrust() {
                   <h3 className="text-lg font-bold text-slate-900 leading-tight">
                     {COMMERCIAL_CONFIG.advisorName}
                   </h3>
-                  <span className="inline-block mt-1 bg-amber-100 text-amber-900 text-[10px] font-bold px-2 py-0.5 rounded">
-                    Identidad demostrativa (Fase 1.1)
+                  <span className="inline-block mt-1 bg-emerald-100 text-emerald-900 text-[10px] font-bold px-2 py-0.5 rounded">
+                    Atención personalizada y directa
                   </span>
                 </div>
               </div>
