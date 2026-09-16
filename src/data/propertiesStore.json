@@ -1,0 +1,82 @@
+[
+  {
+    "id": "prop-aguila-premier",
+    "code": "VDE-AGU-01",
+    "name": "Valle de los Encinos",
+    "model": "Modelo Águila Premier",
+    "development": "Valle de los Encinos",
+    "address": "Calzada del Sol, Salinas Victoria, N.L.",
+    "zone": "Salinas Victoria, N.L. (Valle de los Encinos)",
+    "city": "Salinas Victoria, N.L.",
+    "price": 1180000,
+    "priceFormatted": "$1,180,000 MXN",
+    "bedrooms": 2,
+    "bathrooms": 1.5,
+    "hasStayArea": true,
+    "constructionM2": 74.39,
+    "landM2": 98,
+    "parkingSpots": 2,
+    "admittedFinancing": [
+      "infonavit",
+      "bancario",
+      "contado"
+    ],
+    "availabilityStatus": "disponible",
+    "lastUpdated": "Septiembre 2026 (Inventario y Fotos Reales)",
+    "estimatedClosingCosts": "Aprox. 5% a 7% (Escrituración y aranceles notariales en N.L.)",
+    "image": "/images/properties/aguila-premier/01-facade.jpg",
+    "images": [
+      "/images/properties/aguila-premier/01-facade.jpg",
+      "/images/properties/aguila-premier/02-living-room-wide.jpg",
+      "/images/properties/aguila-premier/03-living-room.jpg",
+      "/images/properties/aguila-premier/04-living-dining.jpg",
+      "/images/properties/aguila-premier/05-dining-room.jpg",
+      "/images/properties/aguila-premier/06-kitchen-dining.jpg",
+      "/images/properties/aguila-premier/07-kitchen.jpg",
+      "/images/properties/aguila-premier/08-stairs-hall.jpg",
+      "/images/properties/aguila-premier/09-hallway-upstairs.jpg",
+      "/images/properties/aguila-premier/10-master-bedroom.jpg",
+      "/images/properties/aguila-premier/11-master-bedroom-angle.jpg",
+      "/images/properties/aguila-premier/12-secondary-bedroom.jpg",
+      "/images/properties/aguila-premier/13-bathroom-upstairs.jpg",
+      "/images/properties/aguila-premier/14-half-bathroom.jpg",
+      "/images/properties/aguila-premier/15-patio-terrace.jpg",
+      "/images/properties/aguila-premier/16-patio-garden.jpg",
+      "/images/properties/aguila-premier/17-patio-side.jpg"
+    ],
+    "tags": [
+      "Valle de los Encinos",
+      "Pet Park",
+      "Canchas Sintéticas",
+      "Palapa",
+      "Acceso Controlado"
+    ],
+    "description": "Vive en la mejor zona de Salinas Victoria, N.L. Casa de dos plantas con 2 recámaras, estancia en planta alta, 1.5 baños, acabados con vitropiso, patio con pasillo lateral y estacionamiento para 2 autos en fraccionamiento privado.",
+    "keyFeatures": [
+      "2 recámaras con espacio para clóset",
+      "Estancia familiar en planta alta",
+      "1.5 baños (medio baño en PB y baño completo en PA)",
+      "Sala - comedor y cocina independiente",
+      "Vitropiso de alta resistencia instalado",
+      "Patio posterior y pasillo lateral independiente",
+      "Estacionamiento para 2 autos",
+      "Preparación para minisplit",
+      "Terreno: 98 m² | Construcción: 74.39 m²",
+      "Amenidades: Pet Park, canchas con pasto sintético y palapa"
+    ],
+    "amenities": [
+      "Pet Park para mascotas",
+      "Canchas deportivas con pasto sintético",
+      "Palapa familiar para eventos",
+      "Acceso controlado con caseta 24/7",
+      "Áreas recreativas y verdes"
+    ],
+    "nearbyServices": [
+      "Escuelas cercanas",
+      "Comercios y tiendas de conveniencia",
+      "Fuentes de empleo industriales en la zona",
+      "Rutas de transporte público accesibles"
+    ],
+    "isIllustrativeDemo": false
+  }
+]

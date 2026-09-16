@@ -30,12 +30,13 @@ import { ConfirmRegistrationModal } from '@/components/panel/ConfirmRegistration
 import { NewAppointmentModal } from '@/components/panel/NewAppointmentModal';
 import { AppointmentAgendaView } from '@/components/panel/AppointmentAgendaView';
 import { CommercialSettingsModal } from '@/components/panel/CommercialSettingsModal';
+import { PropertyManagerView } from '@/components/panel/PropertyManagerView';
 
 export default function AgentPanelPage() {
-  const { leads, commercialConfig } = useApp();
+  const { leads, commercialConfig, properties } = useApp();
 
-  // Pestaña activa principal: Agenda o Cartera de Prospectos
-  const [activeTab, setActiveTab] = useState<'agenda' | 'prospectos'>('agenda');
+  // Pestaña activa principal: Agenda, Cartera de Prospectos o Modelos de Casas
+  const [activeTab, setActiveTab] = useState<'agenda' | 'prospectos' | 'propiedades'>('agenda');
 
   // Modales
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
@@ -331,6 +332,21 @@ export default function AgentPanelPage() {
                 {totalLeads}
               </span>
             </button>
+
+            <button
+              onClick={() => setActiveTab('propiedades')}
+              className={`px-4 py-2 rounded-lg text-xs font-semibold transition flex items-center gap-2 cursor-pointer ${
+                activeTab === 'propiedades'
+                  ? 'bg-white dark:bg-[#163554] text-slate-900 dark:text-white shadow-xs'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+              }`}
+            >
+              <Building2 className="w-3.5 h-3.5 text-[#C09B53]" />
+              <span>Modelos de Casas</span>
+              <span className="bg-slate-200/80 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-[10px] px-1.5 py-0.2 rounded-full font-mono font-medium">
+                {properties.length}
+              </span>
+            </button>
           </div>
 
           <span className="text-xs text-slate-500 dark:text-slate-400 hidden md:inline">
@@ -555,6 +571,9 @@ export default function AgentPanelPage() {
             </div>
           </div>
         )}
+
+        {/* VISTA 3: GESTOR DE MODELOS DE VIVIENDA / INVENTARIO */}
+        {activeTab === 'propiedades' && <PropertyManagerView />}
       </main>
 
       {/* Modal para Agendar Nueva Cita */}

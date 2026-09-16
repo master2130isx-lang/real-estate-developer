@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { Property } from '@/types';
 import { PROPERTIES_DATA } from '@/data/mockData';
+import { useApp } from '@/context/AppContext';
 import { PropertyDetailModal } from './PropertyDetailModal';
 
 interface PropertiesSectionProps {
@@ -24,10 +25,14 @@ interface PropertiesSectionProps {
 }
 
 export function PropertiesSection({ onSelectPropertyForPrequalification }: PropertiesSectionProps) {
+  const { properties: appProperties } = useApp();
+  const properties = appProperties && appProperties.length > 0 ? appProperties : PROPERTIES_DATA;
+
+  const [selectedPropertyId, setSelectedPropertyId] = useState<string>(properties[0]?.id || 'prop-aguila-premier');
   const [selectedModalProperty, setSelectedModalProperty] = useState<Property | null>(null);
   const [activePhotoIndex, setActivePhotoIndex] = useState<number>(0);
 
-  const property = PROPERTIES_DATA[0];
+  const property = properties.find((p) => p.id === selectedPropertyId) || properties[0];
 
   if (!property) return null;
 
@@ -43,12 +48,12 @@ export function PropertiesSection({ onSelectPropertyForPrequalification }: Prope
 
   return (
     <section id="opciones" className="py-20 px-4 sm:px-6 bg-[var(--color-surface)] border-b border-[var(--color-border)] transition-colors">
-      <div className="max-w-[1220px] mx-auto space-y-10">
+      <div className="max-w-[1220px] mx-auto space-y-8">
         {/* Encabezado */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div className="space-y-3 max-w-2xl">
             <span className="label-caps text-[var(--color-accent)]">
-              Modelo Insignia en Venta
+              {properties.length > 1 ? 'Modelos Residenciales en Venta' : 'Modelo Insignia en Venta'}
             </span>
             <h2 className="font-serif text-2xl sm:text-3xl lg:text-4xl font-bold text-[var(--color-navy)] leading-tight">
               {property.model} · {property.development}
@@ -65,6 +70,44 @@ export function PropertiesSection({ onSelectPropertyForPrequalification }: Prope
             </div>
           </div>
         </div>
+
+        {/* Selector de Modelos si hay más de 1 */}
+        {properties.length > 1 && (
+          <div className="flex items-center gap-2 overflow-x-auto pb-2 border-b border-[var(--color-border)]">
+            <span className="text-xs font-semibold text-[var(--color-text-muted)] mr-2 shrink-0">
+              Seleccionar modelo:
+            </span>
+            {properties.map((p) => {
+              const isSelected = p.id === property.id;
+              return (
+                <button
+                  key={p.id}
+                  onClick={() => {
+                    setSelectedPropertyId(p.id);
+                    setActivePhotoIndex(0);
+                  }}
+                  className={`px-4 py-2 rounded-xl border text-xs font-semibold transition cursor-pointer flex items-center gap-2.5 whitespace-nowrap ${
+                    isSelected
+                      ? 'bg-[var(--color-navy)] text-white border-[var(--color-accent)] shadow-xs'
+                      : 'bg-[var(--color-bg)] text-[var(--color-text-secondary)] border-[var(--color-border)] hover:border-[var(--color-accent)]/50'
+                  }`}
+                >
+                  <span
+                    className="w-2 h-2 rounded-full shrink-0"
+                    style={{
+                      backgroundColor: isSelected ? 'var(--color-accent)' : 'transparent',
+                      border: '1px solid var(--color-accent)',
+                    }}
+                  ></span>
+                  <span>{p.model}</span>
+                  <span className="font-mono text-[11px] opacity-80">
+                    {p.priceFormatted || `$${p.price.toLocaleString('es-MX')} MXN`}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        )}
 
         {/* Gran Tarjeta Destacada */}
         <div className="bg-[var(--color-surface)] rounded-xl border border-[var(--color-border)] overflow-hidden grid grid-cols-1 lg:grid-cols-12 gap-0">

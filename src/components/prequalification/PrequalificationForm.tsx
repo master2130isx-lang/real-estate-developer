@@ -43,7 +43,8 @@ export function PrequalificationForm({
   preselectedProperty,
   onOpenPrivacyNotice,
 }: PrequalificationFormProps) {
-  const { createLeadFromPrequalification, logFunnelEvent } = useApp();
+  const { properties: appProperties, createLeadFromPrequalification, logFunnelEvent } = useApp();
+  const availableProperties = appProperties && appProperties.length > 0 ? appProperties : PROPERTIES_DATA;
 
   const [step, setStep] = useState<number>(1);
   const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
@@ -175,7 +176,7 @@ export function PrequalificationForm({
   };
 
   const handleSubmitForm = () => {
-    const selectedProp = PROPERTIES_DATA.find((p) => p.id === propertyId);
+    const selectedProp = availableProperties.find((p) => p.id === propertyId);
 
     // Derivar automáticamente el horario de contacto conforme a la franja de visita elegida
     let derivedContactTime: PreferredContactTime = 'tarde';
@@ -435,7 +436,7 @@ export function PrequalificationForm({
                       onChange={(e) => setPropertyId(e.target.value)}
                       className="w-full px-3.5 py-2.5 rounded border border-slate-300 dark:border-slate-600 text-xs sm:text-sm bg-white dark:bg-[#0B1E30] text-slate-900 dark:text-white font-medium focus:border-[var(--color-accent)] focus:ring-2 focus:ring-[var(--color-accent)]/20 focus:outline-none"
                     >
-                      {PROPERTIES_DATA.map((p) => (
+                      {availableProperties.map((p) => (
                         <option key={p.id} value={p.id}>
                           {p.model} - {p.priceFormatted}
                         </option>

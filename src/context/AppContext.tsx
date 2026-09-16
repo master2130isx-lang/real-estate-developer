@@ -1,15 +1,20 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { Lead, CommercialStatus, FunnelEvent, LeadNote, AuditEvent, AttributionStatus } from '../types';
-import { INITIAL_LEADS } from '../data/mockData';
+import { Property, Lead, CommercialStatus, FunnelEvent, LeadNote, AuditEvent, AttributionStatus } from '../types';
+import { INITIAL_LEADS, PROPERTIES_DATA } from '../data/mockData';
 import { COMMERCIAL_CONFIG, CommercialConfig, shouldRequestNss } from '../config/commercialConfig';
 
 interface AppContextType {
   leads: Lead[];
+  properties: Property[];
   funnelEvents: FunnelEvent[];
   commercialConfig: CommercialConfig;
   updateCommercialConfig: (configUpdate: Partial<CommercialConfig>) => Promise<void>;
+  addProperty: (propertyData: Partial<Property>) => Promise<Property | null>;
+  updateProperty: (id: string, updates: Partial<Property>) => Promise<Property | null>;
+  deleteProperty: (id: string) => Promise<boolean>;
+  reloadProperties: () => Promise<void>;
   archiveLead: (leadId: string, archive: boolean) => void;
   createLeadFromPrequalification: (leadData: Partial<Lead>, rawNss?: string) => Lead;
   scheduleNewAppointment: (appointmentData: {
@@ -46,6 +51,7 @@ interface AppContextType {
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 const STORAGE_KEY_LEADS = 'red_mvp_leads_v1.1';
+const STORAGE_KEY_PROPERTIES = 'red_mvp_properties_v1.1';
 const STORAGE_KEY_FUNNEL = 'red_mvp_funnel_v1.1';
 const STORAGE_KEY_CONFIG = 'red_mvp_config_v1.1';
 
@@ -88,12 +94,23 @@ export function AppProvider({
     if (typeof window !== 'undefined') {
       try {
         const stored = localStorage.getItem(STORAGE_KEY_CONFIG);
-        if (stored) {
-          return JSON.parse(stored);
-        }
+        if (stored) return JSON.parse(stored);
       } catch {}
     }
     return COMMERCIAL_CONFIG;
+  });
+
+  const [properties, setProperties] = useState<Property[]>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const stored = localStorage.getItem(STORAGE_KEY_PROPERTIES);
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        }
+      } catch {}
+    }
+    return PROPERTIES_DATA;
   });
 
   const [leads, setLeads] = useState<Lead[]>(() => INITIAL_LEADS.map(normalizeLead));
@@ -161,6 +178,28 @@ export function AppProvider({
       isMounted = false;
       clearInterval(interval);
     };
+  }, []);
+
+  // Sincronizar catálogo de propiedades desde el servidor
+  const reloadProperties = async () => {
+    try {
+      const res = await fetch('/api/properties');
+      if (res.ok) {
+        const data = await res.json();
+        if (data.ok && Array.isArray(data.properties) && data.properties.length > 0) {
+          setProperties(data.properties);
+          try {
+            localStorage.setItem(STORAGE_KEY_PROPERTIES, JSON.stringify(data.properties));
+          } catch {}
+        }
+      }
+    } catch (err) {
+      console.warn('Error al sincronizar propiedades:', err);
+    }
+  };
+
+  useEffect(() => {
+    reloadProperties();
   }, []);
 
   // Sincronizar configuración comercial desde el servidor
@@ -783,13 +822,88 @@ export function AppProvider({
     }
   };
 
+  const addProperty = async (propertyData: Partial<Property>): Promise<Property | null> => {
+    try {
+      const res = await fetch('/api/properties', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(propertyData),
+      });
+      const data = await res.json();
+      if (data.ok && data.property) {
+        setProperties((prev) => {
+          const updated = [data.property, ...prev];
+          try {
+            localStorage.setItem(STORAGE_KEY_PROPERTIES, JSON.stringify(updated));
+          } catch {}
+          return updated;
+        });
+        return data.property;
+      }
+      return null;
+    } catch {
+      return null;
+    }
+  };
+
+  const updateProperty = async (id: string, updates: Partial<Property>): Promise<Property | null> => {
+    try {
+      const res = await fetch(`/api/properties/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updates),
+      });
+      const data = await res.json();
+      if (data.ok && data.property) {
+        setProperties((prev) => {
+          const updated = prev.map((p) => (p.id === id ? data.property : p));
+          try {
+            localStorage.setItem(STORAGE_KEY_PROPERTIES, JSON.stringify(updated));
+          } catch {}
+          return updated;
+        });
+        return data.property;
+      }
+      return null;
+    } catch {
+      return null;
+    }
+  };
+
+  const deleteProperty = async (id: string): Promise<boolean> => {
+    try {
+      const res = await fetch(`/api/properties/${id}`, {
+        method: 'DELETE',
+      });
+      const data = await res.json();
+      if (data.ok) {
+        setProperties((prev) => {
+          const updated = prev.filter((p) => p.id !== id);
+          try {
+            localStorage.setItem(STORAGE_KEY_PROPERTIES, JSON.stringify(updated));
+          } catch {}
+          return updated;
+        });
+        return true;
+      }
+      return false;
+    } catch {
+      return false;
+    }
+  };
+
   return (
     <AppContext.Provider
       value={{
         leads,
+        properties,
         funnelEvents,
         commercialConfig,
         updateCommercialConfig,
+        addProperty,
+        updateProperty,
+        deleteProperty,
+        reloadProperties,
         archiveLead,
         createLeadFromPrequalification,
         scheduleNewAppointment,

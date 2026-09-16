@@ -96,6 +96,43 @@ CREATE TABLE IF NOT EXISTS funnel_events (
 CREATE INDEX IF NOT EXISTS idx_funnel_event_name ON funnel_events (event_name);
 CREATE INDEX IF NOT EXISTS idx_funnel_timestamp ON funnel_events (timestamp DESC);
 
+-- 4. TABLA DE MODELOS DE VIVIENDA / INVENTARIO (PROPERTIES)
+CREATE TABLE IF NOT EXISTS properties (
+  id TEXT PRIMARY KEY,
+  code TEXT UNIQUE NOT NULL,
+  name TEXT NOT NULL,
+  model TEXT NOT NULL,
+  development TEXT DEFAULT 'Valle de los Encinos',
+  address TEXT,
+  zone TEXT,
+  city TEXT,
+  price NUMERIC NOT NULL,
+  price_formatted TEXT,
+  bedrooms INTEGER DEFAULT 2,
+  bathrooms NUMERIC DEFAULT 1,
+  has_stay_area BOOLEAN DEFAULT FALSE,
+  construction_m2 NUMERIC,
+  land_m2 NUMERIC,
+  parking_spots INTEGER DEFAULT 1,
+  admitted_financing JSONB DEFAULT '["infonavit", "bancario", "contado"]'::jsonb,
+  availability_status TEXT DEFAULT 'disponible',
+  last_updated TEXT,
+  estimated_closing_costs TEXT,
+  image TEXT NOT NULL,
+  images JSONB DEFAULT '[]'::jsonb,
+  tags JSONB DEFAULT '[]'::jsonb,
+  description TEXT,
+  key_features JSONB DEFAULT '[]'::jsonb,
+  amenities JSONB DEFAULT '[]'::jsonb,
+  nearby_services JSONB DEFAULT '[]'::jsonb,
+  is_illustrative_demo BOOLEAN DEFAULT FALSE,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_properties_price ON properties (price);
+CREATE INDEX IF NOT EXISTS idx_properties_status ON properties (availability_status);
+
 -- ==============================================================================
 -- POLÍTICAS DE SEGURIDAD ESTRICTAS (ROW LEVEL SECURITY - RLS)
 -- ==============================================================================
@@ -139,11 +176,19 @@ CREATE POLICY "Registro de telemetria anonima"
   TO anon, authenticated, service_role
   WITH CHECK (true);
 
--- Asesor autenticado: Auditoría de telemetría
-CREATE POLICY "Lectura de telemetria para asesores autenticados"
-  ON funnel_events FOR SELECT
-  TO authenticated, service_role
+-- 4. SEGURIDAD EN MODELOS DE VIVIENDA (PROPERTIES):
+-- Público anónimo: Puede consultar el catálogo de modelos disponibles (SELECT)
+CREATE POLICY "Lectura publica de modelos de viviendas disponibles"
+  ON properties FOR SELECT
+  TO anon, authenticated, service_role
   USING (true);
+
+-- Asesor autenticado y backend: Creación, edición y eliminación de modelos
+CREATE POLICY "Gestion total de modelos solo para asesores autenticados"
+  ON properties FOR ALL
+  TO authenticated, service_role
+  USING (true)
+  WITH CHECK (true);
 
 -- ==============================================================================
 -- SEMBRADO INICIAL DE CONFIGURACIÓN COMERCIAL (SEED DATA)
