@@ -7,15 +7,19 @@ import { getServerCommercialConfig } from './commercialConfigStore';
 const TELEGRAM_API_BASE = 'https://api.telegram.org';
 
 async function getBotToken(): Promise<string | undefined> {
-  if (process.env.TELEGRAM_BOT_TOKEN) return process.env.TELEGRAM_BOT_TOKEN;
   const config = await getServerCommercialConfig();
-  return config.telegramConfig?.botToken;
+  if (config.telegramConfig?.botToken && config.telegramConfig.botToken.trim()) {
+    return config.telegramConfig.botToken.trim();
+  }
+  return process.env.TELEGRAM_BOT_TOKEN;
 }
 
 async function getAdvisorChatId(): Promise<string | undefined> {
-  if (process.env.TELEGRAM_ADVISOR_CHAT_ID) return process.env.TELEGRAM_ADVISOR_CHAT_ID;
   const config = await getServerCommercialConfig();
-  return config.telegramConfig?.advisorChatId;
+  if (config.telegramConfig?.advisorChatId && config.telegramConfig.advisorChatId.trim()) {
+    return config.telegramConfig.advisorChatId.trim();
+  }
+  return process.env.TELEGRAM_ADVISOR_CHAT_ID;
 }
 
 /**

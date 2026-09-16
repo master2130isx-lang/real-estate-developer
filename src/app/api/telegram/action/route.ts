@@ -40,8 +40,8 @@ export async function GET(req: NextRequest) {
   // 3. Notificar a Telegram la actualización del estado
   try {
     const config = await getServerCommercialConfig();
-    const token = process.env.TELEGRAM_BOT_TOKEN || config.telegramConfig?.botToken;
-    const chatId = process.env.TELEGRAM_ADVISOR_CHAT_ID || config.telegramConfig?.advisorChatId;
+    const token = config.telegramConfig?.botToken?.trim() || process.env.TELEGRAM_BOT_TOKEN;
+    const chatId = config.telegramConfig?.advisorChatId?.trim() || process.env.TELEGRAM_ADVISOR_CHAT_ID;
 
     if (token && chatId) {
       const statusText = isConfirm ? '✅ *CITA CONFIRMADA DESDE MÓVIL*' : '❌ *CITA CANCELADA DESDE MÓVIL*';
