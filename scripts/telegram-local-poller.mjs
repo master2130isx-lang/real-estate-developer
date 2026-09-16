@@ -24,8 +24,12 @@ function getBotToken() {
     } catch {}
   }
 
-  // 3. Fallback de desarrollo
-  return '8744099329:AAEKPsqni4ugVioOXYd7dMi3zZREBP0RrKc';
+  // 3. Variable de entorno estándar
+  if (process.env.TELEGRAM_BOT_TOKEN) {
+    return process.env.TELEGRAM_BOT_TOKEN.trim();
+  }
+
+  return '';
 }
 
 async function startPoller() {
