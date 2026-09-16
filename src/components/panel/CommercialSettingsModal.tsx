@@ -19,6 +19,7 @@ import {
   ExternalLink,
   RefreshCw,
   ShieldCheck,
+  Info,
 } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
 import { WhatsAppIcon } from '@/components/common/WhatsAppIcon';
@@ -584,45 +585,82 @@ CREATE POLICY "Permitir todo acceso funnel" ON funnel_events FOR ALL USING (true
 
           {/* TAB 4: BOT DE TELEGRAM */}
           {activeTab === 'telegram' && (
-            <div className="space-y-3.5">
-              <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 text-xs text-emerald-950 space-y-2.5">
-                <div className="flex items-center gap-2 font-bold text-emerald-900">
-                  <ShieldCheck className="w-5 h-5 text-emerald-600 shrink-0" />
-                  <span>Bot Móvil de Alertas Protegido en el Servidor (Vercel)</span>
+            <div className="space-y-4">
+              {/* Explicación Clave sobre Teléfono vs Chat ID de Telegram */}
+              <div className="bg-sky-50 border border-sky-200 rounded-2xl p-4 text-xs text-sky-950 space-y-2.5">
+                <div className="flex items-center gap-2 font-bold text-sky-900">
+                  <Info className="w-5 h-5 text-sky-600 shrink-0" />
+                  <span>¿Por qué Telegram requiere un Chat ID y no un número telefónico?</span>
                 </div>
-                <p className="text-[11px] leading-relaxed text-emerald-800">
-                  Las credenciales de tu bot (<code>TELEGRAM_BOT_TOKEN</code> y <code>TELEGRAM_ADVISOR_CHAT_ID</code>) se encuentran encriptadas y guardadas de forma segura en las variables de entorno de Vercel. Ya no se exponen ni requieren edición manual en el panel.
+                <p className="text-[11px] leading-relaxed text-sky-900">
+                  Por políticas de privacidad de Telegram, <strong>los bots no pueden enviar mensajes buscando por número de teléfono</strong>. En su lugar, cada cuenta de Telegram tiene un <strong>Chat ID numérico único</strong> al que se dirigen las alertas instantáneas.
                 </p>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1 font-mono text-[11px]">
-                  <div className="bg-white/90 p-2.5 rounded-xl border border-emerald-200">
-                    <span className="text-slate-400 block text-[10px] uppercase tracking-wider font-sans font-bold">Chat ID del Asesor:</span>
-                    <span className="font-bold text-slate-900 flex items-center gap-1.5 mt-0.5">
-                      <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-                      948786976 (Vinculado)
+                <div className="bg-white/90 p-3 rounded-xl border border-sky-200 text-[11px] space-y-1.5 text-slate-800">
+                  <span className="font-bold text-sky-950 block">Pasos para cambiar quién recibe las notificaciones:</span>
+                  <ol className="list-decimal pl-4 space-y-1 text-slate-700">
+                    <li>
+                      En el celular nuevo, abre Telegram, busca el bot gratuito <strong>@userinfobot</strong> y pulsa Iniciar. Te responderá de inmediato tu número de <strong>Id</strong> (ej. <code>948786976</code>).
+                    </li>
+                    <li>
+                      En ese mismo celular, abre tu bot oficial <strong>@RED192142_bot</strong> y pulsa el botón <strong>Iniciar / Start</strong> (imprescindible para que Telegram permita al bot enviarte mensajes).
+                    </li>
+                    <li>
+                      Escribe ese número en el campo <strong>Chat ID del Asesor</strong> que ves aquí abajo y pulsa <strong>Guardar Configuración</strong>.
+                    </li>
+                  </ol>
+                </div>
+              </div>
+
+              {/* Campos Editables de Telegram */}
+              <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-3.5">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-900 mb-1">
+                      Chat ID del Asesor (ID numérico) *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={advisorChatId}
+                      onChange={(e) => setAdvisorChatId(e.target.value)}
+                      placeholder="Ej. 948786976"
+                      className="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs bg-white focus:ring-2 focus:ring-[#0d233a] focus:outline-none font-mono font-bold"
+                    />
+                    <span className="text-[10px] text-slate-500 mt-0.5 block">
+                      ID del usuario o grupo que recibirá las alertas de citas
                     </span>
                   </div>
-                  <div className="bg-white/90 p-2.5 rounded-xl border border-emerald-200">
-                    <span className="text-slate-400 block text-[10px] uppercase tracking-wider font-sans font-bold">Bot de Telegram:</span>
-                    <span className="font-bold text-slate-900 flex items-center gap-1.5 mt-0.5">
-                      <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-                      @RED192142_bot (Activo)
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-900 mb-1">
+                      Usuario del Bot Oficial
+                    </label>
+                    <input
+                      type="text"
+                      disabled
+                      value="@RED192142_bot"
+                      className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs bg-slate-100 text-slate-600 font-mono"
+                    />
+                    <span className="text-[10px] text-emerald-700 font-medium mt-0.5 block">
+                      ✓ Bot verificado y conectado al sistema
                     </span>
                   </div>
                 </div>
               </div>
 
-              <div className="p-3 bg-slate-50 rounded-2xl border border-slate-200 flex items-center justify-between gap-3">
+              {/* Botón de Prueba */}
+              <div className="p-3 bg-slate-50 rounded-2xl border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div>
-                  <h4 className="text-xs font-bold text-slate-800">Prueba de Conexión Móvil</h4>
-                  <p className="text-[11px] text-slate-500">Envía un mensaje instantáneo a tu celular para verificar la recepción de alertas</p>
+                  <h4 className="text-xs font-bold text-slate-800">Prueba de Conexión en Vivo</h4>
+                  <p className="text-[11px] text-slate-500">Envía un mensaje de prueba al Chat ID escrito arriba para comprobar que recibes las alertas</p>
                 </div>
 
                 <button
                   type="button"
                   onClick={handleTestTelegram}
-                  disabled={testStatus === 'loading'}
-                  className="bg-sky-600 hover:bg-sky-700 disabled:bg-slate-300 text-white font-bold px-3.5 py-2 rounded-xl text-xs transition flex items-center gap-1.5 cursor-pointer shadow-sm shrink-0"
+                  disabled={testStatus === 'loading' || !advisorChatId.trim()}
+                  className="bg-sky-600 hover:bg-sky-700 disabled:bg-slate-300 text-white font-bold px-3.5 py-2 rounded-xl text-xs transition flex items-center justify-center gap-1.5 cursor-pointer shadow-xs shrink-0"
                 >
                   <Send className="w-3.5 h-3.5" />
                   <span>{testStatus === 'loading' ? 'Enviando...' : 'Enviar Prueba al Celular'}</span>
