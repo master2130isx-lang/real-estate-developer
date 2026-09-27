@@ -8,25 +8,18 @@ import {
   CheckCircle2,
   Info,
   Lock,
-  ExternalLink,
+  Calendar,
+  Clock,
+  ShieldCheck,
 } from 'lucide-react';
-import { Property, FinancingType, PurchaseTimeline, BudgetRange, ContactChannel, PreferredContactTime, Lead } from '@/types';
+import { Property, FinancingType, ContactChannel, Lead } from '@/types';
 import { PROPERTIES_DATA } from '@/data/mockData';
 import { useApp } from '@/context/AppContext';
-import { COMMERCIAL_CONFIG, shouldRequestNss } from '@/config/commercialConfig';
 import { WhatsAppIcon } from '@/components/common/WhatsAppIcon';
 
 export const getTomorrowDateStr = () => {
   const d = new Date();
   d.setDate(d.getDate() + 1);
-  return d.toISOString().split('T')[0];
-};
-
-export const getUpcomingWeekendStr = () => {
-  const d = new Date();
-  const day = d.getDay(); // 0 is Sunday, 6 is Saturday
-  const daysUntilSaturday = (6 - day + 7) % 7 || 7;
-  d.setDate(d.getDate() + daysUntilSaturday);
   return d.toISOString().split('T')[0];
 };
 
@@ -37,43 +30,50 @@ interface PrequalificationFormProps {
   onOpenPrivacyNotice: () => void;
 }
 
+const AVAILABLE_HOURS = [
+  '10:00 AM',
+  '11:00 AM',
+  '12:00 PM',
+  '01:00 PM',
+  '02:00 PM',
+  '03:00 PM',
+  '04:00 PM',
+  '05:00 PM',
+  '06:00 PM',
+];
+
 export function PrequalificationForm({
   isOpen,
   onClose,
   preselectedProperty,
   onOpenPrivacyNotice,
 }: PrequalificationFormProps) {
-  const { properties: appProperties, createLeadFromPrequalification, logFunnelEvent } = useApp();
+  const { properties: appProperties, commercialConfig, createLeadFromPrequalification, logFunnelEvent } = useApp();
   const availableProperties = appProperties && appProperties.length > 0 ? appProperties : PROPERTIES_DATA;
 
+  // 3 Pasos definidos
   const [step, setStep] = useState<number>(1);
   const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
   const [createdLead, setCreatedLead] = useState<Lead | null>(null);
 
-  // Paso 1: Qué busca
-  const [zone, setZone] = useState<string>(() => preselectedProperty?.zone || 'Salinas Victoria, N.L. (Valle de los Encinos)');
-  const [propertyId, setPropertyId] = useState<string>(() => preselectedProperty?.id || 'prop-aguila-premier');
-  const [budgetRange, setBudgetRange] = useState<BudgetRange>('1.2m_a_1.6m');
-  const [purchaseTimeline, setPurchaseTimeline] = useState<PurchaseTimeline>('corto');
+  // Paso 1: Modelo y Crédito
+  const [propertyId, setPropertyId] = useState<string>(() => preselectedProperty?.id || availableProperties[0]?.id || 'prop-aguila-premier');
   const [financingType, setFinancingType] = useState<FinancingType>('infonavit');
-  const [needsOrientation, setNeedsOrientation] = useState<boolean>(false);
 
-  // Paso 2: Contacto
+  // Paso 2: Datos de Contacto y Validación Crediticia (NSS o CURP)
   const [fullName, setFullName] = useState<string>('');
   const [phone, setPhone] = useState<string>('');
   const [email, setEmail] = useState<string>('');
   const [preferredChannel, setPreferredChannel] = useState<ContactChannel>('whatsapp');
+  const [nssInput, setNssInput] = useState<string>('');
+  const [curpInput, setCurpInput] = useState<string>('');
+  const [skipIdentifierForOrientation, setSkipIdentifierForOrientation] = useState<boolean>(false);
   const [privacyConsentAccepted, setPrivacyConsentAccepted] = useState<boolean>(true);
   const [marketingConsentAccepted, setMarketingConsentAccepted] = useState<boolean>(false);
 
-  // Paso 3: Registro interno con NSS
-  const [nssInput, setNssInput] = useState<string>('');
-  const [skipNssForOrientation, setSkipNssForOrientation] = useState<boolean>(false);
-
-  // Paso 4: Preferencia de visita
-  const [appointmentModality, setAppointmentModality] = useState<'presencial' | 'virtual'>('presencial');
+  // Paso 3: Agenda de Visita (Fecha directa y Hora exacta)
   const [preferredDate, setPreferredDate] = useState<string>(getTomorrowDateStr());
-  const [timeSlot, setTimeSlot] = useState<'10:00 - 13:00' | '14:00 - 17:00' | '17:00 - 19:00' | 'sabado_manana'>('10:00 - 13:00');
+  const [exactTime, setExactTime] = useState<string>('11:00 AM');
   const [appointmentNotes, setAppointmentNotes] = useState<string>('');
 
   // Errores de validación
@@ -81,13 +81,13 @@ export function PrequalificationForm({
 
   if (!isOpen) return null;
 
-  const requiresNssStep = shouldRequestNss(financingType);
+  const requiresNss = financingType === 'infonavit';
+  const requiresCurp = financingType === 'fovissste';
 
   // Validaciones paso por paso
   const validateStep1 = () => {
     const errs: Record<string, string> = {};
-    if (!zone) errs.zone = 'Selecciona una zona de preferencia';
-    if (!financingType) errs.financingType = 'Selecciona una forma de compra o solicita orientación';
+    if (!financingType) errs.financingType = 'Selecciona una forma de compra';
     setErrors(errs);
     return Object.keys(errs).length === 0;
   };
@@ -103,6 +103,22 @@ export function PrequalificationForm({
       errs.phone = 'Ingresa tu número celular a 10 dígitos (ej. 5512345678)';
     }
 
+    // Validación de NSS si eligió Infonavit y no pidió orientación previa
+    if (requiresNss && !skipIdentifierForOrientation) {
+      const cleanNss = nssInput.replace(/\D/g, '');
+      if (cleanNss.length !== 11) {
+        errs.nss = 'El NSS consta de exactamente 11 dígitos numéricos';
+      }
+    }
+
+    // Validación de CURP si eligió FOVISSSTE/ISSSTE y no pidió orientación previa
+    if (requiresCurp && !skipIdentifierForOrientation) {
+      const cleanCurp = curpInput.trim().toUpperCase();
+      if (cleanCurp.length !== 18) {
+        errs.curp = 'La CURP consta de 18 caracteres alfanuméricos';
+      }
+    }
+
     if (!privacyConsentAccepted) {
       errs.privacy = 'Es necesario aceptar el Aviso de Privacidad para atender tu solicitud';
     }
@@ -113,21 +129,11 @@ export function PrequalificationForm({
 
   const validateStep3 = () => {
     const errs: Record<string, string> = {};
-    // Si la ruta requiere NSS y no eligió la alternativa de orientación previa
-    if (requiresNssStep && !skipNssForOrientation) {
-      const cleanNss = nssInput.replace(/\D/g, '');
-      if (cleanNss.length !== 11) {
-        errs.nss = 'El NSS consta de exactamente 11 dígitos numéricos';
-      }
-    }
-    setErrors(errs);
-    return Object.keys(errs).length === 0;
-  };
-
-  const validateStep4 = () => {
-    const errs: Record<string, string> = {};
     if (!preferredDate) {
-      errs.preferredDate = 'Por favor indica la fecha tentativa en la que te gustaría realizar la visita';
+      errs.preferredDate = 'Por favor selecciona la fecha de tu visita';
+    }
+    if (!exactTime) {
+      errs.exactTime = 'Por favor selecciona la hora de tu visita';
     }
     setErrors(errs);
     return Object.keys(errs).length === 0;
@@ -142,25 +148,10 @@ export function PrequalificationForm({
     } else if (step === 2) {
       if (validateStep2()) {
         logFunnelEvent('paso_completado', { paso: 2 });
-        // Si la regla comercial requiere paso de NSS, ir al paso 3; si no, pasar directo al paso de visita (4)
-        if (requiresNssStep) {
-          logFunnelEvent('paso_nss_presentado');
-          setStep(3);
-        } else {
-          setStep(4);
-        }
+        setStep(3);
       }
     } else if (step === 3) {
       if (validateStep3()) {
-        if (skipNssForOrientation) {
-          logFunnelEvent('paso_nss_omitido');
-        } else {
-          logFunnelEvent('paso_nss_completado');
-        }
-        setStep(4);
-      }
-    } else if (step === 4) {
-      if (validateStep4()) {
         handleSubmitForm();
       }
     }
@@ -168,54 +159,46 @@ export function PrequalificationForm({
 
   const handleBack = () => {
     setErrors({});
-    if (step === 4 && !requiresNssStep) {
-      setStep(2);
-    } else if (step > 1) {
+    if (step > 1) {
       setStep(step - 1);
     }
   };
 
   const handleSubmitForm = () => {
-    const selectedProp = availableProperties.find((p) => p.id === propertyId);
+    const selectedProp = availableProperties.find((p) => p.id === propertyId) || availableProperties[0];
 
-    // Derivar automáticamente el horario de contacto conforme a la franja de visita elegida
-    let derivedContactTime: PreferredContactTime = 'tarde';
-    if (timeSlot === '10:00 - 13:00' || timeSlot === 'sabado_manana') {
-      derivedContactTime = 'manana';
-    } else if (timeSlot === '14:00 - 17:00') {
-      derivedContactTime = 'tarde';
-    } else {
-      derivedContactTime = 'noche';
-    }
+    const isProvidingNss = requiresNss && !skipIdentifierForOrientation && nssInput.replace(/\D/g, '').length === 11;
+    const isProvidingCurp = requiresCurp && !skipIdentifierForOrientation && curpInput.trim().length === 18;
 
     const leadPayload: Partial<Lead> = {
       fullName: fullName.trim(),
-      phone: phone.replace(/\D/g, ''),
+      phone: phone.trim(),
       email: email.trim() || undefined,
       preferredChannel,
-      preferredContactTime: derivedContactTime,
-      interestedZone: zone,
-      selectedPropertyId: propertyId || undefined,
-      selectedPropertyTitle: selectedProp ? `${selectedProp.model} (${selectedProp.name})` : undefined,
-      budgetRange,
-      purchaseTimeline,
+      preferredContactTime: 'tarde',
+      interestedZone: commercialConfig.coverageZone || 'Salinas Victoria, N.L. (Valle de los Encinos)',
+      selectedPropertyId: selectedProp?.id,
+      selectedPropertyTitle: selectedProp ? `${selectedProp.model} (${selectedProp.priceFormatted})` : undefined,
+      budgetRange: '1.2m_a_1.6m',
+      purchaseTimeline: 'corto',
       financingType,
-      needsOrientation: needsOrientation || skipNssForOrientation,
+      curpValue: isProvidingCurp ? curpInput.trim().toUpperCase() : undefined,
+      needsOrientation: skipIdentifierForOrientation,
       privacyConsentAccepted: true,
       marketingConsentAccepted,
       appointmentRequest: {
-        modality: appointmentModality,
+        modality: 'presencial',
         preferredDate: preferredDate || getTomorrowDateStr(),
-        timeSlot,
+        timeSlot: exactTime,
         notes: appointmentNotes.trim() || undefined,
         status: 'solicitada',
       },
     };
 
-    const isProvidingNss = requiresNssStep && !skipNssForOrientation && nssInput.replace(/\D/g, '').length === 11;
     const newLead = createLeadFromPrequalification(
       leadPayload,
-      isProvidingNss ? nssInput.replace(/\D/g, '') : undefined
+      isProvidingNss ? nssInput.replace(/\D/g, '') : undefined,
+      isProvidingCurp ? curpInput.trim().toUpperCase() : undefined
     );
 
     setCreatedLead(newLead);
@@ -227,18 +210,18 @@ export function PrequalificationForm({
     setCreatedLead(null);
     setStep(1);
     setNssInput('');
-    setSkipNssForOrientation(false);
+    setCurpInput('');
+    setSkipIdentifierForOrientation(false);
     onClose();
   };
 
-  const totalSteps = requiresNssStep ? 4 : 3;
-  const currentStepForProgress = !requiresNssStep && step === 4 ? 3 : step;
-  const progressPercent = Math.round((currentStepForProgress / totalSteps) * 100);
+  const totalSteps = 3;
+  const progressPercent = Math.round((step / totalSteps) * 100);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/70 backdrop-blur-sm overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/75 backdrop-blur-sm overflow-y-auto">
       <div
-        className="relative bg-[var(--color-surface)] rounded-xl max-w-xl w-full max-h-[92vh] overflow-y-auto shadow-2xl border border-[var(--color-border)] p-5 sm:p-8 text-[var(--color-text)] transition-colors"
+        className="relative bg-[var(--color-surface)] rounded-2xl max-w-xl w-full max-h-[92vh] overflow-y-auto shadow-2xl border border-[var(--color-border)] p-5 sm:p-8 text-[var(--color-text)] transition-colors"
         role="dialog"
         aria-modal="true"
         aria-labelledby="form-modal-title"
@@ -255,36 +238,32 @@ export function PrequalificationForm({
         {/* PANTALLA DE CONFIRMACIÓN */}
         {isSubmitted && createdLead ? (
           <div className="py-3 text-center space-y-5">
-            <div className="w-14 h-14 bg-[var(--color-accent)]/15 text-[var(--color-accent)] rounded-full flex items-center justify-center mx-auto border border-[var(--color-accent)]/30">
+            <div className="w-14 h-14 bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 rounded-full flex items-center justify-center mx-auto border border-emerald-500/30">
               <CheckCircle2 className="w-8 h-8" />
             </div>
 
             <div className="space-y-2">
-              <span className="label-caps text-[var(--color-text-muted)] text-[11px] tracking-wider block">
-                Folio asignado: {createdLead.folio}
+              <span className="label-caps text-[var(--color-text-muted)] text-[11px] tracking-wider block font-mono">
+                Folio: {createdLead.folio}
               </span>
               <h2 id="form-modal-title" className="font-serif text-2xl sm:text-3xl font-bold text-[var(--color-navy)] dark:text-[var(--color-text)] leading-snug">
-                Recibimos tu solicitud
+                ¡Solicitud Registrada con Éxito!
               </h2>
-              {/* Mensaje de confirmación exacto conforme a la especificación de negocio */}
-              <div className="bg-[var(--color-surface-alt)] border border-[var(--color-border)] rounded-lg p-4 text-xs sm:text-sm text-[var(--color-text)] text-left space-y-1.5">
+              <div className="bg-[var(--color-surface-alt)] border border-[var(--color-border)] rounded-xl p-4 text-xs sm:text-sm text-[var(--color-text)] text-left space-y-1.5">
                 <p className="font-bold flex items-center gap-1.5 text-[var(--color-navy)] dark:text-[var(--color-accent)]">
                   <Info className="w-4 h-4 text-[var(--color-accent)] flex-shrink-0" />
-                  Atención directa de tu asesor:
+                  Atención directa de tu asesor {commercialConfig.advisorName}:
                 </p>
                 <p className="leading-relaxed text-[var(--color-text-secondary)]">
-                  Tu asesor revisará la información y te contactará por <strong className="text-[var(--color-text)]">WhatsApp</strong> para confirmar la visita.
-                </p>
-                <p className="text-[11px] text-[var(--color-text-muted)] pt-1">
-                  <em>Nota: La cita queda confirmada una vez que acuerden el horario y punto de acceso.</em>
+                  Tu solicitud ha sido recibida. Tu asesor te contactará por <strong className="text-[var(--color-text)]">WhatsApp</strong> para recibirte en la caseta de acceso.
                 </p>
               </div>
             </div>
 
-            {/* Resumen de solicitud registrada */}
-            <div className="bg-[var(--color-surface-alt)] border border-[var(--color-border)] rounded-lg p-4 text-left text-xs space-y-2">
+            {/* Resumen de cita */}
+            <div className="bg-[var(--color-surface-alt)] border border-[var(--color-border)] rounded-xl p-4 text-left text-xs space-y-2">
               <p className="label-caps text-[var(--color-text-muted)] text-[10px] tracking-wider">
-                Resumen de solicitud
+                Detalles de tu Visita
               </p>
               <div className="grid grid-cols-2 gap-2 text-[var(--color-text-secondary)]">
                 <div>
@@ -292,10 +271,8 @@ export function PrequalificationForm({
                   <span className="font-semibold text-[var(--color-text)]">{createdLead.fullName}</span>
                 </div>
                 <div>
-                  <span className="text-[var(--color-text-muted)] block text-[10px]">Canal de confirmación:</span>
-                  <span className="font-semibold text-[var(--color-text)] capitalize">
-                    {createdLead.preferredChannel} • {createdLead.appointmentRequest?.timeSlot || createdLead.preferredContactTime}
-                  </span>
+                  <span className="text-[var(--color-text-muted)] block text-[10px]">Teléfono:</span>
+                  <span className="font-semibold text-[var(--color-text)]">{createdLead.phone}</span>
                 </div>
                 <div>
                   <span className="text-[var(--color-text-muted)] block text-[10px]">Forma de compra:</span>
@@ -304,51 +281,26 @@ export function PrequalificationForm({
                   </span>
                 </div>
                 <div>
-                  <span className="text-[var(--color-text-muted)] block text-[10px]">Estado de registro NSS:</span>
-                  <span className="font-semibold text-[var(--color-text)]">
-                    {createdLead.attributionStatus === 'pendiente_inmobiliaria'
-                      ? 'NSS recibido en web (Pendiente de registro en inmobiliaria)'
-                      : createdLead.attributionStatus === 'pendiente_nss'
-                      ? 'Pendiente de orientación previa'
-                      : 'No aplica para este esquema'}
+                  <span className="text-[var(--color-text-muted)] block text-[10px]">Cita Agendada:</span>
+                  <span className="font-semibold text-emerald-700 dark:text-emerald-400">
+                    {createdLead.appointmentRequest?.preferredDate} a las {createdLead.appointmentRequest?.timeSlot}
                   </span>
                 </div>
-                {createdLead.appointmentRequest && (
-                  <div className="col-span-2 pt-1.5 border-t border-[var(--color-border)]">
-                    <span className="text-[var(--color-text-muted)] block text-[10px]">Visita solicitada:</span>
-                    <span className="font-semibold text-[var(--color-text)]">
-                      Fecha propuesta: {createdLead.appointmentRequest.preferredDate} ({createdLead.appointmentRequest.timeSlot})
-                    </span>
-                  </div>
-                )}
               </div>
             </div>
 
-            {/* Botón Principal de WhatsApp Inmediato */}
+            {/* Botón de WhatsApp directo */}
             {(() => {
-              const financingLabel = createdLead.financingType === 'infonavit'
-                ? 'Crédito Infonavit'
-                : createdLead.financingType === 'bancario'
-                ? 'Crédito Hipotecario Bancario'
-                : createdLead.financingType === 'contado'
-                ? 'Recursos Propios / Contado'
-                : 'Orientación personalizada';
-
-              const visitDetails = createdLead.appointmentRequest
-                ? `\u2022 *Visita propuesta:* ${createdLead.appointmentRequest.preferredDate} (${createdLead.appointmentRequest.timeSlot})\n`
-                : '';
-
+              const cleanWa = commercialConfig.contactChannels.whatsapp.replace(/\D/g, '');
               const waMessage = encodeURIComponent(
-                `¡Hola! Acabo de registrar mi solicitud para conocer el *Modelo Águila Premier* en *Valle de los Encinos*.\n\n` +
-                `\u2022 *Folio de solicitud:* ${createdLead.folio}\n` +
-                `\u2022 *Nombre:* ${createdLead.fullName}\n` +
-                `\u2022 *Celular:* ${createdLead.phone}\n` +
-                `\u2022 *Forma de compra:* ${financingLabel}\n` +
-                visitDetails +
-                `\n¿Podrían confirmarme la disponibilidad para recibirme en la casa muestra? ¡Muchas gracias!`
+                `¡Hola! Acabo de registrar mi solicitud de cita para conocer las casas muestra en ${commercialConfig.agencyName}.\n\n` +
+                `• *Folio:* ${createdLead.folio}\n` +
+                `• *Nombre:* ${createdLead.fullName}\n` +
+                `• *Fecha y hora de visita:* ${createdLead.appointmentRequest?.preferredDate} a las ${createdLead.appointmentRequest?.timeSlot}\n\n` +
+                `¿Me podrían compartir la ubicación exacta por GPS para llegar a la caseta? ¡Muchas gracias!`
               );
 
-              const directWaUrl = `https://wa.me/${COMMERCIAL_CONFIG.contactChannels.whatsapp}?text=${waMessage}`;
+              const directWaUrl = `https://wa.me/${cleanWa}?text=${waMessage}`;
 
               return (
                 <div className="space-y-3 pt-2">
@@ -356,36 +308,32 @@ export function PrequalificationForm({
                     href={directWaUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="w-full bg-[#25D366] hover:bg-[#20bd5a] text-white font-semibold py-3 px-4 rounded text-sm sm:text-base transition flex items-center justify-center gap-2.5 shadow cursor-pointer"
+                    className="w-full bg-[#25D366] hover:bg-[#20bd5a] text-white font-bold py-3.5 px-4 rounded-xl text-sm sm:text-base transition flex items-center justify-center gap-2.5 shadow cursor-pointer"
                   >
                     <WhatsAppIcon className="w-5 h-5 flex-shrink-0" />
-                    <span>Enviar solicitud por WhatsApp a mi asesor</span>
+                    <span>Confirmar Cita por WhatsApp con mi Asesor</span>
                   </a>
-                  <p className="text-[11px] text-[var(--color-text-muted)]">
-                    Tu mensaje se abrirá con el folio y tus datos para acordar la visita de inmediato.
-                  </p>
                 </div>
               );
             })()}
 
-            {/* Botón de cerrar */}
             <div className="pt-2 border-t border-[var(--color-border)]">
               <button
                 onClick={resetFormAndClose}
-                className="w-full bg-[var(--color-surface-alt)] hover:bg-[var(--color-border)] text-[var(--color-text)] font-semibold py-3 px-4 rounded text-sm transition cursor-pointer"
+                className="w-full bg-[var(--color-surface-alt)] hover:bg-[var(--color-border)] text-[var(--color-text)] font-semibold py-3 px-4 rounded-xl text-sm transition cursor-pointer"
               >
                 Cerrar y volver a la página principal
               </button>
             </div>
           </div>
         ) : (
-          /* FORMULARIO POR PASOS */
+          /* FORMULARIO EN 3 PASOS */
           <div className="space-y-6">
-            {/* Header con progreso - pr-12 para evitar cualquier solapamiento con la X */}
+            {/* Header con indicador de 3 pasos */}
             <div className="pr-12">
               <div className="flex justify-between items-center text-xs text-slate-700 dark:text-slate-300 font-medium mb-2">
                 <span className="font-semibold text-xs tracking-wider uppercase">
-                  Paso {currentStepForProgress} de {totalSteps}
+                  Paso {step} de {totalSteps} — {step === 1 ? 'Modelo y Crédito' : step === 2 ? 'Tus Datos' : 'Fecha y Hora'}
                 </span>
                 <span className="font-serif font-bold text-[var(--color-accent)] text-base">{progressPercent}%</span>
               </div>
@@ -397,84 +345,66 @@ export function PrequalificationForm({
               </div>
             </div>
 
-            {/* PASO 1: QUÉ BUSCA (Zona, Propiedad, Presupuesto, Forma de compra, Plazo) */}
+            {/* PASO 1: MODELO Y FORMA DE COMPRA */}
             {step === 1 && (
               <div className="space-y-5">
                 <div>
                   <span className="text-[11px] font-bold uppercase tracking-wider text-[var(--color-accent)] block mb-1">
-                    Preferencia inicial
+                    Paso 1 de 3
                   </span>
                   <h2 id="form-modal-title" className="font-serif text-xl sm:text-2xl font-bold text-slate-900 dark:text-white leading-tight">
-                    ¿Qué buscas y cómo planeas comprar?
+                    ¿Qué modelo te interesa y cómo planeas adquirirlo?
                   </h2>
                   <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 mt-1">
-                    Comparte tus preferencias para coordinar opciones acordes a tus planes.
+                    Selecciona tu modelo favorito y el esquema de crédito con el que te gustaría comprar.
                   </p>
                 </div>
 
-                {/* Zona o Propiedad */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                  <div className="space-y-1.5">
-                    <label className="block text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-100">
-                      Ubicación y Fraccionamiento <span className="text-red-500">*</span>
-                    </label>
-                    <select
-                      value={zone}
-                      onChange={(e) => setZone(e.target.value)}
-                      className="w-full px-3.5 py-2.5 rounded border border-slate-300 dark:border-slate-600 text-xs sm:text-sm bg-white dark:bg-[#0B1E30] text-slate-900 dark:text-white font-medium focus:border-[var(--color-accent)] focus:ring-2 focus:ring-[var(--color-accent)]/20 focus:outline-none"
-                    >
-                      <option value="Salinas Victoria, N.L. (Valle de los Encinos)">Salinas Victoria, N.L. (Valle de los Encinos)</option>
-                    </select>
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <label className="block text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-100">
-                      Modelo seleccionado
-                    </label>
-                    <select
-                      value={propertyId}
-                      onChange={(e) => setPropertyId(e.target.value)}
-                      className="w-full px-3.5 py-2.5 rounded border border-slate-300 dark:border-slate-600 text-xs sm:text-sm bg-white dark:bg-[#0B1E30] text-slate-900 dark:text-white font-medium focus:border-[var(--color-accent)] focus:ring-2 focus:ring-[var(--color-accent)]/20 focus:outline-none"
-                    >
-                      {availableProperties.map((p) => (
-                        <option key={p.id} value={p.id}>
-                          {p.model} - {p.priceFormatted}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
+                {/* Selector de Modelo */}
+                <div className="space-y-1.5">
+                  <label className="block text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-100">
+                    Modelo de Vivienda en {commercialConfig.agencyName}
+                  </label>
+                  <select
+                    value={propertyId}
+                    onChange={(e) => setPropertyId(e.target.value)}
+                    className="w-full px-4 py-3 rounded-xl border border-slate-300 dark:border-slate-600 text-sm bg-white dark:bg-[#0B1E30] text-slate-900 dark:text-white font-medium focus:border-[var(--color-accent)] focus:ring-2 focus:ring-[var(--color-accent)]/20 focus:outline-none"
+                  >
+                    {availableProperties.map((p) => (
+                      <option key={p.id} value={p.id}>
+                        {p.model} — {p.priceFormatted} ({p.bedrooms} Recámaras, {p.bathrooms} Baños)
+                      </option>
+                    ))}
+                  </select>
                 </div>
 
-                {/* Forma de compra */}
+                {/* Forma de Compra */}
                 <div className="space-y-2">
                   <label className="block text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-100">
-                    Forma de compra prevista <span className="text-red-500">*</span>
+                    Forma de adquisición o tipo de crédito <span className="text-red-500">*</span>
                   </label>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                     {[
-                      { id: 'infonavit', label: 'Crédito Infonavit' },
-                      { id: 'bancario', label: 'Crédito Hipotecario Bancario' },
-                      { id: 'contado', label: 'Recursos Propios / Contado' },
-                      { id: 'necesita_orientacion', label: 'Necesito orientación' },
+                      { id: 'infonavit', label: 'Crédito Infonavit', desc: 'Tradicional, Total o Segundo Crédito' },
+                      { id: 'fovissste', label: 'FOVISSSTE / ISSSTE', desc: 'Para trabajadores del Estado' },
+                      { id: 'bancario', label: 'Crédito Bancario', desc: 'Con cualquier banco o Cofinavit' },
+                      { id: 'contado', label: 'Recursos Propios / Contado', desc: 'Liquidación directa sin financiamiento' },
                     ].map((f) => (
                       <button
                         key={f.id}
                         type="button"
                         onClick={() => {
                           setFinancingType(f.id as FinancingType);
-                          if (f.id === 'necesita_orientacion') {
-                            setNeedsOrientation(true);
-                          } else {
-                            setNeedsOrientation(false);
-                          }
+                          setSkipIdentifierForOrientation(false);
                         }}
-                        className={`p-3 rounded text-xs sm:text-sm text-left transition cursor-pointer border ${
+                        className={`p-3.5 rounded-xl text-left transition cursor-pointer border ${
                           financingType === f.id
                             ? 'border-2 border-[var(--color-navy)] dark:border-[var(--color-accent)] bg-slate-100 dark:bg-[#16324D] text-slate-900 dark:text-[var(--color-accent)] font-bold shadow-xs'
-                            : 'border-slate-300 dark:border-slate-700 bg-white dark:bg-[#0E2236] text-slate-800 dark:text-slate-200 hover:border-slate-400 dark:hover:border-slate-500 font-medium'
+                            : 'border-slate-300 dark:border-slate-700 bg-white dark:bg-[#0E2236] text-slate-800 dark:text-slate-200 hover:border-slate-400 font-medium'
                         }`}
                       >
-                        {f.label}
+                        <p className="text-xs sm:text-sm font-bold">{f.label}</p>
+                        <p className="text-[11px] opacity-75 mt-0.5 font-normal">{f.desc}</p>
                       </button>
                     ))}
                   </div>
@@ -482,150 +412,210 @@ export function PrequalificationForm({
                     <p className="text-xs font-semibold text-red-600 dark:text-red-400">{errors.financingType}</p>
                   )}
                 </div>
-
-                {/* Presupuesto */}
-                <div className="space-y-2">
-                  <label className="block text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-100">
-                    Rango de presupuesto aproximado
-                  </label>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                    {[
-                      { id: 'hasta_1.2m', label: 'Hasta $1.2M MXN' },
-                      { id: '1.2m_a_1.6m', label: '$1.2M a $1.6M MXN' },
-                      { id: '1.6m_a_2.2m', label: '$1.6M a $2.2M MXN' },
-                      { id: 'mas_de_2.2m', label: 'Más de $2.2M MXN' },
-                      { id: 'aun_no_lo_se', label: 'Aún no lo sé' },
-                    ].map((b) => (
-                      <button
-                        key={b.id}
-                        type="button"
-                        onClick={() => setBudgetRange(b.id as BudgetRange)}
-                        className={`p-2.5 rounded text-xs sm:text-sm text-center transition cursor-pointer border ${
-                          budgetRange === b.id
-                            ? 'border-2 border-[var(--color-navy)] dark:border-[var(--color-accent)] bg-slate-100 dark:bg-[#16324D] text-slate-900 dark:text-[var(--color-accent)] font-bold shadow-xs'
-                            : 'border-slate-300 dark:border-slate-700 bg-white dark:bg-[#0E2236] text-slate-800 dark:text-slate-200 hover:border-slate-400 dark:hover:border-slate-500 font-medium'
-                        }`}
-                      >
-                        {b.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Plazo aproximado */}
-                <div className="space-y-2">
-                  <label className="block text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-100">
-                    Plazo aproximado de compra
-                  </label>
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                    {[
-                      { id: 'inmediato', label: '< 30 días' },
-                      { id: 'corto', label: '1 a 3 meses' },
-                      { id: 'medio', label: '3 a 6 meses' },
-                      { id: 'explorando', label: 'Explorando' },
-                    ].map((t) => (
-                      <button
-                        key={t.id}
-                        type="button"
-                        onClick={() => setPurchaseTimeline(t.id as PurchaseTimeline)}
-                        className={`py-2.5 px-2 rounded text-xs sm:text-sm text-center transition cursor-pointer border ${
-                          purchaseTimeline === t.id
-                            ? 'border-2 border-[var(--color-navy)] dark:border-[var(--color-accent)] bg-slate-100 dark:bg-[#16324D] text-slate-900 dark:text-[var(--color-accent)] font-bold shadow-xs'
-                            : 'border-slate-300 dark:border-slate-700 bg-white dark:bg-[#0E2236] text-slate-800 dark:text-slate-200 hover:border-slate-400 dark:hover:border-slate-500 font-medium'
-                        }`}
-                      >
-                        {t.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
               </div>
             )}
 
-            {/* PASO 2: DATOS DE CONTACTO */}
+            {/* PASO 2: DATOS DE CONTACTO Y PRECALIFICACIÓN (NSS / CURP) */}
             {step === 2 && (
               <div className="space-y-5">
                 <div>
                   <span className="text-[11px] font-bold uppercase tracking-wider text-[var(--color-accent)] block mb-1">
-                    Contacto directo
+                    Paso 2 de 3
                   </span>
                   <h2 className="font-serif text-xl sm:text-2xl font-bold text-slate-900 dark:text-white leading-tight">
-                    Datos para coordinar tu atención
+                    Tus Datos y Precalificación
                   </h2>
                   <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 mt-1">
-                    Utilizaremos estos datos para atender tu solicitud y confirmar tu cita directamente por WhatsApp.
+                    {requiresNss
+                      ? 'Ingresa tu NSS para consultar tus puntos Infonavit y blindar tu atención con el asesor.'
+                      : requiresCurp
+                      ? 'Ingresa tu CURP para consultar tu crédito FOVISSSTE / ISSSTE disponible.'
+                      : 'Datos para comunicarnos y recibirte personalmente en la casa muestra.'}
                   </p>
                 </div>
 
                 {/* Nombre */}
                 <div className="space-y-1.5">
                   <label className="block text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-100">
-                    Nombre y Apellidos <span className="text-red-500">*</span>
+                    Nombre Completo <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"
+                    id="prequal_name"
+                    name="name"
+                    autoComplete="name"
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
                     placeholder="Ej. Alejandro Morales"
-                    className={`w-full px-4 py-3 rounded border text-sm sm:text-base bg-white dark:bg-[#0B1E30] text-slate-900 dark:text-white font-medium focus:border-[var(--color-accent)] focus:ring-2 focus:ring-[var(--color-accent)]/20 focus:outline-none shadow-xs ${
+                    className={`w-full px-4 py-3 rounded-xl border text-sm sm:text-base bg-white dark:bg-[#0B1E30] text-slate-900 dark:text-white font-medium focus:border-[var(--color-accent)] focus:ring-2 focus:ring-[var(--color-accent)]/20 focus:outline-none shadow-xs ${
                       errors.fullName ? 'border-red-500 bg-red-50/10' : 'border-slate-300 dark:border-slate-600'
                     }`}
                   />
                   {errors.fullName && <p className="text-xs font-semibold text-red-600 dark:text-red-400">{errors.fullName}</p>}
                 </div>
 
-                {/* Teléfono */}
+                {/* Teléfono / WhatsApp */}
                 <div className="space-y-1.5">
                   <label className="block text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-100">
                     Teléfono Celular / WhatsApp <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="tel"
+                    id="prequal_tel"
+                    name="tel"
                     inputMode="tel"
+                    autoComplete="tel"
                     maxLength={10}
                     value={phone}
                     onChange={(e) => setPhone(e.target.value.replace(/\D/g, ''))}
                     placeholder="10 dígitos (Ej. 5512345678)"
-                    className={`w-full px-4 py-3 rounded border text-sm sm:text-base bg-white dark:bg-[#0B1E30] text-slate-900 dark:text-white font-medium focus:border-[var(--color-accent)] focus:ring-2 focus:ring-[var(--color-accent)]/20 focus:outline-none shadow-xs ${
+                    className={`w-full px-4 py-3 rounded-xl border text-sm sm:text-base bg-white dark:bg-[#0B1E30] text-slate-900 dark:text-white font-medium focus:border-[var(--color-accent)] focus:ring-2 focus:ring-[var(--color-accent)]/20 focus:outline-none shadow-xs ${
                       errors.phone ? 'border-red-500 bg-red-50/10' : 'border-slate-300 dark:border-slate-600'
                     }`}
                   />
                   {errors.phone && <p className="text-xs font-semibold text-red-600 dark:text-red-400">{errors.phone}</p>}
                 </div>
 
-                {/* Canal de confirmación y Correo */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                  <div className="space-y-1.5">
-                    <label className="block text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-100">
-                      Canal de confirmación
-                    </label>
-                    <select
-                      value={preferredChannel}
-                      onChange={(e) => setPreferredChannel(e.target.value as ContactChannel)}
-                      className="w-full px-3.5 py-3 rounded border border-slate-300 dark:border-slate-600 text-xs sm:text-sm bg-white dark:bg-[#0B1E30] text-slate-900 dark:text-white font-medium focus:border-[var(--color-accent)] focus:ring-2 focus:ring-[var(--color-accent)]/20 focus:outline-none"
-                    >
-                      <option value="whatsapp">Mensaje por WhatsApp (Recomendado)</option>
-                      <option value="llamada">Llamada telefónica</option>
-                      <option value="correo">Correo electrónico</option>
-                    </select>
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <label className="block text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-100">
-                      Correo Electrónico <span className="text-slate-500 dark:text-slate-400 font-normal text-xs">(Opcional)</span>
-                    </label>
-                    <input
-                      type="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      placeholder="tucorreo@ejemplo.com"
-                      className="w-full px-3.5 py-3 rounded border border-slate-300 dark:border-slate-600 text-xs sm:text-sm bg-white dark:bg-[#0B1E30] text-slate-900 dark:text-white font-medium focus:border-[var(--color-accent)] focus:ring-2 focus:ring-[var(--color-accent)]/20 focus:outline-none"
-                    />
-                  </div>
+                {/* Correo Electrónico Opcional */}
+                <div className="space-y-1.5">
+                  <label className="block text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-100">
+                    Correo Electrónico <span className="text-slate-500 dark:text-slate-400 font-normal text-xs">(Opcional)</span>
+                  </label>
+                  <input
+                    type="email"
+                    id="prequal_email"
+                    name="email"
+                    autoComplete="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="tucorreo@ejemplo.com"
+                    className="w-full px-4 py-3 rounded-xl border border-slate-300 dark:border-slate-600 text-sm bg-white dark:bg-[#0B1E30] text-slate-900 dark:text-white font-medium focus:border-[var(--color-accent)] focus:ring-2 focus:ring-[var(--color-accent)]/20 focus:outline-none"
+                  />
                 </div>
 
-                {/* Consentimientos */}
-                <div className="space-y-2.5 pt-3 border-t border-slate-200 dark:border-slate-700">
+                {/* BLOQUE DINÁMICO SEGÚN CRÉDITO: INFONAVIT (NSS) */}
+                {requiresNss && (
+                  <div className="bg-slate-100 dark:bg-[#0E2236] border border-slate-200 dark:border-slate-700 rounded-xl p-4 space-y-3">
+                    <div className="flex items-center gap-2 text-slate-900 dark:text-white font-bold text-xs uppercase tracking-wider">
+                      <Lock className="w-4 h-4 text-amber-500" />
+                      <span>Número de Seguridad Social (NSS)</span>
+                    </div>
+
+                    {!skipIdentifierForOrientation ? (
+                      <div className="space-y-2">
+                        <input
+                          type="text"
+                          inputMode="numeric"
+                          maxLength={11}
+                          value={nssInput}
+                          onChange={(e) => setNssInput(e.target.value.replace(/\D/g, ''))}
+                          placeholder="11 dígitos numéricos"
+                          className={`w-full px-4 py-3 rounded-xl border-2 text-base sm:text-lg font-mono tracking-widest font-bold focus:border-[var(--color-accent)] focus:outline-none ${
+                            errors.nss
+                              ? 'border-red-500 bg-red-50/10'
+                              : 'border-slate-300 dark:border-slate-600 bg-white dark:bg-[#0B1E30] text-slate-900 dark:text-white'
+                          }`}
+                        />
+                        <div className="flex justify-between text-xs text-slate-500 dark:text-slate-400">
+                          <span>Conserva ceros iniciales</span>
+                          <span className={nssInput.length === 11 ? 'text-emerald-600 dark:text-emerald-400 font-bold' : ''}>
+                            {nssInput.length} / 11 dígitos
+                          </span>
+                        </div>
+                        {errors.nss && <p className="text-xs font-semibold text-red-600 dark:text-red-400">{errors.nss}</p>}
+
+                        <p className="text-[11px] text-slate-600 dark:text-slate-400 leading-relaxed">
+                          🛡️ Tu NSS no inicia ningún trámite sin tu consentimiento ni te compromete a comprar. Garantiza la atención personalizada de tu asesor durante 15 días.
+                        </p>
+
+                        <button
+                          type="button"
+                          onClick={() => setSkipIdentifierForOrientation(true)}
+                          className="text-xs text-[var(--color-navy)] dark:text-[var(--color-accent)] underline font-semibold block pt-1 cursor-pointer"
+                        >
+                          ¿No lo tienes a la mano? Solicitar orientación previa &rarr;
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="text-xs text-slate-600 dark:text-slate-300 space-y-1">
+                        <p className="font-semibold text-slate-900 dark:text-white">Has elegido orientación previa sin NSS.</p>
+                        <p>Tu asesor te apoyará a consultarlo directamente durante la asesoría.</p>
+                        <button
+                          type="button"
+                          onClick={() => setSkipIdentifierForOrientation(false)}
+                          className="text-xs text-[var(--color-navy)] dark:text-[var(--color-accent)] underline font-bold pt-1 cursor-pointer"
+                        >
+                          Prefiero ingresar mi NSS ahora
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* BLOQUE DINÁMICO SEGÚN CRÉDITO: FOVISSSTE / ISSSTE (CURP) */}
+                {requiresCurp && (
+                  <div className="bg-slate-100 dark:bg-[#0E2236] border border-slate-200 dark:border-slate-700 rounded-xl p-4 space-y-3">
+                    <div className="flex items-center gap-2 text-slate-900 dark:text-white font-bold text-xs uppercase tracking-wider">
+                      <ShieldCheck className="w-4 h-4 text-emerald-500" />
+                      <span>Clave Única de Registro de Población (CURP)</span>
+                    </div>
+
+                    {!skipIdentifierForOrientation ? (
+                      <div className="space-y-2">
+                        <input
+                          type="text"
+                          maxLength={18}
+                          value={curpInput}
+                          onChange={(e) => setCurpInput(e.target.value.toUpperCase())}
+                          placeholder="18 caracteres alfanuméricos"
+                          className={`w-full px-4 py-3 rounded-xl border-2 text-base sm:text-lg font-mono tracking-widest font-bold uppercase focus:border-[var(--color-accent)] focus:outline-none ${
+                            errors.curp
+                              ? 'border-red-500 bg-red-50/10'
+                              : 'border-slate-300 dark:border-slate-600 bg-white dark:bg-[#0B1E30] text-slate-900 dark:text-white'
+                          }`}
+                        />
+                        <div className="flex justify-between text-xs text-slate-500 dark:text-slate-400">
+                          <span>Requerido para precalificación FOVISSSTE</span>
+                          <span className={curpInput.trim().length === 18 ? 'text-emerald-600 dark:text-emerald-400 font-bold' : ''}>
+                            {curpInput.trim().length} / 18 caracteres
+                          </span>
+                        </div>
+                        {errors.curp && <p className="text-xs font-semibold text-red-600 dark:text-red-400">{errors.curp}</p>}
+
+                        <button
+                          type="button"
+                          onClick={() => setSkipIdentifierForOrientation(true)}
+                          className="text-xs text-[var(--color-navy)] dark:text-[var(--color-accent)] underline font-semibold block pt-1 cursor-pointer"
+                        >
+                          ¿No la tienes a la mano? Solicitar orientación previa &rarr;
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="text-xs text-slate-600 dark:text-slate-300 space-y-1">
+                        <p className="font-semibold text-slate-900 dark:text-white">Has elegido orientación previa sin CURP.</p>
+                        <p>Tu asesor te ayudará a precalificar tu crédito FOVISSSTE directamente.</p>
+                        <button
+                          type="button"
+                          onClick={() => setSkipIdentifierForOrientation(false)}
+                          className="text-xs text-[var(--color-navy)] dark:text-[var(--color-accent)] underline font-bold pt-1 cursor-pointer"
+                        >
+                          Prefiero ingresar mi CURP ahora
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* NOTA PARA BANCARIO O CONTADO */}
+                {!requiresNss && !requiresCurp && (
+                  <div className="bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 rounded-xl p-3.5 text-xs text-emerald-900 dark:text-emerald-200 flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
+                    <span>Para crédito bancario o pago de contado no requieres NSS ni CURP para programar tu visita.</span>
+                  </div>
+                )}
+
+                {/* Consentimiento */}
+                <div className="pt-2 border-t border-slate-200 dark:border-slate-700">
                   <label className="flex items-start gap-2.5 cursor-pointer text-xs sm:text-sm text-slate-800 dark:text-slate-200">
                     <input
                       type="checkbox"
@@ -646,243 +636,88 @@ export function PrequalificationForm({
                     </span>
                   </label>
                   {errors.privacy && <p className="text-xs font-semibold text-red-600 dark:text-red-400 pl-6">{errors.privacy}</p>}
-
-                  <label className="flex items-start gap-2.5 cursor-pointer text-xs text-slate-600 dark:text-slate-400">
-                    <input
-                      type="checkbox"
-                      checked={marketingConsentAccepted}
-                      onChange={(e) => setMarketingConsentAccepted(e.target.checked)}
-                      className="mt-0.5 h-4 w-4 rounded border-slate-300 text-[var(--color-navy)] focus:ring-[var(--color-accent)]"
-                    />
-                    <span>
-                      (Opcional) Acepto recibir novedades sobre nuevos modelos o promociones futuras.
-                    </span>
-                  </label>
                 </div>
               </div>
             )}
 
-            {/* PASO 3: REGISTRO INTERNO CON NSS */}
-            {step === 3 && requiresNssStep && (
-              <div className="space-y-5">
-                <div>
-                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded text-xs font-bold bg-slate-100 dark:bg-[#16324D] text-slate-900 dark:text-[var(--color-accent)] mb-2 border border-slate-200 dark:border-slate-700">
-                    <Lock className="w-3.5 h-3.5 text-[var(--color-accent)]" />
-                    <span>Registro interno de atención (Infonavit)</span>
-                  </div>
-                  <h2 className="font-serif text-xl sm:text-2xl font-bold text-slate-900 dark:text-white leading-tight">
-                    Registro de atención con tu asesor
-                  </h2>
-                </div>
-
-                {/* TEXTO EXACTO PROPUESTO PARA LA FINALIDAD DEL NSS */}
-                <div className="bg-slate-100 dark:bg-[#0E2236] border border-slate-200 dark:border-slate-700 rounded-lg p-4 text-xs sm:text-sm text-slate-800 dark:text-slate-200 space-y-2">
-                  <p className="leading-relaxed font-semibold text-slate-900 dark:text-white">
-                    Utilizaremos tu NSS para solicitar tu registro en el sistema interno de{' '}
-                    <strong>{COMMERCIAL_CONFIG.agencyName}</strong> y asignar a{' '}
-                    <strong>{COMMERCIAL_CONFIG.advisorName}</strong> la atribución comercial de tu atención durante 15 días, conforme a sus reglas.
-                  </p>
-                  <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-                    Este registro se utiliza para la asignación interna de comisión; <strong>no inicia un trámite ni una consulta de crédito y no te obliga a comprar</strong>.
-                  </p>
-                </div>
-
-                {!skipNssForOrientation ? (
-                  <div className="space-y-3.5">
-                    <div className="space-y-1.5">
-                      <label className="block text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-100">
-                        Número de Seguridad Social (NSS - 11 dígitos)
-                      </label>
-                      <input
-                        type="text"
-                        inputMode="numeric"
-                        maxLength={11}
-                        value={nssInput}
-                        onChange={(e) => setNssInput(e.target.value.replace(/\D/g, ''))}
-                        placeholder="02894711823"
-                        className={`w-full px-4 py-3.5 rounded border-2 text-lg sm:text-xl tracking-widest font-mono font-bold focus:border-[var(--color-accent)] focus:outline-none shadow-xs ${
-                          errors.nss
-                            ? 'border-red-500 bg-red-50/10'
-                            : 'border-slate-300 dark:border-slate-600 bg-white dark:bg-[#0B1E30] text-slate-900 dark:text-white'
-                        }`}
-                      />
-                      <div className="flex justify-between text-xs text-slate-600 dark:text-slate-400 font-medium">
-                        <span>Conserva ceros iniciales como texto</span>
-                        <span className={nssInput.length === 11 ? 'text-[var(--color-accent)] font-bold' : ''}>
-                          {nssInput.length} / 11 dígitos
-                        </span>
-                      </div>
-                      {errors.nss && <p className="text-xs font-semibold text-red-600 dark:text-red-400">{errors.nss}</p>}
-                    </div>
-
-                    {/* Alternativa visible obligatoria: Orientación previa */}
-                    <div className="pt-2 text-center border-t border-slate-200 dark:border-slate-700">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setSkipNssForOrientation(true);
-                          setErrors({});
-                        }}
-                        className="text-xs sm:text-sm text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white underline font-semibold cursor-pointer"
-                      >
-                        Prefiero recibir orientación antes de registrarme &rarr;
-                      </button>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="bg-slate-100 dark:bg-[#0E2236] border border-slate-200 dark:border-slate-700 rounded-lg p-4 text-center space-y-2">
-                    <p className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white">
-                      Has elegido recibir orientación antes de registrarte
-                    </p>
-                    <p className="text-xs text-slate-600 dark:text-slate-300">
-                      Tu solicitud se registrará como pendiente de orientación. El asesor te contactará para resolver tus dudas sin registrar aún tu NSS en la inmobiliaria.
-                    </p>
-                    <button
-                      type="button"
-                      onClick={() => setSkipNssForOrientation(false)}
-                      className="text-xs sm:text-sm text-[var(--color-navy)] dark:text-[var(--color-accent)] font-bold underline cursor-pointer"
-                    >
-                      Deseo ingresar mi NSS para el registro de atención
-                    </button>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* PASO 4: PREFERENCIA DE VISITA */}
-            {step === 4 && (
+            {/* PASO 3: FECHA Y HORA EXACTA DE VISITA */}
+            {step === 3 && (
               <div className="space-y-5">
                 <div>
                   <span className="text-[11px] font-bold uppercase tracking-wider text-[var(--color-accent)] block mb-1">
-                    Agenda preliminar
+                    Paso 3 de 3
                   </span>
                   <h2 className="font-serif text-xl sm:text-2xl font-bold text-slate-900 dark:text-white leading-tight">
-                    Paso {requiresNssStep ? '4' : '3'}: Preferencia de Visita
+                    ¿Qué día y hora deseas visitar la Casa Muestra?
                   </h2>
                   <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 mt-1">
-                    El asesor revisará la disponibilidad y te contactará por WhatsApp para confirmar la visita.
+                    Contamos con personal suficiente para atenderte en el horario exacto que elijas.
                   </p>
                 </div>
 
-                <div className="space-y-4">
-                  {/* Modalidad */}
-                  <div className="space-y-1.5">
-                    <label className="block text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-100">
-                      Modalidad de visita
-                    </label>
-                    <div className="grid grid-cols-2 gap-2.5">
-                      <button
-                        type="button"
-                        onClick={() => setAppointmentModality('presencial')}
-                        className={`p-3.5 rounded text-xs sm:text-sm font-semibold text-center transition cursor-pointer border ${
-                          appointmentModality === 'presencial'
-                            ? 'border-2 border-[var(--color-navy)] dark:border-[var(--color-accent)] bg-slate-100 dark:bg-[#16324D] text-slate-900 dark:text-[var(--color-accent)] font-bold shadow-xs'
-                            : 'border-slate-300 dark:border-slate-700 bg-white dark:bg-[#0E2236] text-slate-800 dark:text-slate-200 hover:border-slate-400 dark:hover:border-slate-500'
-                        }`}
-                      >
-                        🏡 Recorrido en Casa Muestra
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setAppointmentModality('virtual')}
-                        className={`p-3.5 rounded text-xs sm:text-sm font-semibold text-center transition cursor-pointer border ${
-                          appointmentModality === 'virtual'
-                            ? 'border-2 border-[var(--color-navy)] dark:border-[var(--color-accent)] bg-slate-100 dark:bg-[#16324D] text-slate-900 dark:text-[var(--color-accent)] font-bold shadow-xs'
-                            : 'border-slate-300 dark:border-slate-700 bg-white dark:bg-[#0E2236] text-slate-800 dark:text-slate-200 hover:border-slate-400 dark:hover:border-slate-500'
-                        }`}
-                      >
-                        💻 Asesoría Virtual por Video
-                      </button>
-                    </div>
-                  </div>
+                {/* Selector de Fecha */}
+                <div className="space-y-1.5">
+                  <label className="block text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
+                    <Calendar className="w-4 h-4 text-[var(--color-accent)]" />
+                    <span>Selecciona la Fecha de tu Visita</span> <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="date"
+                    value={preferredDate}
+                    min={new Date().toISOString().split('T')[0]}
+                    onChange={(e) => setPreferredDate(e.target.value)}
+                    className={`w-full px-4 py-3.5 rounded-xl border text-sm sm:text-base font-semibold bg-white dark:bg-[#0B1E30] text-slate-900 dark:text-white focus:border-[var(--color-accent)] focus:ring-2 focus:ring-[var(--color-accent)]/20 focus:outline-none shadow-xs ${
+                      errors.preferredDate ? 'border-red-500 bg-red-50/10' : 'border-slate-300 dark:border-slate-600'
+                    }`}
+                  />
+                  {errors.preferredDate && (
+                    <p className="text-xs font-semibold text-red-600 dark:text-red-400">{errors.preferredDate}</p>
+                  )}
+                </div>
 
-                  {/* Día preferido */}
-                  <div className="space-y-1.5">
-                    <div className="flex items-center justify-between">
-                      <label className="block text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-100">
-                        Día tentativo preferido <span className="text-red-500">*</span>
-                      </label>
-                      <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">Acceso rápido:</span>
-                    </div>
-
-                    {/* Chips de 1 solo click */}
-                    <div className="flex gap-2 mb-1.5">
+                {/* Selector de Hora Exacta */}
+                <div className="space-y-2">
+                  <label className="block text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
+                    <Clock className="w-4 h-4 text-[var(--color-accent)]" />
+                    <span>Hora Exacta de la Cita</span> <span className="text-red-500">*</span>
+                  </label>
+                  <div className="grid grid-cols-3 gap-2">
+                    {AVAILABLE_HOURS.map((hour) => (
                       <button
+                        key={hour}
                         type="button"
-                        onClick={() => setPreferredDate(getTomorrowDateStr())}
-                        className={`px-3.5 py-2 rounded text-xs sm:text-sm font-bold border transition cursor-pointer ${
-                          preferredDate === getTomorrowDateStr()
+                        onClick={() => setExactTime(hour)}
+                        className={`py-3 px-2 rounded-xl text-xs sm:text-sm font-bold text-center transition cursor-pointer border ${
+                          exactTime === hour
                             ? 'border-2 border-[var(--color-navy)] dark:border-[var(--color-accent)] bg-[var(--color-accent)] text-[var(--color-navy)] shadow-xs'
-                            : 'border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-[#0E2236] text-slate-800 dark:text-slate-200 hover:border-slate-400'
+                            : 'border-slate-300 dark:border-slate-700 bg-white dark:bg-[#0E2236] text-slate-800 dark:text-slate-200 hover:border-slate-400'
                         }`}
                       >
-                        ⚡ Mañana
+                        {hour}
                       </button>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setPreferredDate(getUpcomingWeekendStr());
-                          setTimeSlot('sabado_manana');
-                        }}
-                        className={`px-3.5 py-2 rounded text-xs sm:text-sm font-bold border transition cursor-pointer ${
-                          preferredDate === getUpcomingWeekendStr()
-                            ? 'border-2 border-[var(--color-navy)] dark:border-[var(--color-accent)] bg-[var(--color-accent)] text-[var(--color-navy)] shadow-xs'
-                            : 'border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-[#0E2236] text-slate-800 dark:text-slate-200 hover:border-slate-400'
-                        }`}
-                      >
-                        📅 Próximo Fin de Semana
-                      </button>
-                    </div>
-
-                    <input
-                      type="date"
-                      value={preferredDate}
-                      min={new Date().toISOString().split('T')[0]}
-                      onChange={(e) => setPreferredDate(e.target.value)}
-                      className={`w-full px-4 py-3 rounded border text-sm sm:text-base font-medium bg-white dark:bg-[#0B1E30] text-slate-900 dark:text-white focus:border-[var(--color-accent)] focus:ring-2 focus:ring-[var(--color-accent)]/20 focus:outline-none shadow-xs ${
-                        errors.preferredDate ? 'border-red-500 bg-red-50/10' : 'border-slate-300 dark:border-slate-600'
-                      }`}
-                    />
-                    {errors.preferredDate && (
-                      <p className="text-xs font-semibold text-red-600 dark:text-red-400">{errors.preferredDate}</p>
-                    )}
+                    ))}
                   </div>
+                  {errors.exactTime && (
+                    <p className="text-xs font-semibold text-red-600 dark:text-red-400">{errors.exactTime}</p>
+                  )}
+                </div>
 
-                  {/* Franja horaria */}
-                  <div className="space-y-1.5">
-                    <label className="block text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-100">
-                      Franja horaria estimada
-                    </label>
-                    <select
-                      value={timeSlot}
-                      onChange={(e) => setTimeSlot(e.target.value as '10:00 - 13:00' | '14:00 - 17:00' | '17:00 - 19:00' | 'sabado_manana')}
-                      className="w-full px-3.5 py-3 rounded border border-slate-300 dark:border-slate-600 text-xs sm:text-sm bg-white dark:bg-[#0B1E30] text-slate-900 dark:text-white font-medium focus:border-[var(--color-accent)] focus:ring-2 focus:ring-[var(--color-accent)]/20 focus:outline-none shadow-xs"
-                    >
-                      <option value="10:00 - 13:00">Por la mañana (10:00 AM - 1:00 PM)</option>
-                      <option value="14:00 - 17:00">Por la tarde (2:00 PM - 5:00 PM)</option>
-                      <option value="17:00 - 19:00">Al atardecer (5:00 PM - 7:00 PM)</option>
-                      <option value="sabado_manana">Fin de semana por la mañana</option>
-                    </select>
-                  </div>
+                {/* Comentarios Opcionales */}
+                <div className="space-y-1.5">
+                  <label className="block text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-100">
+                    Comentarios o peticiones especiales <span className="text-slate-500 dark:text-slate-400 font-normal text-xs">(Opcional)</span>
+                  </label>
+                  <textarea
+                    rows={2}
+                    value={appointmentNotes}
+                    onChange={(e) => setAppointmentNotes(e.target.value)}
+                    placeholder="Ej. Asistiré con mi familia; deseamos conocer también las amenidades del fraccionamiento."
+                    className="w-full px-4 py-3 rounded-xl border border-slate-300 dark:border-slate-600 text-xs sm:text-sm bg-white dark:bg-[#0B1E30] text-slate-900 dark:text-white font-medium focus:border-[var(--color-accent)] focus:ring-2 focus:ring-[var(--color-accent)]/20 focus:outline-none shadow-xs"
+                  ></textarea>
+                </div>
 
-                  {/* Comentarios */}
-                  <div className="space-y-1.5">
-                    <label className="block text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-100">
-                      Comentarios adicionales <span className="text-slate-500 dark:text-slate-400 font-normal text-xs">(Opcional)</span>
-                    </label>
-                    <textarea
-                      rows={2}
-                      value={appointmentNotes}
-                      onChange={(e) => setAppointmentNotes(e.target.value)}
-                      placeholder="Ej. Asistiré acompañado; busco orientación sobre crédito conyugal."
-                      className="w-full px-3.5 py-2.5 rounded border border-slate-300 dark:border-slate-600 text-xs sm:text-sm bg-white dark:bg-[#0B1E30] text-slate-900 dark:text-white font-medium focus:border-[var(--color-accent)] focus:ring-2 focus:ring-[var(--color-accent)]/20 focus:outline-none shadow-xs"
-                    ></textarea>
-                  </div>
-
-                  {/* Aclaración */}
-                  <div className="bg-slate-100 dark:bg-[#0E2236] rounded-lg p-3.5 text-xs sm:text-sm text-slate-700 dark:text-slate-300 leading-relaxed border border-slate-200 dark:border-slate-700">
-                    <strong className="text-slate-900 dark:text-white font-bold">Importante:</strong> Esta solicitud no representa un bloqueo definitivo. Tu asesor revisará la agenda y se comunicará contigo vía WhatsApp para confirmar los detalles.
-                  </div>
+                <div className="bg-slate-100 dark:bg-[#0E2236] rounded-xl p-3.5 text-xs text-slate-700 dark:text-slate-300 leading-relaxed border border-slate-200 dark:border-slate-700">
+                  <strong className="text-slate-900 dark:text-white font-bold">Punto de encuentro:</strong> Caseta principal de {commercialConfig.agencyName} ({commercialConfig.contactChannels.officeAddressNote || 'Calzada del Sol'}). Tu asesor te recibirá personalmente.
                 </div>
               </div>
             )}
@@ -893,7 +728,7 @@ export function PrequalificationForm({
                 <button
                   type="button"
                   onClick={handleBack}
-                  className="px-5 py-3 rounded border border-slate-300 dark:border-slate-600 text-slate-800 dark:text-slate-200 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 font-bold text-xs sm:text-sm transition flex items-center gap-1.5 cursor-pointer"
+                  className="px-5 py-3 rounded-xl border border-slate-300 dark:border-slate-600 text-slate-800 dark:text-slate-200 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 font-bold text-xs sm:text-sm transition flex items-center gap-1.5 cursor-pointer"
                 >
                   <ArrowLeft className="w-4 h-4" />
                   <span>Atrás</span>
@@ -905,9 +740,9 @@ export function PrequalificationForm({
               <button
                 type="button"
                 onClick={handleNext}
-                className="bg-[var(--color-accent)] hover:bg-[var(--color-accent-hover)] text-[var(--color-navy)] dark:text-[#0B1929] font-bold py-3 px-7 rounded text-sm sm:text-base transition flex items-center gap-2 cursor-pointer shadow"
+                className="bg-[var(--color-accent)] hover:bg-[var(--color-accent-hover)] text-[var(--color-navy)] dark:text-[#0B1929] font-bold py-3.5 px-8 rounded-xl text-sm sm:text-base transition flex items-center gap-2 cursor-pointer shadow"
               >
-                <span>{step === 4 ? 'Enviar Solicitud' : 'Continuar'}</span>
+                <span>{step === 3 ? 'Confirmar Cita y Enviar' : 'Continuar'}</span>
                 <ArrowRight className="w-4 h-4" />
               </button>
             </div>

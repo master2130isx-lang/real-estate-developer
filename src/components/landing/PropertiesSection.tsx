@@ -118,7 +118,7 @@ export function PropertiesSection({ onSelectPropertyForPrequalification }: Prope
                 src={gallery[activePhotoIndex]}
                 alt={`${property.model} - Foto ${activePhotoIndex + 1}`}
                 fill
-                className="object-cover transition-all duration-300"
+                className="object-cover object-[center_25%] transition-all duration-300"
                 sizes="(max-width: 1024px) 100vw, 700px"
                 priority
               />

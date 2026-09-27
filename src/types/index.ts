@@ -1,5 +1,6 @@
 export type FinancingType =
   | 'infonavit'
+  | 'fovissste'
   | 'bancario'
   | 'contado'
   | 'otro'
@@ -133,10 +134,12 @@ export interface Lead {
   privacyConsentAccepted: boolean;
   marketingConsentAccepted: boolean;
   
-  // Manejo de NSS
+  // Manejo de NSS y CURP (Infonavit / ISSSTE-FOVISSSTE)
   nssStatus: NssStatus;
   nssValueEncryptedMock?: string; // Simulación de demostración (no guardar en claro en prod)
   nssLastFour?: string; // Para ofuscación segura
+  curpValue?: string; // Para derechohabientes ISSSTE / FOVISSSTE
+  curpLastFour?: string;
   
   // Seguimiento de atribución comercial interna (15 días)
   attributionStatus: AttributionStatus;

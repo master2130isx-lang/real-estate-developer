@@ -5,9 +5,10 @@ import Link from 'next/link';
 import { ArrowLeft, Building2 } from 'lucide-react';
 import { PrequalificationForm } from '@/components/prequalification/PrequalificationForm';
 import { PrivacyModal } from '@/components/landing/PrivacyModal';
-import { COMMERCIAL_CONFIG } from '@/config/commercialConfig';
+import { useApp } from '@/context/AppContext';
 
 export default function SolicitarVisitaPage() {
+  const { commercialConfig } = useApp();
   const [isPrivacyOpen, setIsPrivacyOpen] = useState(false);
 
   return (
@@ -25,7 +26,7 @@ export default function SolicitarVisitaPage() {
           <div className="flex items-center gap-2">
             <Building2 className="w-4 h-4 text-[var(--color-accent)]" />
             <span className="font-serif text-xs font-bold text-[#F0ECE4] tracking-tight">
-              {COMMERCIAL_CONFIG.agencyName}
+              {commercialConfig.agencyName}
             </span>
           </div>
         </div>

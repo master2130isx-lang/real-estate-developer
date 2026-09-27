@@ -39,10 +39,10 @@ export function Navbar({ onOpenPrequalification, onOpenPrivacy }: NavbarProps) {
             </div>
             <div>
               <span className="font-serif text-base sm:text-lg font-bold tracking-tight text-[var(--color-navy)] block leading-tight">
-                Valle de los Encinos
+                {commercialConfig.agencyName || 'Valle de los Encinos'}
               </span>
               <span className="label-caps text-[var(--color-text-muted)] text-[9px]">
-                RESIDENCIAL · N.L.
+                {commercialConfig.coverageZone ? commercialConfig.coverageZone.toUpperCase() : 'RESIDENCIAL · N.L.'}
               </span>
             </div>
           </Link>

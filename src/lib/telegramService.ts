@@ -114,14 +114,25 @@ export async function notifyNewAppointmentTelegram(
   const financingLabel = ((lead.financingType || 'infonavit') as string).replace(/_/g, ' ').toUpperCase();
   const waUrl = buildClientWhatsAppConfirmUrl(lead);
 
-  // Formatear NSS visible para que el asesor pueda copiarlo de inmediato
+  // Formatear NSS o CURP visible para que el asesor pueda copiarlo de inmediato
   const nssRaw = lead.nssValueEncryptedMock || (lead.nssLastFour ? `*******${lead.nssLastFour}` : null);
   const nssDisplay = nssRaw ? `\`${nssRaw}\`` : 'No proporcionado';
-  const nssSection = nssRaw
-    ? `🔢 *NSS:* ${nssDisplay}\n⚡ _(Listo para registrar en constructora y activar 15 días de comisión)_\n`
-    : lead.financingType === 'infonavit'
-    ? `⚠️ *NSS:* Pendiente de solicitar al cliente\n`
-    : `ℹ️ *NSS:* No aplica (${financingLabel})\n`;
+
+  const curpRaw = lead.curpValue || (lead.curpLastFour ? `**************${lead.curpLastFour}` : null);
+  const curpDisplay = curpRaw ? `\`${curpRaw}\`` : 'No proporcionada';
+
+  let identifierSection = '';
+  if (lead.financingType === 'fovissste' || lead.curpValue) {
+    identifierSection = curpRaw
+      ? `🏛️ *CURP (ISSSTE/FOVISSSTE):* ${curpDisplay}\n⚡ _(Listo para precalificar y activar exclusividad)_\n`
+      : `⚠️ *CURP (ISSSTE/FOVISSSTE):* Pendiente de solicitar al cliente\n`;
+  } else if (nssRaw) {
+    identifierSection = `🔢 *NSS (Infonavit):* ${nssDisplay}\n⚡ _(Listo para registrar en constructora y activar 15 días de comisión)_\n`;
+  } else if (lead.financingType === 'infonavit') {
+    identifierSection = `⚠️ *NSS:* Pendiente de solicitar al cliente\n`;
+  } else {
+    identifierSection = `ℹ️ *Identificador:* No aplica (${financingLabel})\n`;
+  }
 
   const title = hasAppointment ? '🚨 *NUEVA SOLICITUD DE CITA*' : '✨ *NUEVO PROSPECTO WEB REGISTRADO*';
   const visitSection = hasAppointment
@@ -137,7 +148,7 @@ export async function notifyNewAppointmentTelegram(
 👤 *Cliente:* ${lead.fullName}
 📱 *Teléfono:* \`${lead.phone}\`
 ${visitSection}💳 *Forma de compra:* ${financingLabel}
-${nssSection}🏠 *Vivienda:* Modelo Águila Premier ($1,180,000 MXN)
+${identifierSection}🏠 *Vivienda:* Modelo Águila Premier ($1,180,000 MXN)
 📍 *Ubicación:* Valle de los Encinos, Salinas Victoria
 ${lead.appointmentRequest?.notes ? `📝 *Comentarios:* _${lead.appointmentRequest.notes}_\n` : ''}━━━━━━━━━━━━━━━━━━━━
 ${footerPrompt}`;

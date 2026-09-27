@@ -79,18 +79,25 @@ export const COMMERCIAL_CONFIG: CommercialConfig = {
 };
 
 /**
- * Función centralizada que determina si un prospecto requiere NSS
- * según las reglas comerciales de la inmobiliaria.
+ * Función centralizada que determina si un prospecto requiere NSS (Infonavit)
  */
 export function shouldRequestNss(financingType: string): boolean {
   if (financingType === 'infonavit') {
     return COMMERCIAL_CONFIG.attributionRules.requireNssForInfonavit;
   }
-  if (financingType === 'bancario') {
-    return COMMERCIAL_CONFIG.attributionRules.requireNssForBancario;
-  }
-  if (financingType === 'contado') {
-    return COMMERCIAL_CONFIG.attributionRules.requireNssForContado;
-  }
   return false;
+}
+
+/**
+ * Función centralizada que determina si un prospecto requiere CURP (FOVISSSTE / ISSSTE)
+ */
+export function shouldRequestCurp(financingType: string): boolean {
+  return financingType === 'fovissste' || financingType === 'issste';
+}
+
+/**
+ * Determina si la forma de adquisición requiere algún identificador crediticio (NSS o CURP)
+ */
+export function shouldRequestCreditIdentifier(financingType: string): boolean {
+  return shouldRequestNss(financingType) || shouldRequestCurp(financingType);
 }

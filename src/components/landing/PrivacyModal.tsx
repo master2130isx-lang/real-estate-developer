@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { X, Shield, AlertTriangle } from 'lucide-react';
-import { COMMERCIAL_CONFIG } from '@/config/commercialConfig';
+import { useApp } from '@/context/AppContext';
 
 interface PrivacyModalProps {
   isOpen: boolean;
@@ -10,6 +10,7 @@ interface PrivacyModalProps {
 }
 
 export function PrivacyModal({ isOpen, onClose }: PrivacyModalProps) {
+  const { commercialConfig } = useApp();
   if (!isOpen) return null;
 
   return (
@@ -46,9 +47,9 @@ export function PrivacyModal({ isOpen, onClose }: PrivacyModalProps) {
             </h3>
             <p>
               El responsable del tratamiento y resguardo legítimo de sus datos personales es{' '}
-              <strong className="text-[var(--color-text)]">{COMMERCIAL_CONFIG.agencyName}</strong>, con domicilio comercial para efectos de atención ubicado en{' '}
-              <strong className="text-[var(--color-text)]">{COMMERCIAL_CONFIG.contactChannels.officeAddressNote || 'Calzada del Sol, Salinas Victoria, Nuevo León'}</strong>, y correo electrónico de contacto oficial{' '}
-              <strong className="text-[var(--color-text)]">{COMMERCIAL_CONFIG.contactChannels.email}</strong>.
+              <strong className="text-[var(--color-text)]">{commercialConfig.agencyName}</strong>, con domicilio comercial para efectos de atención ubicado en{' '}
+              <strong className="text-[var(--color-text)]">{commercialConfig.contactChannels.officeAddressNote || 'Calzada del Sol, Salinas Victoria, Nuevo León'}</strong>, y correo electrónico de contacto oficial{' '}
+              <strong className="text-[var(--color-text)]">{commercialConfig.contactChannels.email}</strong>.
             </p>
           </section>
 
@@ -96,7 +97,7 @@ export function PrivacyModal({ isOpen, onClose }: PrivacyModalProps) {
             </h3>
             <p>
               Usted tiene derecho en todo momento a Acceder, Rectificar, Cancelar u Oponerse al tratamiento de sus datos personales, así como a revocar el consentimiento otorgado. Dichas solicitudes se atenderán a través del correo{' '}
-              <strong className="text-[var(--color-text)]">{COMMERCIAL_CONFIG.contactChannels.email}</strong>.
+              <strong className="text-[var(--color-text)]">{commercialConfig.contactChannels.email}</strong>.
             </p>
           </section>
 

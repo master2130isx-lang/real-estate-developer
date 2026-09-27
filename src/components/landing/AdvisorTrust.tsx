@@ -119,7 +119,7 @@ export function AdvisorTrust() {
 
                 <div className="pt-2">
                   <a
-                    href={`https://wa.me/${cleanWa}?text=${encodeURIComponent('Hola, me gustaría platicar con un asesor sobre el Modelo Águila Premier en Valle de los Encinos.')}`}
+                    href={`https://wa.me/${cleanWa}?text=${encodeURIComponent(`Hola, me gustaría platicar con un asesor sobre las viviendas en ${commercialConfig.agencyName}.`)}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="w-full bg-[#25D366] hover:bg-[#20bd5a] text-white font-semibold py-2.5 px-3 rounded text-xs transition flex items-center justify-center gap-2"

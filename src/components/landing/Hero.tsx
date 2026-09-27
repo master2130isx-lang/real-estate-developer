@@ -58,13 +58,13 @@ export function Hero({ onOpenPrequalification }: HeroProps) {
 
           {/* Columna Derecha: Fotografía arquitectónica */}
           <div className="order-1 lg:order-2">
-            <div className="relative rounded-lg overflow-hidden aspect-[4/3] sm:aspect-[16/11] lg:aspect-[4/3] bg-[var(--color-surface-alt)]">
+            <div className="relative rounded-2xl overflow-hidden aspect-[4/3] sm:aspect-[16/11] lg:aspect-[4/3] bg-[var(--color-surface-alt)] shadow-lg border border-[var(--color-border)]">
               <Image
                 src="/images/properties/aguila-premier/facade.jpg"
                 alt="Casa Muestra Modelo Águila Premier en Valle de los Encinos, Salinas Victoria"
                 fill
                 priority
-                className="object-cover"
+                className="object-cover object-[center_20%]"
                 sizes="(max-width: 768px) 100vw, 600px"
               />
             </div>

@@ -94,13 +94,18 @@ export function LeadDetailModal({ lead, onClose }: LeadDetailModalProps) {
 
   const handleCopyConstructorSheet = () => {
     const advisor = commercialConfig?.advisorName || 'Ismael Zapata';
-    const nss = revealedNss || lead.nssValueEncryptedMock || (lead.nssLastFour ? `*******${lead.nssLastFour}` : 'No proporcionado');
+    const isFovissste = lead.financingType === 'fovissste' || Boolean(lead.curpValue);
+    const idKey = isFovissste ? 'CURP (ISSSTE)' : 'NSS (Infonavit)';
+    const idVal = isFovissste
+      ? (lead.curpValue || (lead.curpLastFour ? `**************${lead.curpLastFour}` : 'No proporcionada'))
+      : (revealedNss || lead.nssValueEncryptedMock || (lead.nssLastFour ? `*******${lead.nssLastFour}` : 'No proporcionado'));
+
     const sheetText = `📋 REGISTRO DE ATRIBUCIÓN COMERCIAL (15 DÍAS)
-Desarrollo: Valle de los Encinos - Salinas Victoria, N.L.
+Desarrollo: ${commercialConfig?.agencyName || 'Valle de los Encinos'}
 Modelo: ${lead.selectedPropertyTitle || 'Modelo Águila Premier ($1,180,000 MXN)'}
 Cliente: ${lead.fullName}
 Teléfono: ${lead.phone}
-NSS: ${nss}
+${idKey}: ${idVal}
 Forma de compra: ${lead.financingType.toUpperCase()}
 Asesor Responsable: ${advisor}
 Folio Web: ${lead.folio || 'N/A'}`;
@@ -288,13 +293,15 @@ Folio Web: ${lead.folio || 'N/A'}`;
               </div>
             </div>
 
-            {/* SECCIÓN SEGURA DEL NSS */}
+            {/* SECCIÓN SEGURA DEL NSS / CURP */}
             <div className="bg-[#0d233a] text-white p-5 rounded-2xl space-y-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <Lock className="w-4 h-4 text-amber-400" />
                   <span className="font-bold text-xs uppercase tracking-wider text-slate-200">
-                    NSS Recibido en Web (Expediente Protegido)
+                    {lead.financingType === 'fovissste' || lead.curpValue
+                      ? 'CURP (FOVISSSTE / ISSSTE) • Expediente Protegido'
+                      : 'NSS Recibido en Web (Expediente Protegido)'}
                   </span>
                 </div>
                 <span className="text-[10px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded border border-slate-700">
@@ -303,24 +310,30 @@ Folio Web: ${lead.folio || 'N/A'}`;
               </div>
 
               <p className="text-xs text-slate-300 leading-relaxed">
-                El NSS se utiliza exclusivamente para solicitar el registro de atribución comercial ante la inmobiliaria. Permanece oculto y su consulta queda registrada en la bitácora de auditoría.
+                {lead.financingType === 'fovissste' || lead.curpValue
+                  ? 'La CURP se utiliza exclusivamente para solicitar la precalificación y el registro de atribución comercial ante la inmobiliaria.'
+                  : 'El NSS se utiliza exclusivamente para solicitar el registro de atribución comercial ante la inmobiliaria. Permanece oculto y su consulta queda registrada en la bitácora de auditoría.'}
               </p>
 
               <div className="bg-slate-800/80 p-3.5 rounded-xl flex items-center justify-between border border-slate-700">
                 <div>
-                  <span className="text-[11px] text-slate-400 block">Número de Seguridad Social:</span>
+                  <span className="text-[11px] text-slate-400 block">
+                    {lead.financingType === 'fovissste' || lead.curpValue ? 'Clave Única (CURP):' : 'Número de Seguridad Social:'}
+                  </span>
                   <span className="font-mono text-base font-bold tracking-widest text-amber-300">
-                    {revealedNss
-                      ? revealedNss
-                      : lead.nssStatus === 'recibido'
-                      ? `•••• •••• ${lead.nssLastFour || '••••'}`
-                      : lead.nssStatus === 'pendiente'
-                      ? 'No proporcionado en formulario'
-                      : 'No aplica'}
+                    {lead.financingType === 'fovissste' || lead.curpValue
+                      ? (lead.curpValue || (lead.curpLastFour ? `••••••••••••••${lead.curpLastFour}` : 'No proporcionada en formulario'))
+                      : (revealedNss
+                          ? revealedNss
+                          : lead.nssStatus === 'recibido'
+                          ? `•••• •••• ${lead.nssLastFour || '••••'}`
+                          : lead.nssStatus === 'pendiente'
+                          ? 'No proporcionado en formulario'
+                          : 'No aplica')}
                   </span>
                 </div>
 
-                {lead.nssStatus === 'recibido' && !revealedNss && (
+                {!(lead.financingType === 'fovissste' || lead.curpValue) && lead.nssStatus === 'recibido' && !revealedNss && (
                   <button
                     onClick={() => setIsRevealModalOpen(true)}
                     className="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-3 py-2 rounded-xl text-xs transition flex items-center gap-1.5 cursor-pointer shadow"

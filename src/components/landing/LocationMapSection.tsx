@@ -2,20 +2,23 @@
 
 import React from 'react';
 import { MapPin, Navigation, Bus, GraduationCap, Building2, ExternalLink, Clock, Compass } from 'lucide-react';
-import { COMMERCIAL_CONFIG } from '@/config/commercialConfig';
+import { useApp } from '@/context/AppContext';
 import { WhatsAppIcon } from '@/components/common/WhatsAppIcon';
 
 export function LocationMapSection() {
-  const queryAddress = encodeURIComponent('Calzada del Sol, Salinas Victoria, Nuevo León, México');
+  const { commercialConfig } = useApp();
+  const addressQuery = commercialConfig.contactChannels.officeAddressNote || 'Calzada del Sol, Salinas Victoria, Nuevo León, México';
+  const queryAddress = encodeURIComponent(addressQuery);
   const googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${queryAddress}`;
-  const wazeUrl = `https://waze.com/ul?q=${encodeURIComponent('Calzada del Sol Salinas Victoria NL')}&navigate=yes`;
+  const wazeUrl = `https://waze.com/ul?q=${queryAddress}&navigate=yes`;
 
+  const cleanWa = commercialConfig.contactChannels.whatsapp.replace(/\D/g, '');
   const waLocationMsg = encodeURIComponent(
-    '¡Hola! Me gustaría que me compartan la ubicación exacta de la casa muestra en Valle de los Encinos (Salinas Victoria) por WhatsApp.'
+    `¡Hola! Me gustaría que me compartan la ubicación exacta de la casa muestra en ${commercialConfig.agencyName} (${commercialConfig.coverageZone}) por WhatsApp.`
   );
-  const waLocationUrl = `https://wa.me/${COMMERCIAL_CONFIG.contactChannels.whatsapp}?text=${waLocationMsg}`;
+  const waLocationUrl = `https://wa.me/${cleanWa}?text=${waLocationMsg}`;
 
-  const mapEmbedUrl = `https://maps.google.com/maps?q=Calzada%20del%20Sol,%20Salinas%20Victoria,%20Nuevo%20Leon&t=&z=14&ie=UTF8&iwloc=&output=embed`;
+  const mapEmbedUrl = `https://maps.google.com/maps?q=${queryAddress}&t=&z=14&ie=UTF8&iwloc=&output=embed`;
 
   return (
     <section id="ubicacion" className="py-20 px-4 sm:px-6 bg-[var(--color-surface)] border-b border-[var(--color-border)] transition-colors">
@@ -27,10 +30,10 @@ export function LocationMapSection() {
               Ubicación y Conectividad
             </span>
             <h2 className="font-serif text-2xl sm:text-3xl lg:text-4xl font-bold text-[var(--color-navy)] leading-tight">
-              ¿Cómo llegar a Valle de los Encinos?
+              ¿Cómo llegar a {commercialConfig.agencyName}?
             </h2>
             <p className="text-[var(--color-text-secondary)] text-sm sm:text-base leading-relaxed">
-              Fraccionamiento ubicado en <strong>Calzada del Sol, Salinas Victoria, N.L.</strong> Conoce las principales vías de acceso y abre la ruta directa en tu aplicación de mapas favorita.
+              Fraccionamiento ubicado en <strong>{commercialConfig.contactChannels.officeAddressNote || 'Calzada del Sol, Salinas Victoria, N.L.'}</strong> Conoce las principales vías de acceso y abre la ruta directa en tu aplicación de mapas favorita.
             </p>
           </div>
 
@@ -109,7 +112,7 @@ export function LocationMapSection() {
                 <span>Punto de encuentro para visitas</span>
               </div>
               <p className="text-[var(--color-text-secondary)] leading-relaxed">
-                Las citas se coordinan directamente en la <strong>caseta de acceso con control 24/7</strong> del fraccionamiento Valle de los Encinos sobre Calzada del Sol. Tu asesor te recibirá personalmente para darte el recorrido por la casa muestra.
+                Las citas se coordinan directamente en la <strong>caseta de acceso con control 24/7</strong> de {commercialConfig.agencyName} ({commercialConfig.contactChannels.officeAddressNote || 'sobre Calzada del Sol'}). Tu asesor te recibirá personalmente para darte el recorrido por la casa muestra.
               </p>
             </div>
 

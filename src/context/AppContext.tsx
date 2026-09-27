@@ -3,7 +3,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Property, Lead, CommercialStatus, FunnelEvent, LeadNote, AuditEvent, AttributionStatus } from '../types';
 import { INITIAL_LEADS, PROPERTIES_DATA } from '../data/mockData';
-import { COMMERCIAL_CONFIG, CommercialConfig, shouldRequestNss } from '../config/commercialConfig';
+import { COMMERCIAL_CONFIG, CommercialConfig, shouldRequestNss, shouldRequestCurp } from '../config/commercialConfig';
 
 interface AppContextType {
   leads: Lead[];
@@ -16,7 +16,7 @@ interface AppContextType {
   deleteProperty: (id: string) => Promise<boolean>;
   reloadProperties: () => Promise<void>;
   archiveLead: (leadId: string, archive: boolean) => void;
-  createLeadFromPrequalification: (leadData: Partial<Lead>, rawNss?: string) => Lead;
+  createLeadFromPrequalification: (leadData: Partial<Lead>, rawNss?: string, rawCurp?: string) => Lead;
   scheduleNewAppointment: (appointmentData: {
     fullName: string;
     phone: string;
@@ -72,6 +72,8 @@ function normalizeLead(lead: any): Lead {
     privacyConsentAccepted: lead.privacyConsentAccepted ?? true,
     marketingConsentAccepted: !!lead.marketingConsentAccepted,
     nssStatus: lead.nssStatus || 'no_aplica',
+    curpValue: lead.curpValue || '',
+    curpLastFour: lead.curpLastFour || (lead.curpValue ? lead.curpValue.slice(-4) : undefined),
     attributionStatus: lead.attributionStatus || 'no_aplica',
     commercialStatus: lead.commercialStatus || 'nuevo',
     compatibility: lead.compatibility || 'media',
@@ -272,7 +274,8 @@ export function AppProvider({
 
   const createLeadFromPrequalification = (
     data: Partial<Lead>,
-    rawNss?: string
+    rawNss?: string,
+    rawCurp?: string
   ): Lead => {
     const timestamp = new Date();
     const formattedDate = timestamp.toISOString().replace('T', ' ').substring(0, 16);
@@ -295,12 +298,15 @@ export function AppProvider({
     }
 
     // REGLA FUNDAMENTAL DE NEGOCIO:
-    // NSS recibido en web ≠ bloqueo confirmado en inmobiliaria
+    // Identificador recibido en web (NSS o CURP) ≠ bloqueo confirmado en inmobiliaria
     const isNssApplicable = shouldRequestNss(data.financingType || '');
+    const isCurpApplicable = shouldRequestCurp(data.financingType || '');
     let nssStatus: Lead['nssStatus'] = 'no_aplica';
     let attributionStatus: AttributionStatus = 'no_aplica';
     let nssLastFour: string | undefined = undefined;
     let nssValueEncryptedMock: string | undefined = undefined;
+    let curpValue: string | undefined = undefined;
+    let curpLastFour: string | undefined = undefined;
 
     if (isNssApplicable) {
       if (rawNss && rawNss.trim().length === 11) {
@@ -311,6 +317,15 @@ export function AppProvider({
         attributionStatus = 'pendiente_inmobiliaria';
       } else {
         nssStatus = 'pendiente';
+        attributionStatus = 'pendiente_nss';
+      }
+    } else if (isCurpApplicable) {
+      const cleanCurp = (rawCurp || data.curpValue || '').trim().toUpperCase();
+      if (cleanCurp.length === 18) {
+        curpValue = cleanCurp;
+        curpLastFour = cleanCurp.slice(-4);
+        attributionStatus = 'pendiente_inmobiliaria';
+      } else {
         attributionStatus = 'pendiente_nss';
       }
     }
@@ -337,12 +352,16 @@ export function AppProvider({
       nssStatus,
       nssLastFour,
       nssValueEncryptedMock,
+      curpValue,
+      curpLastFour,
       attributionStatus,
       commercialStatus: data.appointmentRequest ? 'cita_solicitada' : 'nuevo',
       compatibility,
       nextAction:
         attributionStatus === 'pendiente_inmobiliaria'
-          ? 'Registrar NSS en sistema interno de la inmobiliaria y preparar mensaje de WhatsApp'
+          ? (isCurpApplicable
+              ? 'Registrar CURP en sistema interno de la inmobiliaria y preparar mensaje de WhatsApp'
+              : 'Registrar NSS en sistema interno de la inmobiliaria y preparar mensaje de WhatsApp')
           : 'Preparar mensaje de WhatsApp para dar atención y confirmar visita',
       assignedAdvisor: commercialConfig?.advisorName || 'Ismael Zapata',
       appointmentRequest: data.appointmentRequest,
