@@ -32,7 +32,9 @@ export async function POST(req: NextRequest) {
   try {
     const formData = await req.formData();
     const file = formData.get('file') as File | null;
-    const propertyId = (formData.get('propertyId') as string) || 'modelos';
+    // Sanitizar propertyId para prevenir path traversal (eliminar .., /, \, y caracteres no seguros)
+    const rawPropertyId = (formData.get('propertyId') as string) || 'modelos';
+    const propertyId = rawPropertyId.replace(/[^a-zA-Z0-9_-]/g, '').substring(0, 64) || 'modelos';
 
     if (!file) {
       return NextResponse.json({ ok: false, error: 'No se envió ningún archivo' }, { status: 400 });

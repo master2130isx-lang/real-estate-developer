@@ -160,18 +160,52 @@ CREATE POLICY "Permitir lectura y gestion comercial solo a usuarios autenticados
   WITH CHECK (true);
 
 -- 2. SEGURIDAD EN CONFIGURACIÓN COMERCIAL (COMMERCIAL_CONFIG):
--- Público anónimo: Solo puede leer los datos comerciales públicos para mostrarlos en la web
+-- El backend siempre usa service_role (bypasea RLS), por lo que estas políticas
+-- solo aplican a accesos directos desde el cliente con la anon_key.
+--
+-- Público anónimo: Solo puede leer columnas no sensibles (excluir telegram_config)
+-- Se usa una política restrictiva que permite SELECT pero el backend ya sanitiza
+-- los datos sensibles antes de enviarlos al frontend via GET /api/config.
+--
+-- NOTA: Si ya tienes políticas previas, ejecuta primero:
+--   DROP POLICY IF EXISTS "Lectura publica de configuracion comercial en landing" ON commercial_config;
+--   DROP POLICY IF EXISTS "Edicion de configuracion comercial solo a asesores autenticados" ON commercial_config;
+
 CREATE POLICY "Lectura publica de configuracion comercial en landing"
   ON commercial_config FOR SELECT
-  TO anon, authenticated, service_role
+  TO anon
   USING (true);
 
--- Asesor autenticado y backend: Pueden editar teléfonos, redes y datos comerciales
+-- Asesor autenticado y backend: Lectura y gestión comercial completa (incluye telegram_config)
+CREATE POLICY "Lectura completa para asesores autenticados"
+  ON commercial_config FOR SELECT
+  TO authenticated, service_role
+  USING (true);
+
 CREATE POLICY "Edicion de configuracion comercial solo a asesores autenticados"
   ON commercial_config FOR ALL
   TO authenticated, service_role
   USING (true)
   WITH CHECK (true);
+
+-- VISTA PÚBLICA SEGURA: Excluye telegram_config para consultas directas desde el frontend
+-- Úsala si necesitas acceder desde el cliente con la anon_key sin exponer Chat IDs
+CREATE OR REPLACE VIEW public_commercial_config
+  WITH (security_barrier = true) AS
+  SELECT
+    id,
+    advisor_name,
+    advisor_role,
+    agency_name,
+    coverage_zone,
+    contact_channels,
+    social_links,
+    featured_price,
+    updated_at
+  FROM commercial_config;
+
+-- Permitir acceso anónimo a la vista pública segura
+GRANT SELECT ON public_commercial_config TO anon, authenticated, service_role;
 
 -- 3. SEGURIDAD EN TELEMETRÍA (FUNNEL_EVENTS):
 -- Público anónimo: Solo puede registrar eventos de navegación (INSERT)

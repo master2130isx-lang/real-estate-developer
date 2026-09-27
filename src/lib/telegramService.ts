@@ -1,6 +1,7 @@
 import { Lead } from '@/types';
 import { COMMERCIAL_CONFIG } from '@/config/commercialConfig';
 import { getServerLeadById, updateServerLeadAppointment } from './leadsServerStore';
+import { generateActionToken } from './auth';
 
 import { getServerCommercialConfig } from './commercialConfigStore';
 
@@ -190,8 +191,9 @@ ${identifierSection}🏠 *Vivienda:* ${lead.selectedPropertyTitle || 'Modelo Ág
 ${lead.appointmentRequest?.notes ? `📝 *Comentarios:* _${lead.appointmentRequest.notes}_\n` : ''}━━━━━━━━━━━━━━━━━━━━
 ${footerPrompt}`;
 
-  // URL de acción directa web (funciona siempre al 100% en cualquier dispositivo)
-  const webConfirmUrl = `${resolvedOrigin}/api/telegram/action?action=confirm&leadId=${lead.id}`;
+  // URL de acción directa web con token HMAC firmado (funciona siempre al 100% en cualquier dispositivo)
+  const confirmToken = generateActionToken(lead.id, 'confirm');
+  const webConfirmUrl = `${resolvedOrigin}/api/telegram/action?action=confirm&leadId=${lead.id}&token=${confirmToken}`;
 
   const inlineKeyboard = hasAppointment
     ? {

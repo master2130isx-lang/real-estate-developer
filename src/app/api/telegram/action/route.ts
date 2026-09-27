@@ -2,13 +2,28 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerLeadById, updateServerLeadAppointment } from '@/lib/leadsServerStore';
 import { buildClientWhatsAppConfirmUrl, buildClientWhatsAppCancelUrl } from '@/lib/telegramService';
 import { getServerCommercialConfig } from '@/lib/commercialConfigStore';
+import { verifyActionToken } from '@/lib/auth';
 
 const TELEGRAM_API_BASE = 'https://api.telegram.org';
+
+/**
+ * Escapa caracteres HTML para prevenir XSS en contenido interpolado
+ */
+function escapeHtml(str: string): string {
+  if (!str) return '';
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const action = searchParams.get('action') || 'confirm';
   const leadId = searchParams.get('leadId');
+  const token = searchParams.get('token');
 
   if (!leadId) {
     return new NextResponse(renderHtmlPage('error', 'Falta el identificador del prospecto (leadId).', null, ''), {
@@ -17,9 +32,25 @@ export async function GET(req: NextRequest) {
     });
   }
 
+  // Validar token HMAC firmado
+  if (!token || !verifyActionToken(token, leadId, action)) {
+    return new NextResponse(
+      renderHtmlPage(
+        'error',
+        'Enlace inválido o expirado. Usa los botones de tu notificación de Telegram o accede desde el panel del asesor.',
+        null,
+        ''
+      ),
+      {
+        headers: { 'Content-Type': 'text/html; charset=utf-8' },
+        status: 403,
+      }
+    );
+  }
+
   const lead = await getServerLeadById(leadId);
   if (!lead) {
-    return new NextResponse(renderHtmlPage('error', `No se encontró el prospecto con ID: ${leadId}`, null, ''), {
+    return new NextResponse(renderHtmlPage('error', 'No se encontró el prospecto solicitado.', null, ''), {
       headers: { 'Content-Type': 'text/html; charset=utf-8' },
       status: 404,
     });
@@ -40,10 +71,10 @@ export async function GET(req: NextRequest) {
   // 3. Notificar a Telegram la actualización del estado
   try {
     const config = await getServerCommercialConfig();
-    const token = process.env.TELEGRAM_BOT_TOKEN;
+    const botToken = process.env.TELEGRAM_BOT_TOKEN;
     const chatId = config.telegramConfig?.advisorChatId?.trim() || process.env.TELEGRAM_ADVISOR_CHAT_ID;
 
-    if (token && chatId) {
+    if (botToken && chatId) {
       const statusText = isConfirm ? '✅ *CITA CONFIRMADA DESDE MÓVIL*' : '❌ *CITA CANCELADA DESDE MÓVIL*';
       const visitDate = activeLead.appointmentRequest?.confirmedDate || activeLead.appointmentRequest?.preferredDate || 'Por acordar';
       const visitTime = activeLead.appointmentRequest?.confirmedTime || activeLead.appointmentRequest?.timeSlot || 'Por acordar';
@@ -57,7 +88,7 @@ export async function GET(req: NextRequest) {
 ━━━━━━━━━━━━━━━━━━━━
 El estado ha sido actualizado en la base de datos comercial.`;
 
-      await fetch(`${TELEGRAM_API_BASE}/bot${token}/sendMessage`, {
+      await fetch(`${TELEGRAM_API_BASE}/bot${botToken}/sendMessage`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -107,12 +138,21 @@ function renderHtmlPage(
   const dateStr = lead?.appointmentRequest?.confirmedDate || lead?.appointmentRequest?.preferredDate || 'Fecha por acordar';
   const timeStr = lead?.appointmentRequest?.confirmedTime || lead?.appointmentRequest?.timeSlot || 'Horario por convenir';
 
+  // Escapar TODOS los datos del usuario para prevenir XSS
+  const safeName = escapeHtml(lead?.fullName || '');
+  const safePhone = escapeHtml(lead?.phone || '');
+  const safeDateStr = escapeHtml(dateStr);
+  const safeTimeStr = escapeHtml(timeStr);
+  const safePropertyTitle = escapeHtml(lead?.selectedPropertyTitle || 'Modelo Águila Premier ($1.18M)');
+  const safeErrorMsg = escapeHtml(errorMsg);
+  const safeWaUrl = escapeHtml(waUrl);
+
   return `<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>${title} • Valle de los Encinos</title>
+  <title>${escapeHtml(title)} • Valle de los Encinos</title>
   <style>
     * { margin:0; padding:0; box-sizing:border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
     body { background: #0B1522; color: #F1F5F9; min-height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; }
@@ -143,8 +183,8 @@ function renderHtmlPage(
       ${isSuccess ? '✓ Base de Datos y CRM Actualizados' : isCancelled ? '✕ Cita Cancelada en CRM' : '⚠ Error'}
     </div>
 
-    <h1>${title}</h1>
-    <p class="subtitle">${isSuccess ? 'La visita ha quedado confirmada en la agenda del asesor.' : isCancelled ? 'La visita fue retirada de la agenda activa.' : errorMsg}</p>
+    <h1>${escapeHtml(title)}</h1>
+    <p class="subtitle">${isSuccess ? 'La visita ha quedado confirmada en la agenda del asesor.' : isCancelled ? 'La visita fue retirada de la agenda activa.' : safeErrorMsg}</p>
 
     ${
       lead
@@ -152,15 +192,15 @@ function renderHtmlPage(
     <div class="details-box">
       <div class="details-row">
         <span class="details-label">Cliente:</span>
-        <span class="details-val">${lead.fullName}</span>
+        <span class="details-val">${safeName}</span>
       </div>
       <div class="details-row">
         <span class="details-label">Teléfono:</span>
-        <span class="details-val">${lead.phone}</span>
+        <span class="details-val">${safePhone}</span>
       </div>
       <div class="details-row">
         <span class="details-label">Fecha de Visita:</span>
-        <span class="details-val">${dateStr} (${timeStr})</span>
+        <span class="details-val">${safeDateStr} (${safeTimeStr})</span>
       </div>
       <div class="details-row">
         <span class="details-label">Punto de Acceso:</span>
@@ -168,7 +208,7 @@ function renderHtmlPage(
       </div>
       <div class="details-row">
         <span class="details-label">Vivienda:</span>
-        <span class="details-val">${lead?.selectedPropertyTitle || 'Modelo Águila Premier ($1.18M)'}</span>
+        <span class="details-val">${safePropertyTitle}</span>
       </div>
     </div>
     `
@@ -178,7 +218,7 @@ function renderHtmlPage(
     ${
       waUrl
         ? `
-    <a href="${waUrl}" class="btn-wa" id="wa-btn">
+    <a href="${safeWaUrl}" class="btn-wa" id="wa-btn">
       <span>💬 Abrir WhatsApp con el Cliente</span>
     </a>
     `

@@ -1,8 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabase, isSupabaseConfigured } from '@/lib/supabaseClient';
+import { setSessionCookie } from '@/lib/auth';
+import { checkRateLimit, getClientIp, LOGIN_RATE_LIMIT } from '@/lib/rateLimit';
 
 export async function POST(req: NextRequest) {
   try {
+    // Rate limiting: 5 intentos por minuto por IP
+    const ip = getClientIp(req.headers);
+    const rl = checkRateLimit(`login:${ip}`, LOGIN_RATE_LIMIT);
+    if (!rl.allowed) {
+      return NextResponse.json(
+        { ok: false, error: 'Demasiados intentos de inicio de sesión. Intenta de nuevo en 1 minuto.' },
+        { status: 429, headers: { 'Retry-After': '60' } }
+      );
+    }
+
     const { email, password } = await req.json();
 
     if (!email || !password) {
@@ -13,6 +25,7 @@ export async function POST(req: NextRequest) {
     }
 
     const cleanEmail = email.trim().toLowerCase();
+    const isHttps = req.nextUrl.protocol === 'https:' || req.headers.get('x-forwarded-proto') === 'https';
 
     // 1. Si Supabase está configurado, autenticar contra Supabase Auth (auth.users)
     if (isSupabaseConfigured()) {
@@ -36,7 +49,7 @@ export async function POST(req: NextRequest) {
           );
         }
 
-        // Crear respuesta y asignar cookie HTTP-Only segura
+        // Crear respuesta y asignar cookie HMAC firmada
         const response = NextResponse.json({
           ok: true,
           user: {
@@ -46,54 +59,48 @@ export async function POST(req: NextRequest) {
           message: 'Inicio de sesión exitoso.',
         });
 
-        const isHttps = req.nextUrl.protocol === 'https:' || req.headers.get('x-forwarded-proto') === 'https';
-
-        const sessionPayload = JSON.stringify({
-          userId: data.user.id,
-          email: data.user.email,
-          expiresAt: Date.now() + 7 * 24 * 60 * 60 * 1000, // 7 días
-        });
-
-        response.cookies.set('advisor_session', sessionPayload, {
-          httpOnly: true,
-          secure: isHttps,
-          sameSite: 'lax',
-          path: '/',
-          maxAge: 7 * 24 * 60 * 60,
-        });
-
+        setSessionCookie(response, data.user.id, data.user.email || cleanEmail, isHttps);
         return response;
       }
     }
 
-    // 2. Si estamos en modo de desarrollo local sin Supabase conectado aún
-    // Permitir acceso temporal para no bloquear al asesor
+    // 2. Modo local sin Supabase: verificar credenciales contra variables de entorno
+    // NUNCA permitir acceso sin validar contraseña
+    const adminEmail = (process.env.ADMIN_EMAIL || '').trim().toLowerCase();
+    const adminPassword = process.env.ADMIN_PASSWORD || '';
+
+    if (!adminEmail || !adminPassword) {
+      return NextResponse.json(
+        {
+          ok: false,
+          error:
+            'Autenticación no disponible. Configura ADMIN_EMAIL y ADMIN_PASSWORD en las variables de entorno, o conecta Supabase Auth.',
+        },
+        { status: 503 }
+      );
+    }
+
+    if (cleanEmail !== adminEmail || password !== adminPassword) {
+      return NextResponse.json(
+        {
+          ok: false,
+          error: 'Credenciales incorrectas. Verifica tu correo y contraseña.',
+        },
+        { status: 401 }
+      );
+    }
+
+    // Credenciales locales válidas
     const response = NextResponse.json({
       ok: true,
       user: {
         id: 'local-advisor',
         email: cleanEmail,
       },
-      message: 'Inicio de sesión en modo local / demostración.',
+      message: 'Inicio de sesión exitoso (modo local).',
     });
 
-    const isHttpsLocal = req.nextUrl.protocol === 'https:' || req.headers.get('x-forwarded-proto') === 'https';
-    response.cookies.set(
-      'advisor_session',
-      JSON.stringify({
-        userId: 'local-advisor',
-        email: cleanEmail,
-        expiresAt: Date.now() + 7 * 24 * 60 * 60 * 1000,
-      }),
-      {
-        httpOnly: true,
-        secure: isHttpsLocal,
-        sameSite: 'lax',
-        path: '/',
-        maxAge: 7 * 24 * 60 * 60,
-      }
-    );
-
+    setSessionCookie(response, 'local-advisor', cleanEmail, isHttps);
     return response;
   } catch (error: any) {
     console.error('Error en login:', error);

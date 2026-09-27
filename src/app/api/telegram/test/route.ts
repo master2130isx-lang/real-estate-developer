@@ -1,8 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerCommercialConfig } from '@/lib/commercialConfigStore';
+import { checkRateLimit, getClientIp, TELEGRAM_TEST_RATE_LIMIT } from '@/lib/rateLimit';
 
 export async function POST(req: NextRequest) {
   try {
+    // Rate limiting: 3 mensajes de prueba por minuto
+    const ip = getClientIp(req.headers);
+    const rl = checkRateLimit(`tg-test:${ip}`, TELEGRAM_TEST_RATE_LIMIT);
+    if (!rl.allowed) {
+      return NextResponse.json(
+        { ok: false, error: 'Demasiados mensajes de prueba. Intenta de nuevo en 1 minuto.' },
+        { status: 429, headers: { 'Retry-After': '60' } }
+      );
+    }
+
     const body = await req.json().catch(() => ({}));
     const config = await getServerCommercialConfig();
 

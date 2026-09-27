@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerLeads, saveServerLead, purgeAllServerLeads, resetServerLeadsToDemo } from '@/lib/leadsServerStore';
 import { notifyNewAppointmentTelegram } from '@/lib/telegramService';
 import { Lead } from '@/types';
+import { isDeveloperSession } from '@/lib/auth';
+import { checkRateLimit, getClientIp, LEAD_CREATION_RATE_LIMIT } from '@/lib/rateLimit';
 
 export async function GET() {
   try {
@@ -14,6 +16,16 @@ export async function GET() {
 
 export async function POST(req: NextRequest) {
   try {
+    // Rate limiting: 10 registros por minuto por IP
+    const ip = getClientIp(req.headers);
+    const rl = checkRateLimit(`leads:${ip}`, LEAD_CREATION_RATE_LIMIT);
+    if (!rl.allowed) {
+      return NextResponse.json(
+        { ok: false, error: 'Demasiadas solicitudes. Intenta de nuevo en un momento.' },
+        { status: 429, headers: { 'Retry-After': '60' } }
+      );
+    }
+
     const body = await req.json();
     const lead = body as Lead;
 
@@ -50,28 +62,8 @@ export async function POST(req: NextRequest) {
  */
 export async function DELETE(req: NextRequest) {
   try {
-    // 1. Validar sesión del desarrollador
-    const sessionCookie = req.cookies.get('advisor_session');
-    let userEmail = '';
-
-    if (sessionCookie && sessionCookie.value) {
-      try {
-        const parsed = JSON.parse(sessionCookie.value);
-        userEmail = (parsed.email || '').trim().toLowerCase();
-      } catch {
-        // Sesión corrupta
-      }
-    }
-
-    const adminEmail = (process.env.ADMIN_EMAIL || 'master2130.isx@gmail.com').trim().toLowerCase();
-    const isDeveloper = userEmail === adminEmail || userEmail === 'master2130.isx@gmail.com';
-
-    // 2. Leer payload de seguridad
-    const body = await req.json().catch(() => ({}));
-    const { confirmationCode, action } = body;
-
-    // Si no es el desarrollador autenticado
-    if (!isDeveloper) {
+    // 1. Validar sesión del desarrollador usando el módulo centralizado de autenticación
+    if (!isDeveloperSession(req)) {
       return NextResponse.json(
         {
           ok: false,
@@ -80,6 +72,10 @@ export async function DELETE(req: NextRequest) {
         { status: 403 }
       );
     }
+
+    // 2. Leer payload de seguridad
+    const body = await req.json().catch(() => ({}));
+    const { confirmationCode, action } = body;
 
     // 3. Validar código de confirmación estricto
     if (action === 'reset_demo') {
