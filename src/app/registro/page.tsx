@@ -2,7 +2,6 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import {
   Building2,
   Calendar,
@@ -238,21 +237,6 @@ export default function ExpressRegistrationPage() {
               <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
                 Completa tus datos en 30 segundos. Tu navegador rellenará en automático la información guardada.
               </p>
-            </div>
-
-            {/* Fotografía de la Casa Muestra */}
-            <div className="relative rounded-2xl overflow-hidden aspect-[16/9] bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-800 shadow-xs">
-              <Image
-                src="/images/properties/aguila-premier/facade.jpg"
-                alt="Casa Muestra en Valle de los Encinos"
-                fill
-                priority
-                className="object-cover object-[center_20%]"
-                sizes="(max-width: 640px) 100vw, 600px"
-              />
-              <div className="absolute bottom-2 left-2 bg-[#0F2C40]/90 backdrop-blur-xs text-white text-[11px] font-semibold px-2.5 py-1 rounded-lg">
-                🏡 Modelo Águila Premier • $1,180,000 MXN
-              </div>
             </div>
 
             {errorMsg && (
