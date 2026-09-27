@@ -75,13 +75,18 @@ El asistente leerá este archivo automáticamente y tendrá el 100% del contexto
   - Opción dual: Vaciar a 0 registros (tabla limpia) o restablecer los 7 prospectos iniciales de demostración con la clave `RESTABLECER-DEMO`.
   - **Inmunidad de inventario:** Los modelos de viviendas creados en el catálogo (`properties`) quedan totalmente blindados y nunca se ven afectados.
 
-### 5. Configuración Comercial y Seguridad de Telegram (`CommercialSettingsModal`)
+### 5. Configuración Comercial y Directorio Multi-Destinatario de Telegram (`CommercialSettingsModal`)
 - Pestañas optimizadas sin desbordamiento horizontal: *Asesor, Redes, Inmobiliaria, Telegram, Base de Datos*.
+- **Directorio de Destinatarios de Telegram con Alias y Alternancia a Voluntad:**
+  - Permite registrar múltiples Chat IDs asociados a un alias descriptivo (ej. *"Mi Celular (Developer)"*, *"Carlos Cantú (Asesor)"*).
+  - **Alternancia con 1 solo clic:** Selecciona qué destinatario recibe las alertas en vivo de citas y nuevos prospectos, ideal para alternar entre desarrollo/pruebas y asesores en producción sin tocar variables de entorno.
+  - **Pruebas de envío individuales:** Cada destinatario registrado cuenta con su propio botón de prueba para verificar que el bot `@RED192142_bot` pueda entregarle mensajes antes de activarlo.
+  - **Gestión completa:** Agregar nuevos destinatarios, eliminarlos (con protección para no dejar la lista vacía) y marcar como activo de inmediato.
+  - **Persistencia bidireccional:** Se guarda permanentemente en Supabase PostgreSQL (`commercial_config`), respaldado en `localStorage` y en archivo local.
 - **Seguridad del Bot Móvil de Telegram:**
-  - Las credenciales (`TELEGRAM_BOT_TOKEN` y `TELEGRAM_ADVISOR_CHAT_ID`) están resguardadas en el servidor y configuradas en Vercel.
-  - Se eliminaron los campos de entrada de texto directo para evitar exposición de credenciales en el cliente.
-  - Tarjeta de auditoría que confirma el estado activo de `@RED192142_bot` y Chat ID `948786976`.
-  - Botón interactivo para **"Enviar Mensaje de Prueba al Celular"** sin exponer tokens.
+  - El token (`TELEGRAM_BOT_TOKEN`) permanece 100% blindado en variables de entorno del servidor.
+  - Tarjeta de auditoría en vivo que resalta el destinatario activo en servicio.
+  - Guía integrada de 30 segundos para obtener el Chat ID de cualquier nuevo asesor mediante `@userinfobot`.
   - Sincronizador de Webhook con un solo clic para producción en Vercel o modo local.
 
 ### 6. Base de Datos Definitiva en la Nube (Supabase PostgreSQL)

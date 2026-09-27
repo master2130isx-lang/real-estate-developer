@@ -7,7 +7,14 @@ export async function POST(req: NextRequest) {
     const config = await getServerCommercialConfig();
 
     const token = body.token?.trim() || config.telegramConfig?.botToken?.trim() || process.env.TELEGRAM_BOT_TOKEN;
-    const chatId = body.chatId?.trim() || config.telegramConfig?.advisorChatId?.trim() || process.env.TELEGRAM_ADVISOR_CHAT_ID;
+    const chatId =
+      body.chatId?.trim() ||
+      config.telegramConfig?.recipients?.find((r) => r.isActive)?.chatId ||
+      config.telegramConfig?.activeChatId?.trim() ||
+      config.telegramConfig?.advisorChatId?.trim() ||
+      process.env.TELEGRAM_ADVISOR_CHAT_ID;
+
+    const alias = body.alias?.trim() || 'Asesor / Desarrollador';
 
     if (!token || !chatId) {
       return NextResponse.json(
@@ -18,14 +25,17 @@ export async function POST(req: NextRequest) {
 
     const testMessage = `🤖 *¡CONEXIÓN EXITOSA CON TU BOT!*
 ━━━━━━━━━━━━━━━━━━━━
-Tu bot está vinculado correctamente con tu plataforma inmobiliaria.
+📍 *Destinatario:* ${alias}
+🆔 *Chat ID:* \`${chatId}\`
 
-A partir de ahora, cuando un cliente solicite una cita en la web, recibirás aquí la notificación instantánea con los botones de:
+Tu bot está vinculado correctamente con tu plataforma comercial inmobiliaria.
+
+A partir de ahora, cuando un cliente solicite una cita en la web, recibirás aquí la notificación instantánea con:
 • ✅ *Confirmar Cita*
 • ❌ *Cancelar Cita*
 • 💬 *Abrir WhatsApp con el Cliente*
 
-¡Todo listo para vender más propiedades! 🚀`;
+¡Todo listo para gestionar tus citas en tiempo real! 🚀`;
 
     const res = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
       method: 'POST',

@@ -4,6 +4,15 @@
  * hasta que el responsable del negocio confirme la información definitiva.
  */
 
+export interface TelegramRecipient {
+  id: string;
+  alias: string;
+  chatId: string;
+  isActive: boolean;
+  createdAt?: string;
+  notes?: string;
+}
+
 export interface CommercialConfig {
   isDemoMode: boolean;
   agencyName: string;
@@ -27,6 +36,8 @@ export interface CommercialConfig {
   telegramConfig?: {
     botToken?: string;
     advisorChatId?: string;
+    activeChatId?: string;
+    recipients?: TelegramRecipient[];
   };
   featuredPrice: {
     amountFormatted: string;
@@ -66,6 +77,16 @@ export const COMMERCIAL_CONFIG: CommercialConfig = {
   telegramConfig: {
     botToken: process.env.TELEGRAM_BOT_TOKEN || '',
     advisorChatId: process.env.TELEGRAM_ADVISOR_CHAT_ID || '948786976',
+    activeChatId: '948786976',
+    recipients: [
+      {
+        id: 'rec-dev',
+        alias: 'Mi Celular (Developer)',
+        chatId: '948786976',
+        isActive: true,
+        createdAt: '2026-09-26',
+      },
+    ],
   },
   featuredPrice: {
     amountFormatted: '$1,180,000 MXN',

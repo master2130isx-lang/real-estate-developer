@@ -16,10 +16,39 @@ async function getBotToken(): Promise<string | undefined> {
 
 async function getAdvisorChatId(): Promise<string | undefined> {
   const config = await getServerCommercialConfig();
+
+  // 1. Si hay una lista de destinatarios, priorizar el que esté marcado como activo (isActive: true)
+  if (Array.isArray(config.telegramConfig?.recipients) && config.telegramConfig.recipients.length > 0) {
+    const active = config.telegramConfig.recipients.find((r) => r.isActive && r.chatId?.trim());
+    if (active) {
+      return active.chatId.trim();
+    }
+  }
+
+  // 2. Si hay un activeChatId explícito
+  if (config.telegramConfig?.activeChatId && config.telegramConfig.activeChatId.trim()) {
+    return config.telegramConfig.activeChatId.trim();
+  }
+
+  // 3. Si hay un advisorChatId
   if (config.telegramConfig?.advisorChatId && config.telegramConfig.advisorChatId.trim()) {
     return config.telegramConfig.advisorChatId.trim();
   }
+
+  // 4. Fallback a variables de entorno del servidor
   return process.env.TELEGRAM_ADVISOR_CHAT_ID;
+}
+
+export async function getActiveRecipientInfo(): Promise<{ chatId: string; alias: string }> {
+  const config = await getServerCommercialConfig();
+  if (Array.isArray(config.telegramConfig?.recipients) && config.telegramConfig.recipients.length > 0) {
+    const active = config.telegramConfig.recipients.find((r) => r.isActive && r.chatId?.trim());
+    if (active) {
+      return { chatId: active.chatId.trim(), alias: active.alias };
+    }
+  }
+  const chatId = config.telegramConfig?.activeChatId || config.telegramConfig?.advisorChatId || process.env.TELEGRAM_ADVISOR_CHAT_ID || '948786976';
+  return { chatId, alias: 'Asesor Principal' };
 }
 
 /**

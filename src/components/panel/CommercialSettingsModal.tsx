@@ -22,10 +22,14 @@ import {
   ShieldAlert,
   Info,
   Star,
+  Smartphone,
+  Plus,
+  Trash2,
 } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
 import { WhatsAppIcon } from '@/components/common/WhatsAppIcon';
 import { DeveloperPurgeModal } from './DeveloperPurgeModal';
+import { TelegramRecipient } from '@/config/commercialConfig';
 
 interface CommercialSettingsModalProps {
   isOpen: boolean;
@@ -59,9 +63,142 @@ export function CommercialSettingsModal({ isOpen, onClose }: CommercialSettingsM
 
   // Telegram
   const [botToken, setBotToken] = useState(commercialConfig.telegramConfig?.botToken || '');
-  const [advisorChatId, setAdvisorChatId] = useState(commercialConfig.telegramConfig?.advisorChatId || '');
+  const [advisorChatId, setAdvisorChatId] = useState(commercialConfig.telegramConfig?.advisorChatId || '948786976');
   const [testStatus, setTestStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [testError, setTestError] = useState('');
+
+  // Directorio de Destinatarios de Telegram con Alias
+  const [recipients, setRecipients] = useState<TelegramRecipient[]>(() => {
+    if (commercialConfig.telegramConfig?.recipients && commercialConfig.telegramConfig.recipients.length > 0) {
+      return commercialConfig.telegramConfig.recipients;
+    }
+    const legacyChatId = commercialConfig.telegramConfig?.advisorChatId || '948786976';
+    return [
+      {
+        id: 'rec-dev',
+        alias: 'Mi Celular (Developer)',
+        chatId: legacyChatId,
+        isActive: true,
+        createdAt: '2026-09-26',
+      },
+    ];
+  });
+
+  const [newAlias, setNewAlias] = useState('');
+  const [newChatId, setNewChatId] = useState('');
+  const [newSetAsActive, setNewSetAsActive] = useState(false);
+  const [testRecipientStatus, setTestRecipientStatus] = useState<{ [id: string]: 'loading' | 'success' | 'error' }>({});
+  const [testRecipientError, setTestRecipientError] = useState<{ [id: string]: string }>({});
+
+  const handleSetActiveRecipient = async (id: string) => {
+    const updated = recipients.map((r) => ({
+      ...r,
+      isActive: r.id === id,
+    }));
+    setRecipients(updated);
+    const active = updated.find((r) => r.id === id);
+    if (active) {
+      setAdvisorChatId(active.chatId);
+      await updateCommercialConfig({
+        telegramConfig: {
+          ...commercialConfig.telegramConfig,
+          advisorChatId: active.chatId,
+          activeChatId: active.chatId,
+          recipients: updated,
+        },
+      });
+    }
+  };
+
+  const handleAddRecipient = async () => {
+    if (!newAlias.trim() || !newChatId.trim()) return;
+    const cleanChat = newChatId.trim();
+    const cleanName = newAlias.trim();
+    const shouldBeActive = newSetAsActive || recipients.length === 0;
+
+    const newRec: TelegramRecipient = {
+      id: `rec-${Date.now().toString(36)}`,
+      alias: cleanName,
+      chatId: cleanChat,
+      isActive: shouldBeActive,
+      createdAt: new Date().toISOString().split('T')[0],
+    };
+
+    const updated = shouldBeActive
+      ? [...recipients.map((r) => ({ ...r, isActive: false })), newRec]
+      : [...recipients, newRec];
+
+    setRecipients(updated);
+    setNewAlias('');
+    setNewChatId('');
+    setNewSetAsActive(false);
+
+    if (shouldBeActive) {
+      setAdvisorChatId(cleanChat);
+    }
+
+    await updateCommercialConfig({
+      telegramConfig: {
+        ...commercialConfig.telegramConfig,
+        advisorChatId: shouldBeActive ? cleanChat : (recipients.find((r) => r.isActive)?.chatId || cleanChat),
+        activeChatId: shouldBeActive ? cleanChat : (recipients.find((r) => r.isActive)?.chatId || cleanChat),
+        recipients: updated,
+      },
+    });
+  };
+
+  const handleRemoveRecipient = async (id: string) => {
+    if (recipients.length <= 1) {
+      alert('Debes mantener al menos un destinatario registrado en la lista.');
+      return;
+    }
+    const filtered = recipients.filter((r) => r.id !== id);
+    let updated = filtered;
+    if (!filtered.some((r) => r.isActive) && filtered.length > 0) {
+      updated = filtered.map((r, i) => (i === 0 ? { ...r, isActive: true } : r));
+      setAdvisorChatId(updated[0].chatId);
+    }
+    setRecipients(updated);
+
+    await updateCommercialConfig({
+      telegramConfig: {
+        ...commercialConfig.telegramConfig,
+        advisorChatId: updated.find((r) => r.isActive)?.chatId,
+        activeChatId: updated.find((r) => r.isActive)?.chatId,
+        recipients: updated,
+      },
+    });
+  };
+
+  const handleTestRecipient = async (rec: TelegramRecipient) => {
+    setTestRecipientStatus((prev) => ({ ...prev, [rec.id]: 'loading' }));
+    setTestRecipientError((prev) => ({ ...prev, [rec.id]: '' }));
+
+    try {
+      const res = await fetch('/api/telegram/test', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          chatId: rec.chatId,
+          alias: rec.alias,
+        }),
+      });
+
+      const data = await res.json();
+      if (data.ok) {
+        setTestRecipientStatus((prev) => ({ ...prev, [rec.id]: 'success' }));
+        setTimeout(() => {
+          setTestRecipientStatus((prev) => ({ ...prev, [rec.id]: undefined as any }));
+        }, 3500);
+      } else {
+        setTestRecipientStatus((prev) => ({ ...prev, [rec.id]: 'error' }));
+        setTestRecipientError((prev) => ({ ...prev, [rec.id]: data.error || 'Fallo de envío' }));
+      }
+    } catch (err: any) {
+      setTestRecipientStatus((prev) => ({ ...prev, [rec.id]: 'error' }));
+      setTestRecipientError((prev) => ({ ...prev, [rec.id]: err.message || 'Error de red' }));
+    }
+  };
 
   // Webhook Producción
   const [webhookUrl, setWebhookUrl] = useState('');
@@ -285,7 +422,9 @@ CREATE POLICY "Permitir todo acceso properties" ON properties FOR ALL USING (tru
       },
       telegramConfig: {
         botToken: botToken.trim(),
-        advisorChatId: advisorChatId.trim(),
+        advisorChatId: recipients.find((r) => r.isActive)?.chatId || advisorChatId.trim(),
+        activeChatId: recipients.find((r) => r.isActive)?.chatId || advisorChatId.trim(),
+        recipients,
       },
       featuredPrice: {
         ...commercialConfig.featuredPrice,
@@ -648,157 +787,304 @@ CREATE POLICY "Permitir todo acceso properties" ON properties FOR ALL USING (tru
             </div>
           )}
 
-          {/* TAB 4: BOT DE TELEGRAM */}
+          {/* TAB 4: BOT DE TELEGRAM & DIRECTORIO DE DESTINATARIOS */}
           {activeTab === 'telegram' && (
             <div className="space-y-4">
-              {/* Explicación Clave sobre Teléfono vs Chat ID de Telegram */}
-              <div className="bg-sky-50 border border-sky-200 rounded-2xl p-4 text-xs text-sky-950 space-y-2.5">
-                <div className="flex items-center gap-2 font-bold text-sky-900">
-                  <Info className="w-5 h-5 text-sky-600 shrink-0" />
-                  <span>¿Por qué Telegram requiere un Chat ID y no un número telefónico?</span>
-                </div>
-                <p className="text-[11px] leading-relaxed text-sky-900">
-                  Por políticas de privacidad de Telegram, <strong>los bots no pueden enviar mensajes buscando por número de teléfono</strong>. En su lugar, cada cuenta de Telegram tiene un <strong>Chat ID numérico único</strong> al que se dirigen las alertas instantáneas.
-                </p>
+              {/* Tarjeta Destacada del Destinatario Activo */}
+              {(() => {
+                const activeRec = recipients.find((r) => r.isActive) || recipients[0];
+                return (
+                  <div className="p-4 rounded-2xl bg-gradient-to-r from-emerald-50 to-teal-50 border-2 border-emerald-500/40 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-2xl bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-sm">
+                        <Smartphone className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-bold text-emerald-950 uppercase tracking-wide">
+                            Destino Activo en Vivo:
+                          </span>
+                          <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-600 text-white animate-pulse">
+                            <span className="w-1.5 h-1.5 rounded-full bg-white"></span>
+                            Recibiendo Alertas
+                          </span>
+                        </div>
+                        <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                          <span>{activeRec?.alias || 'Asesor Principal'}</span>
+                          <span className="font-mono text-xs font-semibold px-2 py-0.5 rounded-md bg-white border border-emerald-300 text-emerald-900">
+                            ID: {activeRec?.chatId || advisorChatId}
+                          </span>
+                        </h3>
+                      </div>
+                    </div>
 
-                <div className="bg-white/90 p-3 rounded-xl border border-sky-200 text-[11px] space-y-1.5 text-slate-800">
-                  <span className="font-bold text-sky-950 block">Pasos para cambiar quién recibe las notificaciones:</span>
-                  <ol className="list-decimal pl-4 space-y-1 text-slate-700">
-                    <li>
-                      En el celular nuevo, abre Telegram, busca el bot gratuito <strong>@userinfobot</strong> y pulsa Iniciar. Te responderá de inmediato tu número de <strong>Id</strong> (ej. <code>948786976</code>).
-                    </li>
-                    <li>
-                      En ese mismo celular, abre tu bot oficial <strong>@RED192142_bot</strong> y pulsa el botón <strong>Iniciar / Start</strong> (imprescindible para que Telegram permita al bot enviarte mensajes).
-                    </li>
-                    <li>
-                      Escribe ese número en el campo <strong>Chat ID del Asesor</strong> que ves aquí abajo y pulsa <strong>Guardar Configuración</strong>.
-                    </li>
-                  </ol>
-                </div>
-              </div>
-
-              {/* Campos Editables de Telegram */}
-              <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-3.5">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-xs font-bold text-slate-900 mb-1">
-                      Chat ID del Asesor (ID numérico) *
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      value={advisorChatId}
-                      onChange={(e) => setAdvisorChatId(e.target.value)}
-                      placeholder="Ej. 948786976"
-                      className="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs bg-white focus:ring-2 focus:ring-[#0d233a] focus:outline-none font-mono font-bold"
-                    />
-                    <span className="text-[10px] text-slate-500 mt-0.5 block">
-                      ID del usuario o grupo que recibirá las alertas de citas
-                    </span>
+                    {activeRec && (
+                      <button
+                        type="button"
+                        onClick={() => handleTestRecipient(activeRec)}
+                        disabled={testRecipientStatus[activeRec.id] === 'loading'}
+                        className="bg-emerald-700 hover:bg-emerald-800 disabled:opacity-50 text-white font-bold px-3.5 py-2 rounded-xl text-xs transition flex items-center justify-center gap-1.5 cursor-pointer shadow-xs shrink-0 self-start sm:self-auto"
+                      >
+                        <Send className="w-3.5 h-3.5" />
+                        <span>
+                          {testRecipientStatus[activeRec.id] === 'loading'
+                            ? 'Enviando...'
+                            : testRecipientStatus[activeRec.id] === 'success'
+                            ? '¡Enviado!'
+                            : 'Probar Alerta Activa'}
+                        </span>
+                      </button>
+                    )}
                   </div>
+                );
+              })()}
 
+              {/* Directorio de Chat IDs Guardados (Alternar a voluntad) */}
+              <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-3">
+                <div className="flex items-center justify-between">
                   <div>
-                    <label className="block text-xs font-bold text-slate-900 mb-1">
-                      Usuario del Bot Oficial
-                    </label>
-                    <input
-                      type="text"
-                      disabled
-                      value="@RED192142_bot"
-                      className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs bg-slate-100 text-slate-600 font-mono"
-                    />
-                    <span className="text-[10px] text-emerald-700 font-medium mt-0.5 block">
-                      ✓ Bot verificado y conectado al sistema
-                    </span>
+                    <h4 className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
+                      <span>Directorio de Destinatarios de Telegram</span>
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-200 text-slate-700">
+                        {recipients.length} {recipients.length === 1 ? 'guardado' : 'guardados'}
+                      </span>
+                    </h4>
+                    <p className="text-[11px] text-slate-500">
+                      Alterna con 1 solo clic quién recibe las notificaciones de clientes según estés en pruebas o en producción.
+                    </p>
                   </div>
                 </div>
-              </div>
 
-              {/* Botón de Prueba */}
-              <div className="p-3 bg-slate-50 rounded-2xl border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <div>
-                  <h4 className="text-xs font-bold text-slate-800">Prueba de Conexión en Vivo</h4>
-                  <p className="text-[11px] text-slate-500">Envía un mensaje de prueba al Chat ID escrito arriba para comprobar que recibes las alertas</p>
+                <div className="space-y-2">
+                  {recipients.map((rec) => {
+                    const isTesting = testRecipientStatus[rec.id] === 'loading';
+                    const isSuccess = testRecipientStatus[rec.id] === 'success';
+                    const hasError = testRecipientStatus[rec.id] === 'error';
+
+                    return (
+                      <div
+                        key={rec.id}
+                        className={`p-3 rounded-2xl border transition flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 ${
+                          rec.isActive
+                            ? 'bg-white border-emerald-400 ring-2 ring-emerald-500/20 shadow-xs'
+                            : 'bg-white/80 border-slate-200 hover:border-slate-300'
+                        }`}
+                      >
+                        <div className="flex items-center gap-3">
+                          <div
+                            className={`w-8 h-8 rounded-xl flex items-center justify-center text-xs shrink-0 ${
+                              rec.isActive
+                                ? 'bg-emerald-100 text-emerald-800 font-bold'
+                                : 'bg-slate-100 text-slate-600'
+                            }`}
+                          >
+                            <Smartphone className="w-4 h-4" />
+                          </div>
+
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs font-bold text-slate-900">{rec.alias}</span>
+                              {rec.isActive && (
+                                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300">
+                                  ✓ Activo
+                                </span>
+                              )}
+                            </div>
+                            <span className="text-[11px] font-mono text-slate-500">
+                              Chat ID: <span className="font-bold text-slate-700">{rec.chatId}</span>
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Botones de Acción por Fila */}
+                        <div className="flex items-center gap-1.5 self-end sm:self-auto">
+                          {!rec.isActive ? (
+                            <button
+                              type="button"
+                              onClick={() => handleSetActiveRecipient(rec.id)}
+                              className="bg-slate-800 hover:bg-slate-900 text-white font-semibold px-3 py-1.5 rounded-xl text-[11px] transition flex items-center gap-1 cursor-pointer shadow-xs"
+                            >
+                              <span>Activar</span>
+                            </button>
+                          ) : (
+                            <span className="text-[11px] font-bold text-emerald-700 px-2.5 py-1 rounded-xl bg-emerald-50 border border-emerald-200">
+                              En servicio
+                            </span>
+                          )}
+
+                          <button
+                            type="button"
+                            onClick={() => handleTestRecipient(rec)}
+                            disabled={isTesting}
+                            title="Enviar mensaje de prueba a este Chat ID"
+                            className="bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium px-2.5 py-1.5 rounded-xl text-[11px] transition flex items-center gap-1 cursor-pointer disabled:opacity-50"
+                          >
+                            <Send className="w-3 h-3 text-sky-600" />
+                            <span>
+                              {isTesting ? 'Probando...' : isSuccess ? '¡Exitoso!' : 'Probar'}
+                            </span>
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveRecipient(rec.id)}
+                            disabled={recipients.length <= 1}
+                            title={
+                              recipients.length <= 1
+                                ? 'No puedes eliminar el único destinatario'
+                                : 'Eliminar de la lista'
+                            }
+                            className="p-1.5 rounded-xl text-slate-400 hover:text-rose-600 hover:bg-rose-50 disabled:opacity-30 disabled:hover:text-slate-400 disabled:hover:bg-transparent transition cursor-pointer"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+
+                        {hasError && (
+                          <div className="w-full text-[10px] text-rose-600 font-semibold px-2 py-1 bg-rose-50 rounded-lg border border-rose-200 mt-1">
+                            Error: {testRecipientError[rec.id]}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
 
-                <button
-                  type="button"
-                  onClick={handleTestTelegram}
-                  disabled={testStatus === 'loading' || !advisorChatId.trim()}
-                  className="bg-sky-600 hover:bg-sky-700 disabled:bg-slate-300 text-white font-bold px-3.5 py-2 rounded-xl text-xs transition flex items-center justify-center gap-1.5 cursor-pointer shadow-xs shrink-0"
-                >
-                  <Send className="w-3.5 h-3.5" />
-                  <span>{testStatus === 'loading' ? 'Enviando...' : 'Enviar Prueba al Celular'}</span>
-                </button>
-              </div>
+                {/* Formulario para Agregar Nuevo Destinatario */}
+                <div className="pt-3 border-t border-slate-200 space-y-2.5">
+                  <span className="text-xs font-bold text-slate-800 block flex items-center gap-1.5">
+                    <Plus className="w-3.5 h-3.5 text-[#0d233a]" />
+                    <span>Agregar Nuevo Destinatario / Agente</span>
+                  </span>
 
-              {testStatus === 'success' && (
-                <div className="p-2.5 rounded-xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-700 font-bold flex items-center gap-2 animate-in fade-in">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                  <span>¡Mensaje de prueba enviado exitosamente a tu celular vía Telegram!</span>
-                </div>
-              )}
-              {testStatus === 'error' && (
-                <div className="p-2.5 rounded-xl bg-rose-50 border border-rose-200 text-xs text-rose-600 font-semibold flex items-center gap-2 animate-in fade-in">
-                  <AlertCircle className="w-4 h-4 text-rose-500 shrink-0" />
-                  <span>{testError}</span>
-                </div>
-              )}
-
-                {/* Conexión de Webhook (Producción vs Local) */}
-                <div className="pt-3 mt-3 border-t border-slate-200/70 space-y-2.5">
-                  <div className="flex items-center justify-between">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                     <div>
-                      <h4 className="font-bold text-xs text-slate-800 flex items-center gap-1.5">
-                        <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                        <span>Receptor de Botones Interactivos del Bot</span>
-                      </h4>
-                      <p className="text-[11px] text-slate-500">
-                        En local, los botones interactivos se procesan al instante en tu equipo. Al publicar en Vercel, registra tu dominio aquí para que funcione en la nube sin servidores locales.
-                      </p>
+                      <input
+                        type="text"
+                        value={newAlias}
+                        onChange={(e) => setNewAlias(e.target.value)}
+                        placeholder="Alias (ej. Asesor Carlos Cantú)"
+                        className="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs bg-white focus:ring-2 focus:ring-[#0d233a] focus:outline-none"
+                      />
+                    </div>
+                    <div>
+                      <input
+                        type="text"
+                        value={newChatId}
+                        onChange={(e) => setNewChatId(e.target.value)}
+                        placeholder="Chat ID (ej. 987654321)"
+                        className="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs bg-white focus:ring-2 focus:ring-[#0d233a] focus:outline-none font-mono"
+                      />
                     </div>
                   </div>
 
-                  <div className="bg-slate-50 p-3 rounded-2xl border border-slate-200 space-y-2">
-                    <label className="block text-[11px] font-semibold text-slate-700">
-                      URL del Dominio en Producción (Vercel o Dominio Propio):
-                    </label>
-                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-1">
+                    <label className="flex items-center gap-2 text-xs text-slate-700 cursor-pointer">
                       <input
-                        type="url"
-                        value={webhookUrl}
-                        onChange={(e) => setWebhookUrl(e.target.value)}
-                        placeholder="https://tu-proyecto.vercel.app"
-                        className="flex-1 px-3 py-1.5 rounded-xl border border-slate-300 text-xs bg-white focus:ring-2 focus:ring-[#0d233a] focus:outline-none font-mono"
+                        type="checkbox"
+                        checked={newSetAsActive}
+                        onChange={(e) => setNewSetAsActive(e.target.checked)}
+                        className="rounded text-[#0d233a] focus:ring-0"
                       />
-                      <button
-                        type="button"
-                        onClick={handleSetWebhook}
-                        disabled={!webhookUrl.trim() || webhookLoading}
-                        className="bg-slate-800 hover:bg-slate-900 disabled:bg-slate-300 text-white font-bold px-3 py-1.5 rounded-xl text-xs transition cursor-pointer"
-                      >
-                        {webhookLoading ? 'Conectando...' : 'Conectar Webhook'}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={handleDeleteWebhook}
-                        disabled={webhookLoading}
-                        className="bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold px-2.5 py-1.5 rounded-xl text-xs transition cursor-pointer"
-                        title="Desconectar Webhook para volver a Modo Local"
-                      >
-                        Modo Local
-                      </button>
-                    </div>
+                      <span>Establecer como destino activo de inmediato</span>
+                    </label>
 
+                    <button
+                      type="button"
+                      onClick={handleAddRecipient}
+                      disabled={!newAlias.trim() || !newChatId.trim()}
+                      className="bg-[#0d233a] hover:bg-[#163b5c] disabled:opacity-40 text-white font-bold px-4 py-2 rounded-xl text-xs transition flex items-center justify-center gap-1.5 cursor-pointer shadow-xs"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      <span>Guardar en Lista</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Explicación Amigable sobre Teléfono vs Chat ID de Telegram */}
+              <div className="bg-sky-50 border border-sky-200 rounded-2xl p-4 text-xs text-sky-950 space-y-2">
+                <div className="flex items-center gap-2 font-bold text-sky-900">
+                  <Info className="w-4 h-4 text-sky-600 shrink-0" />
+                  <span>¿Cómo obtener el Chat ID de un nuevo asesor en 30 segundos?</span>
+                </div>
+                <ol className="list-decimal pl-4 space-y-1 text-[11px] text-slate-700 leading-relaxed">
+                  <li>
+                    Pide al asesor que en su celular abra Telegram, busque el bot <strong>@userinfobot</strong> y pulse Iniciar. Le responderá su número de <strong>Id</strong> (ej. <code>948786976</code>).
+                  </li>
+                  <li>
+                    Pídele que también abra tu bot oficial <strong>@RED192142_bot</strong> y presione <strong>Iniciar / Start</strong> (requisito para que Telegram permita enviarle mensajes).
+                  </li>
+                  <li>
+                    Escribe su nombre y su ID arriba y pulsa <strong>Guardar en Lista</strong>. ¡Podrás alternar a su número cuando desees!
+                  </li>
+                </ol>
+              </div>
+
+              {/* Bot Oficial Verificado */}
+              <div className="p-3 bg-slate-50 rounded-2xl border border-slate-200 flex items-center justify-between gap-3 text-xs">
+                <div>
+                  <span className="font-bold text-slate-800 block">Bot Oficial de Notificaciones:</span>
+                  <span className="font-mono text-emerald-800 font-bold">@RED192142_bot</span>
+                </div>
+                <span className="text-[11px] text-emerald-700 font-semibold px-2 py-0.5 rounded-lg bg-emerald-100 border border-emerald-300">
+                  ✓ Token Protegido en Servidor
+                </span>
+              </div>
+
+              {/* Conexión de Webhook (Producción vs Local) */}
+              <div className="pt-3 mt-3 border-t border-slate-200/70 space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h4 className="font-bold text-xs text-slate-800 flex items-center gap-1.5">
+                      <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                      <span>Receptor de Botones Interactivos del Bot</span>
+                    </h4>
+                    <p className="text-[11px] text-slate-500">
+                      En local, los botones interactivos se procesan al instante en tu equipo. Al publicar en Vercel, registra tu dominio aquí para que funcione en la nube sin servidores locales.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="bg-slate-50 p-3 rounded-2xl border border-slate-200 space-y-2">
+                  <label className="block text-[11px] font-semibold text-slate-700">
+                    URL del Dominio en Producción (Vercel o Dominio Propio):
+                  </label>
+                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                    <input
+                      type="url"
+                      value={webhookUrl}
+                      onChange={(e) => setWebhookUrl(e.target.value)}
+                      placeholder="https://tu-proyecto.vercel.app"
+                      className="flex-1 px-3 py-1.5 rounded-xl border border-slate-300 text-xs bg-white focus:ring-2 focus:ring-[#0d233a] focus:outline-none font-mono"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleSetWebhook}
+                      disabled={!webhookUrl.trim() || webhookLoading}
+                      className="bg-slate-800 hover:bg-slate-900 disabled:bg-slate-300 text-white font-bold px-3 py-1.5 rounded-xl text-xs transition cursor-pointer"
+                    >
+                      {webhookLoading ? 'Conectando...' : 'Conectar Webhook'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleDeleteWebhook}
+                      disabled={webhookLoading}
+                      className="bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold px-2.5 py-1.5 rounded-xl text-xs transition cursor-pointer"
+                      title="Desconectar Webhook para volver a Modo Local"
+                    >
+                      Modo Local
+                    </button>
+                  </div>
                     {webhookStatus && (
-                      <p className="text-[11px] font-semibold text-slate-700 animate-in fade-in pt-1">
+                      <div className="text-[11px] font-mono p-2 bg-white rounded-xl border border-slate-200 mt-1.5 text-slate-700">
                         {webhookStatus}
-                      </p>
+                      </div>
                     )}
                   </div>
                 </div>
               </div>
-          )}
+            )}
 
           {/* TAB 5: BASE DE DATOS (SUPABASE) */}
           {activeTab === 'database' && (
