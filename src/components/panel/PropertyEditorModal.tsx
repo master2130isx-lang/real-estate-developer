@@ -43,9 +43,10 @@ const COMMON_AMENITIES = [
 
 const COMMON_FINANCING: { id: FinancingType; label: string }[] = [
   { id: 'infonavit', label: 'Crédito Infonavit (Total, Tradicional, Conyugal)' },
+  { id: 'fovissste', label: 'Crédito ISSSTE' },
   { id: 'bancario', label: 'Crédito Hipotecario Bancario' },
   { id: 'contado', label: 'Pago de Contado' },
-  { id: 'otro', label: 'Cofinavit / Fovissste para Todos' },
+  { id: 'otro', label: 'Cofinavit / Otros esquemas' },
   { id: 'necesita_orientacion', label: 'Asesoría y Calificación en Desarrollo' },
 ];
 

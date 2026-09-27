@@ -111,7 +111,7 @@ export function PrequalificationForm({
       }
     }
 
-    // Validación de CURP si eligió FOVISSSTE/ISSSTE y no pidió orientación previa
+    // Validación de CURP si eligió ISSSTE y no pidió orientación previa
     if (requiresCurp && !skipIdentifierForOrientation) {
       const cleanCurp = curpInput.trim().toUpperCase();
       if (cleanCurp.length !== 18) {
@@ -552,7 +552,7 @@ export function PrequalificationForm({
                   </div>
                 )}
 
-                {/* BLOQUE DINÁMICO SEGÚN CRÉDITO: FOVISSSTE / ISSSTE (CURP) */}
+                {/* BLOQUE DINÁMICO SEGÚN CRÉDITO: ISSSTE (CURP) */}
                 {requiresCurp && (
                   <div className="bg-slate-100 dark:bg-[#0E2236] border border-slate-200 dark:border-slate-700 rounded-xl p-4 space-y-3">
                     <div className="flex items-center gap-2 text-slate-900 dark:text-white font-bold text-xs uppercase tracking-wider">

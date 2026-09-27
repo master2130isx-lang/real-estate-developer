@@ -43,9 +43,10 @@ export function PropertyDetailModal({
 
   const financingLabels: Record<string, string> = {
     infonavit: 'Infonavit (Tradicional, Total, Conyugal)',
+    fovissste: 'Crédito ISSSTE',
     bancario: 'Crédito Hipotecario Bancario',
     contado: 'Recursos Propios / Contado',
-    otro: 'Fovissste u otros esquemas',
+    otro: 'Otros esquemas de financiamiento',
     por_definir: 'Consultar esquema',
   };
 

@@ -306,6 +306,7 @@ export function NewAppointmentModal({
                   className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-xs bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-[#0d233a] dark:focus:ring-amber-500 focus:outline-none"
                 >
                   <option value="infonavit">Crédito Infonavit (Tradicional / Total)</option>
+                  <option value="fovissste">Crédito ISSSTE</option>
                   <option value="bancario">Crédito Hipotecario Bancario</option>
                   <option value="contado">Recursos Propios / Contado</option>
                   <option value="necesita_orientacion">Por definir / Asesoría previa</option>
