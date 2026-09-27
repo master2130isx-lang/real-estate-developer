@@ -8,18 +8,21 @@ import { getServerCommercialConfig } from '@/lib/commercialConfigStore';
 const geistSans = Geist({
   variable: '--font-geist-sans',
   subsets: ['latin'],
+  display: 'swap',
 });
 
 const geistMono = Geist_Mono({
   variable: '--font-geist-mono',
   subsets: ['latin'],
+  display: 'swap',
 });
 
 const playfairDisplay = Playfair_Display({
   variable: '--font-serif',
   subsets: ['latin'],
-  weight: ['400', '700', '800', '900'],
+  weight: ['400', '700'],
   style: ['normal', 'italic'],
+  display: 'swap',
 });
 
 export const metadata: Metadata = {

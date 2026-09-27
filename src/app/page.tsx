@@ -1,20 +1,46 @@
 'use client';
 
 import React, { useState } from 'react';
+import dynamic from 'next/dynamic';
 import { Navbar } from '@/components/landing/Navbar';
 import { Hero } from '@/components/landing/Hero';
 import { PropertiesSection } from '@/components/landing/PropertiesSection';
 import { HowItWorks } from '@/components/landing/HowItWorks';
-import { AdvisorTrust } from '@/components/landing/AdvisorTrust';
-import { LocationMapSection } from '@/components/landing/LocationMapSection';
-import { FaqSection } from '@/components/landing/FaqSection';
 import { StickyMobileCTA } from '@/components/landing/StickyMobileCTA';
 import { Footer } from '@/components/landing/Footer';
-import { PrivacyModal } from '@/components/landing/PrivacyModal';
-import { PrequalificationForm } from '@/components/prequalification/PrequalificationForm';
 import { Property } from '@/types';
 import { ArrowRight } from 'lucide-react';
-import { WhatsAppFloatingButton } from '@/components/landing/WhatsAppFloatingButton';
+
+// Componentes secundarios e interactivos diferidos para eliminar JavaScript bloqueante inicial
+const AdvisorTrust = dynamic(
+  () => import('@/components/landing/AdvisorTrust').then((m) => m.AdvisorTrust),
+  { ssr: false }
+);
+
+const LocationMapSection = dynamic(
+  () => import('@/components/landing/LocationMapSection').then((m) => m.LocationMapSection),
+  { ssr: false }
+);
+
+const FaqSection = dynamic(
+  () => import('@/components/landing/FaqSection').then((m) => m.FaqSection),
+  { ssr: false }
+);
+
+const PrequalificationForm = dynamic(
+  () => import('@/components/prequalification/PrequalificationForm').then((m) => m.PrequalificationForm),
+  { ssr: false }
+);
+
+const PrivacyModal = dynamic(
+  () => import('@/components/landing/PrivacyModal').then((m) => m.PrivacyModal),
+  { ssr: false }
+);
+
+const WhatsAppFloatingButton = dynamic(
+  () => import('@/components/landing/WhatsAppFloatingButton').then((m) => m.WhatsAppFloatingButton),
+  { ssr: false }
+);
 
 export default function Home() {
   const [isPrequalificationOpen, setIsPrequalificationOpen] = useState(() => {

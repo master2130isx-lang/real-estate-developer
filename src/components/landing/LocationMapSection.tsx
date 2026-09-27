@@ -74,7 +74,7 @@ export function LocationMapSection() {
               href={wazeUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 bg-sky-600 hover:bg-sky-700 text-white font-semibold text-xs px-4 py-2.5 rounded transition"
+              className="inline-flex items-center gap-1.5 bg-sky-700 hover:bg-sky-800 text-white font-semibold text-xs px-4 py-2.5 rounded transition shadow-xs"
             >
               <Navigation className="w-3.5 h-3.5" />
               <span>Waze</span>
@@ -94,7 +94,7 @@ export function LocationMapSection() {
                 <MapPin className="w-4 h-4 text-[var(--color-accent)]" />
                 <span>Calzada del Sol, Salinas Victoria, N.L.</span>
               </div>
-              <span className="label-caps text-[var(--color-success)] text-[9px]">
+              <span className="label-caps bg-emerald-950/90 text-emerald-300 border border-emerald-600/40 px-2 py-0.5 rounded text-[11px] font-semibold tracking-wide">
                 Caseta 24/7
               </span>
             </div>
@@ -138,7 +138,7 @@ export function LocationMapSection() {
                 href={waLocationUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 bg-[#25D366] hover:bg-[#20bd5a] text-white font-semibold px-3 py-1.5 rounded text-xs transition flex-shrink-0"
+                className="inline-flex items-center gap-1.5 bg-[#128C7E] hover:bg-[#0d6b60] text-white font-semibold px-3.5 py-2 rounded text-xs transition flex-shrink-0 shadow-xs"
               >
                 <WhatsAppIcon className="w-3.5 h-3.5" />
                 <span>Pedir ubicación por WhatsApp</span>

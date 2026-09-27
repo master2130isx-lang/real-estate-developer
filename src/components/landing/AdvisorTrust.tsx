@@ -122,7 +122,7 @@ export function AdvisorTrust() {
                     href={`https://wa.me/${cleanWa}?text=${encodeURIComponent(`Hola, me gustaría platicar con un asesor sobre las viviendas en ${commercialConfig.agencyName}.`)}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="w-full bg-[#25D366] hover:bg-[#20bd5a] text-white font-semibold py-2.5 px-3 rounded text-xs transition flex items-center justify-center gap-2"
+                    className="w-full bg-[#128C7E] hover:bg-[#0d6b60] text-white font-semibold py-2.5 px-3 rounded text-xs transition flex items-center justify-center gap-2 shadow-xs"
                   >
                     <WhatsAppIcon className="w-4 h-4" />
                     <span>Contactar por WhatsApp ({commercialConfig.contactChannels.phone})</span>

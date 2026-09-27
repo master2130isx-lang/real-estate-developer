@@ -1,0 +1,7 @@
+defaults and fully supports es6-module
+chrome >= 109
+firefox >= 109
+safari >= 16.4
+edge >= 109
+ios_saf >= 16.4
+not dead
