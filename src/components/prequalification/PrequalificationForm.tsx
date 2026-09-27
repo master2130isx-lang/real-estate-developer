@@ -308,7 +308,7 @@ export function PrequalificationForm({
                     href={directWaUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="w-full bg-[#128C7E] hover:bg-[#0d6b60] text-white font-bold py-3.5 px-4 rounded-xl text-sm sm:text-base transition flex items-center justify-center gap-2.5 shadow cursor-pointer"
+                    className="w-full bg-[#15803d] hover:bg-[#166534] text-white font-bold py-3.5 px-4 rounded-xl text-sm sm:text-base transition flex items-center justify-center gap-2.5 shadow cursor-pointer"
                   >
                     <WhatsAppIcon className="w-5 h-5 flex-shrink-0" />
                     <span>Confirmar Cita por WhatsApp con mi Asesor</span>

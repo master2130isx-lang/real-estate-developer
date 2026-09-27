@@ -92,17 +92,17 @@ export function Hero({ onOpenPrequalification }: HeroProps) {
               />
 
               {/* Placa elegante sobre la foto */}
-              <div className="absolute bottom-3 left-3 sm:bottom-4 sm:left-4 bg-[#0F2C40]/90 dark:bg-[#071526]/95 backdrop-blur-md text-white px-3.5 py-2 rounded-xl border border-white/15 shadow-lg flex items-center gap-3">
+              <div className="absolute bottom-3 left-3 sm:bottom-4 sm:left-4 bg-[#0F2C40]/90 dark:bg-[#071526]/95 backdrop-blur-md text-white px-4 py-2.5 rounded-xl border border-white/15 shadow-lg flex items-center gap-3">
                 <div>
-                  <span className="text-[#C09B53] font-bold text-[9px] sm:text-[10px] tracking-wider uppercase block">
+                  <span className="text-[#D4AD62] font-bold text-xs sm:text-[13px] tracking-wider uppercase block leading-snug">
                     Casa Muestra en Exhibición
                   </span>
-                  <span className="font-serif font-bold text-xs sm:text-sm text-white">
+                  <span className="font-serif font-bold text-sm sm:text-base text-white">
                     {heroModelName}
                   </span>
                 </div>
                 {heroPrice && (
-                  <span className="text-[11px] sm:text-xs font-mono font-semibold text-slate-200 bg-white/10 px-2 py-1 rounded-lg">
+                  <span className="text-xs sm:text-[13px] font-mono font-semibold text-slate-200 bg-white/10 px-2.5 py-1 rounded-lg">
                     {heroPrice}
                   </span>
                 )}

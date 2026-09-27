@@ -151,6 +151,10 @@ export function AppProvider({
   useEffect(() => {
     let isMounted = true;
     const syncWithServer = async () => {
+      // Evitar llamadas innecesarias a /api/leads en la landing pública para acelerar la carga
+      if (typeof window !== 'undefined' && !window.location.pathname.startsWith('/panel')) {
+        return;
+      }
       try {
         const res = await fetch('/api/leads');
         if (res.ok) {

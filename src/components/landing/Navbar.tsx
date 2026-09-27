@@ -180,7 +180,7 @@ export function Navbar({ onOpenPrequalification, onOpenPrivacy }: NavbarProps) {
               target="_blank"
               rel="noopener noreferrer"
               onClick={() => setMobileMenuOpen(false)}
-              className="w-full bg-[#128C7E] hover:bg-[#0d6b60] text-white py-3 rounded font-semibold text-center text-sm flex items-center justify-center gap-2 shadow-xs transition"
+              className="w-full bg-[#15803d] hover:bg-[#166534] text-white py-3 rounded font-semibold text-center text-sm flex items-center justify-center gap-2 shadow-xs transition"
             >
               <WhatsAppIcon className="w-4 h-4" />
               <span>WhatsApp ({commercialConfig.contactChannels.phone})</span>

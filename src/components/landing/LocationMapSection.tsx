@@ -138,7 +138,7 @@ export function LocationMapSection() {
                 href={waLocationUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 bg-[#128C7E] hover:bg-[#0d6b60] text-white font-semibold px-3.5 py-2 rounded text-xs transition flex-shrink-0 shadow-xs"
+                className="inline-flex items-center gap-1.5 bg-[#15803d] hover:bg-[#166534] text-white font-semibold px-3.5 py-2 rounded text-xs transition flex-shrink-0 shadow-xs"
               >
                 <WhatsAppIcon className="w-3.5 h-3.5" />
                 <span>Pedir ubicación por WhatsApp</span>

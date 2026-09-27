@@ -206,26 +206,42 @@ export function PropertiesSection({ onSelectPropertyForPrequalification }: Prope
               </p>
 
               {/* Ficha Métrica */}
-              <div className="grid grid-cols-4 gap-2 py-4 border-y border-[var(--color-border)] text-center text-xs">
+              <div className="grid grid-cols-4 gap-2 py-4 border-y border-[var(--color-border)] text-center">
                 <div className="space-y-1">
                   <Bed className="w-4 h-4 text-[var(--color-text-muted)] mx-auto" />
-                  <span className="text-[var(--color-text-muted)] block text-[10px]">Recámaras</span>
-                  <span className="font-semibold text-[var(--color-navy)]">2 + Estancia</span>
+                  <span className="text-[var(--color-text-muted)] block text-xs sm:text-[13px] font-medium leading-normal">
+                    Recámaras
+                  </span>
+                  <span className="font-semibold text-xs sm:text-sm text-[var(--color-navy)] block">
+                    2 + Estancia
+                  </span>
                 </div>
                 <div className="space-y-1">
                   <Bath className="w-4 h-4 text-[var(--color-text-muted)] mx-auto" />
-                  <span className="text-[var(--color-text-muted)] block text-[10px]">Baños</span>
-                  <span className="font-semibold text-[var(--color-navy)]">1.5</span>
+                  <span className="text-[var(--color-text-muted)] block text-xs sm:text-[13px] font-medium leading-normal">
+                    Baños
+                  </span>
+                  <span className="font-semibold text-xs sm:text-sm text-[var(--color-navy)] block">
+                    1.5
+                  </span>
                 </div>
                 <div className="space-y-1">
                   <Maximize2 className="w-4 h-4 text-[var(--color-text-muted)] mx-auto" />
-                  <span className="text-[var(--color-text-muted)] block text-[10px]">Construcción</span>
-                  <span className="font-semibold text-[var(--color-navy)]">{property.constructionM2} m²</span>
+                  <span className="text-[var(--color-text-muted)] block text-xs sm:text-[13px] font-medium leading-normal">
+                    Construcción
+                  </span>
+                  <span className="font-semibold text-xs sm:text-sm text-[var(--color-navy)] block">
+                    {property.constructionM2} m²
+                  </span>
                 </div>
                 <div className="space-y-1">
                   <Car className="w-4 h-4 text-[var(--color-text-muted)] mx-auto" />
-                  <span className="text-[var(--color-text-muted)] block text-[10px]">Cochera</span>
-                  <span className="font-semibold text-[var(--color-navy)]">{property.parkingSpots} Autos</span>
+                  <span className="text-[var(--color-text-muted)] block text-xs sm:text-[13px] font-medium leading-normal">
+                    Cochera
+                  </span>
+                  <span className="font-semibold text-xs sm:text-sm text-[var(--color-navy)] block">
+                    {property.parkingSpots} Autos
+                  </span>
                 </div>
               </div>
 
