@@ -24,7 +24,7 @@ export function AdvisorTrust() {
     <section id="asesor" className="py-20 px-4 sm:px-6 bg-[var(--color-surface)] border-b border-[var(--color-border)] transition-colors">
       <div className="max-w-[1220px] mx-auto space-y-10">
         <div className="text-center max-w-2xl mx-auto space-y-3">
-          <span className="label-caps text-[var(--color-accent)]">
+          <span className="label-caps text-[var(--color-accent-text)]">
             Atención humana y personalizada
           </span>
           <h2 className="font-serif text-2xl sm:text-3xl lg:text-4xl font-bold text-[var(--color-navy)] leading-tight">

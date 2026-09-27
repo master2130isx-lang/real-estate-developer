@@ -18,7 +18,7 @@ export function ThemeToggle({ className = '' }: ThemeToggleProps) {
 
   if (!mounted) {
     return (
-      <div className={`w-9 h-9 rounded-full border border-[var(--color-border)] bg-[var(--color-bg)] opacity-50 ${className}`} />
+      <div className={`w-11 h-11 min-w-[44px] min-h-[44px] rounded-full border border-[var(--color-border)] bg-[var(--color-bg)] opacity-50 ${className}`} />
     );
   }
 
@@ -28,7 +28,7 @@ export function ThemeToggle({ className = '' }: ThemeToggleProps) {
     <button
       type="button"
       onClick={toggleTheme}
-      className={`relative w-9 h-9 rounded-full border transition-all duration-200 flex items-center justify-center cursor-pointer ${
+      className={`relative w-11 h-11 min-w-[44px] min-h-[44px] rounded-full border transition-all duration-200 flex items-center justify-center cursor-pointer ${
         isDark
           ? 'bg-[var(--color-surface)] border-[var(--color-border)] text-[var(--color-accent)] hover:bg-[var(--color-surface-alt)]'
           : 'bg-[var(--color-bg)] border-[var(--color-border)] text-[var(--color-text-muted)] hover:text-[var(--color-navy)] hover:bg-[var(--color-surface-alt)]'

@@ -18,58 +18,78 @@ export function Footer({ onOpenPrivacy }: FooterProps) {
   const cleanWa = commercialConfig.contactChannels.whatsapp.replace(/\D/g, '');
 
   return (
-    <footer className="bg-[var(--color-navy-deep)] text-[#9CA3AF] text-xs py-14 px-4 sm:px-6 border-t border-white/5">
+    <footer className="bg-[var(--color-navy-deep)] text-[#D1D5DB] text-xs py-14 px-4 sm:px-6 border-t border-white/5">
       <div className="max-w-[1220px] mx-auto space-y-8">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Columna 1: Marca */}
           <div className="space-y-3">
             <div className="flex items-center gap-2.5">
-              <div className="w-9 h-9 rounded-lg bg-white/8 flex items-center justify-center">
-                <Building2 className="w-4 h-4 text-[var(--color-accent)]" />
+              <div className="w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center">
+                <Building2 className="w-5 h-5 text-[var(--color-accent)]" />
               </div>
               <span className="font-serif text-base font-bold tracking-tight text-[#F0ECE4]">
                 {commercialConfig.agencyName}
               </span>
             </div>
-            <p className="text-[#8A847C] text-xs leading-relaxed">
+            <p className="text-[#D1D5DB] text-xs leading-relaxed">
               Plataforma de asesoría inmobiliaria personalizada, catálogo de vivienda y acompañamiento integral para tu crédito Infonavit o bancario.
             </p>
           </div>
 
           {/* Columna 2: Navegación */}
-          <div className="space-y-2.5">
-            <span className="label-caps text-[#F0ECE4] text-[10px] block">Navegación</span>
-            <ul className="space-y-1.5">
-              <li><a href="#opciones" className="hover:text-[var(--color-accent)] transition">Residencias</a></li>
-              <li><a href="#como-funciona" className="hover:text-[var(--color-accent)] transition">Cómo Funciona</a></li>
-              <li><a href="#asesor" className="hover:text-[var(--color-accent)] transition">Atención</a></li>
-              <li><a href="#ubicacion" className="hover:text-[var(--color-accent)] transition">Ubicación</a></li>
-              <li><a href="#preguntas" className="hover:text-[var(--color-accent)] transition">Preguntas Frecuentes</a></li>
+          <div className="space-y-2">
+            <span className="label-caps text-[#F0ECE4] text-[10px] block mb-1">Navegación</span>
+            <ul className="flex flex-col">
+              <li>
+                <a href="#opciones" className="py-2.5 min-h-[44px] inline-flex items-center text-[#D1D5DB] hover:text-[var(--color-accent)] transition">
+                  Residencias
+                </a>
+              </li>
+              <li>
+                <a href="#como-funciona" className="py-2.5 min-h-[44px] inline-flex items-center text-[#D1D5DB] hover:text-[var(--color-accent)] transition">
+                  Cómo Funciona
+                </a>
+              </li>
+              <li>
+                <a href="#asesor" className="py-2.5 min-h-[44px] inline-flex items-center text-[#D1D5DB] hover:text-[var(--color-accent)] transition">
+                  Atención
+                </a>
+              </li>
+              <li>
+                <a href="#ubicacion" className="py-2.5 min-h-[44px] inline-flex items-center text-[#D1D5DB] hover:text-[var(--color-accent)] transition">
+                  Ubicación
+                </a>
+              </li>
+              <li>
+                <a href="#preguntas" className="py-2.5 min-h-[44px] inline-flex items-center text-[#D1D5DB] hover:text-[var(--color-accent)] transition">
+                  Preguntas Frecuentes
+                </a>
+              </li>
             </ul>
           </div>
 
           {/* Columna 3: Seguridad y Panel */}
-          <div className="space-y-2.5">
-            <span className="label-caps text-[#F0ECE4] text-[10px] block">Seguridad y Acceso</span>
-            <ul className="space-y-1.5">
+          <div className="space-y-2">
+            <span className="label-caps text-[#F0ECE4] text-[10px] block mb-1">Seguridad y Acceso</span>
+            <ul className="flex flex-col">
               <li>
                 <button
                   onClick={onOpenPrivacy}
-                  className="hover:text-[var(--color-accent)] text-left transition flex items-center gap-1.5 cursor-pointer"
+                  className="py-2.5 min-h-[44px] text-[#D1D5DB] hover:text-[var(--color-accent)] text-left transition flex items-center gap-2 cursor-pointer w-full"
                 >
-                  <Shield className="w-3.5 h-3.5 text-[var(--color-accent)]" />
+                  <Shield className="w-4 h-4 text-[var(--color-accent)] shrink-0" />
                   <span>Aviso de Privacidad</span>
                 </button>
               </li>
               <li>
-                <Link href="/panel" className="hover:text-[var(--color-accent)] transition flex items-center gap-1.5">
-                  <UserCheck className="w-3.5 h-3.5 text-[var(--color-accent)]" />
+                <Link href="/panel" className="py-2.5 min-h-[44px] text-[#D1D5DB] hover:text-[var(--color-accent)] transition flex items-center gap-2">
+                  <UserCheck className="w-4 h-4 text-[var(--color-accent)] shrink-0" />
                   <span>Panel del Asesor (CRM)</span>
                 </Link>
               </li>
-              <li className="pt-2 text-[11px] text-[#6B7280]">
-                <div className="flex items-center gap-1">
-                  <MapPin className="w-3 h-3 flex-shrink-0" />
+              <li className="pt-2 text-xs text-[#D1D5DB]">
+                <div className="flex items-center gap-1.5">
+                  <MapPin className="w-3.5 h-3.5 flex-shrink-0 text-[var(--color-accent)]" />
                   <span>{commercialConfig.coverageZone}</span>
                 </div>
               </li>
@@ -81,30 +101,30 @@ export function Footer({ onOpenPrivacy }: FooterProps) {
             <span className="label-caps text-[#F0ECE4] text-[10px] block">Redes y Contacto</span>
 
             {hasSocial && (
-              <div className="space-y-1.5">
-                <p className="text-[11px] text-[#6B7280]">Síguenos en nuestras redes:</p>
-                <div className="flex items-center gap-2 flex-wrap">
+              <div className="space-y-2">
+                <p className="text-xs text-[#D1D5DB]">Síguenos en nuestras redes:</p>
+                <div className="flex items-center gap-2.5 flex-wrap">
                   {social?.facebook && (
-                    <a href={social.facebook} target="_blank" rel="noopener noreferrer" title="Facebook"
-                      className="w-8 h-8 rounded bg-white/8 hover:bg-[#1877F2] text-[#9CA3AF] hover:text-white flex items-center justify-center transition">
+                    <a href={social.facebook} target="_blank" rel="noopener noreferrer" title="Facebook" aria-label="Facebook"
+                      className="w-11 h-11 min-w-[44px] min-h-[44px] rounded-lg bg-white/10 hover:bg-[#1877F2] text-[#D1D5DB] hover:text-white flex items-center justify-center transition">
                       <FacebookIcon className="w-4 h-4" />
                     </a>
                   )}
                   {social?.instagram && (
-                    <a href={social.instagram} target="_blank" rel="noopener noreferrer" title="Instagram"
-                      className="w-8 h-8 rounded bg-white/8 hover:bg-pink-600 text-[#9CA3AF] hover:text-white flex items-center justify-center transition">
+                    <a href={social.instagram} target="_blank" rel="noopener noreferrer" title="Instagram" aria-label="Instagram"
+                      className="w-11 h-11 min-w-[44px] min-h-[44px] rounded-lg bg-white/10 hover:bg-pink-600 text-[#D1D5DB] hover:text-white flex items-center justify-center transition">
                       <InstagramIcon className="w-4 h-4" />
                     </a>
                   )}
                   {social?.tiktok && (
-                    <a href={social.tiktok} target="_blank" rel="noopener noreferrer" title="TikTok"
-                      className="w-8 h-8 rounded bg-white/8 hover:bg-black text-[#9CA3AF] hover:text-white flex items-center justify-center transition">
+                    <a href={social.tiktok} target="_blank" rel="noopener noreferrer" title="TikTok" aria-label="TikTok"
+                      className="w-11 h-11 min-w-[44px] min-h-[44px] rounded-lg bg-white/10 hover:bg-black text-[#D1D5DB] hover:text-white flex items-center justify-center transition">
                       <TikTokIcon className="w-4 h-4" />
                     </a>
                   )}
                   {social?.youtube && (
-                    <a href={social.youtube} target="_blank" rel="noopener noreferrer" title="YouTube"
-                      className="w-8 h-8 rounded bg-white/8 hover:bg-red-600 text-[#9CA3AF] hover:text-white flex items-center justify-center transition">
+                    <a href={social.youtube} target="_blank" rel="noopener noreferrer" title="YouTube" aria-label="YouTube"
+                      className="w-11 h-11 min-w-[44px] min-h-[44px] rounded-lg bg-white/10 hover:bg-red-600 text-[#D1D5DB] hover:text-white flex items-center justify-center transition">
                       <YouTubeIcon className="w-4 h-4" />
                     </a>
                   )}
@@ -112,44 +132,46 @@ export function Footer({ onOpenPrivacy }: FooterProps) {
               </div>
             )}
 
-            <div className="space-y-1.5 pt-1 text-xs">
+            <div className="space-y-2 pt-1">
               <a
                 href={`https://wa.me/${cleanWa}?text=${encodeURIComponent('Hola, me comunico desde su sitio web para solicitar informes.')}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-1.5 text-[#25D366] hover:text-[#4ADE80] transition font-semibold"
+                className="py-2.5 min-h-[44px] inline-flex items-center gap-2 text-[#25D366] hover:text-[#4ADE80] transition font-semibold text-xs"
               >
-                <WhatsAppIcon className="w-3.5 h-3.5" />
+                <WhatsAppIcon className="w-4 h-4" />
                 <span>WhatsApp: {commercialConfig.contactChannels.phone}</span>
               </a>
               {commercialConfig.contactChannels.email && (
-                <a
-                  href={`mailto:${commercialConfig.contactChannels.email}`}
-                  className="flex items-center gap-1.5 text-[#6B7280] hover:text-[#9CA3AF] transition text-[11px]"
-                >
-                  <Mail className="w-3.5 h-3.5" />
-                  <span>{commercialConfig.contactChannels.email}</span>
-                </a>
+                <div>
+                  <a
+                    href={`mailto:${commercialConfig.contactChannels.email}`}
+                    className="py-2 min-h-[44px] inline-flex items-center gap-2 text-[#D1D5DB] hover:text-white transition text-xs"
+                  >
+                    <Mail className="w-4 h-4 text-[var(--color-accent)]" />
+                    <span>{commercialConfig.contactChannels.email}</span>
+                  </a>
+                </div>
               )}
             </div>
           </div>
         </div>
 
         {/* Descargos */}
-        <div className="pt-6 border-t border-white/8 text-[11px] text-[#5A5650] space-y-2">
+        <div className="pt-6 border-t border-white/10 text-xs text-[#9CA3AF] space-y-2">
           <p>
             * Los precios y especificaciones mostrados son recursos de referencia ilustrativos para la evaluación técnica del prototipo. Los gastos notariales y de escrituración varían según la legislación y el municipio aplicable.
           </p>
-          <div className="flex flex-col sm:flex-row justify-between items-center gap-3 pt-3 text-[11px] text-[#6B7280]">
+          <div className="flex flex-col sm:flex-row justify-between items-center gap-3 pt-3 text-xs text-[#D1D5DB]">
             <div className="flex flex-wrap items-center gap-3">
-              <span>© {new Date().getFullYear()} {commercialConfig.agencyName}. Prototipo Fase 1.1.</span>
+              <span>© {new Date().getFullYear()} {commercialConfig.agencyName}.</span>
               <span className="hidden sm:inline text-white/20">·</span>
               <Link
                 href="/panel"
-                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-white/5 hover:bg-white/10 text-[#9CA3AF] hover:text-[var(--color-accent)] transition border border-white/8 text-[10px] tracking-wide"
+                className="min-h-[44px] inline-flex items-center gap-1.5 px-3 py-1.5 rounded bg-white/10 hover:bg-white/15 text-[#D1D5DB] hover:text-[var(--color-accent)] transition border border-white/10 text-xs tracking-wide"
                 title="Acceso exclusivo al panel de gestión del asesor"
               >
-                <UserCheck className="w-3 h-3 text-[var(--color-accent)]" />
+                <UserCheck className="w-3.5 h-3.5 text-[var(--color-accent)]" />
                 <span>Acceso Asesor (Panel)</span>
               </Link>
             </div>

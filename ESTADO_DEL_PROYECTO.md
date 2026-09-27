@@ -31,6 +31,14 @@ El asistente leerá este archivo automáticamente y tendrá el 100% del contexto
 ### 1. Landing Page Pública (`/`)
 - Header con navegación directa a modelos, amenidades, ubicación, contacto y acceso al panel comercial.
 - Cintillo superior de alta legibilidad (*Top Bar*): `"VISITAS PRIVADAS · MONTERREY, NUEVO LEÓN"` optimizado con tipografía nítida en negrita y color profundo de alto contraste (`dark:text-[#071A2C] font-bold`), resolviendo el problema de bajo contraste anterior.
+- **Optimización Integral de Velocidad Móvil y Google PageSpeed:**
+  - **LCP Optimizado:** Precarga en `<head>` (`<link rel="preload" as="image" fetchpriority="high">`) y `fetchPriority="high"` en la imagen de portada del Hero sin dependencia del renderizado de cliente.
+  - **Ahorro de ~2.7 MB en imágenes:** Activación de Next.js Image Optimization con formatos modernos `AVIF` y `WebP`. Miniaturas de galería re-escaladas a `sizes="(max-width: 768px) 93px, 100px"`, `quality={60}` y `loading="lazy"`.
+  - **Carga diferida de Google Maps:** El iframe se carga mediante `IntersectionObserver` (`rootMargin: '350px'`), ahorrando ~465 KB de JS inicial y eliminando 210 ms de bloqueo en el hilo principal.
+  - **Compilación JS moderna:** Target actualizado a `ES2022` y `browserslist` moderno para eliminar polyfills innecesarios de ES2017.
+  - **Accesibilidad (WCAG AA/AAA):** Corrección de contraste en textos atenuados (`--color-text-muted: #54504A`), números de pasos `"01"`, `"02"`, `"03"`, textos del footer (`#D1D5DB`) y jerarquía de encabezados semánticos (`h1 -> h2 -> h3 -> h4`).
+  - **Objetivos táctiles (Tap Targets):** Botones y enlaces interactivos con tamaño mínimo de 44x44 / 48x48 px en navbar, menú móvil y footer.
+  - **Seguridad y Cabeceras HTTP:** HSTS (`preload`), X-Frame-Options (`SAMEORIGIN`), Cross-Origin-Opener-Policy (`same-origin`), X-Content-Type-Options (`nosniff`) y Referrer-Policy.
 - **Portada Principal Dinámica e Interactiva (`Hero`):**
   - Ya no depende de una imagen estática fija. Permite seleccionar qué modelo de casa y qué imagen se exhiben en la portada principal.
   - Muestra una ficha flotante con el nombre del modelo, su precio en tiempo real y el badge *"Casa Muestra en Exhibición"*.

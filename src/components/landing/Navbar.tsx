@@ -78,13 +78,13 @@ export function Navbar({ onOpenPrequalification, onOpenPrivacy }: NavbarProps) {
             <ThemeToggle />
             <button
               onClick={onOpenPrequalification}
-              className="bg-[var(--color-accent)] hover:bg-[var(--color-accent-hover)] text-[var(--color-navy)] dark:text-[#0B1929] px-3 py-2 rounded text-xs font-semibold cursor-pointer"
+              className="bg-[var(--color-accent)] hover:bg-[var(--color-accent-hover)] text-[var(--color-navy)] dark:text-[#0B1929] px-4 py-2.5 min-h-[44px] min-w-[44px] rounded text-xs font-semibold cursor-pointer flex items-center justify-center"
             >
               Visita
             </button>
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 text-[var(--color-text-secondary)] hover:text-[var(--color-text)] focus:outline-none"
+              className="min-w-[44px] min-h-[44px] p-2.5 text-[var(--color-text-secondary)] hover:text-[var(--color-text)] focus:outline-none flex items-center justify-center rounded-lg cursor-pointer"
               aria-label="Abrir menú"
             >
               {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
@@ -95,39 +95,39 @@ export function Navbar({ onOpenPrequalification, onOpenPrivacy }: NavbarProps) {
 
       {/* Menú Móvil desplegable */}
       {mobileMenuOpen && (
-        <div className="md:hidden bg-[var(--color-surface)] border-b border-[var(--color-border)] px-4 py-4 space-y-3">
+        <div className="md:hidden bg-[var(--color-surface)] border-b border-[var(--color-border)] px-4 py-4 space-y-1">
           <a
             href="#opciones"
             onClick={() => setMobileMenuOpen(false)}
-            className="block py-2 text-sm font-medium text-[var(--color-text-secondary)] hover:text-[var(--color-navy)]"
+            className="flex items-center min-h-[44px] py-2.5 text-sm font-medium text-[var(--color-text-secondary)] hover:text-[var(--color-navy)]"
           >
             Residencias
           </a>
           <a
             href="#ubicacion"
             onClick={() => setMobileMenuOpen(false)}
-            className="block py-2 text-sm font-medium text-[var(--color-text-secondary)] hover:text-[var(--color-navy)]"
+            className="flex items-center min-h-[44px] py-2.5 text-sm font-medium text-[var(--color-text-secondary)] hover:text-[var(--color-navy)]"
           >
             El entorno
           </a>
           <a
             href="#como-funciona"
             onClick={() => setMobileMenuOpen(false)}
-            className="block py-2 text-sm font-medium text-[var(--color-text-secondary)] hover:text-[var(--color-navy)]"
+            className="flex items-center min-h-[44px] py-2.5 text-sm font-medium text-[var(--color-text-secondary)] hover:text-[var(--color-navy)]"
           >
             Financiamiento
           </a>
           <a
             href="#asesor"
             onClick={() => setMobileMenuOpen(false)}
-            className="block py-2 text-sm font-medium text-[var(--color-text-secondary)] hover:text-[var(--color-navy)]"
+            className="flex items-center min-h-[44px] py-2.5 text-sm font-medium text-[var(--color-text-secondary)] hover:text-[var(--color-navy)]"
           >
             Atención
           </a>
           <a
             href="#preguntas"
             onClick={() => setMobileMenuOpen(false)}
-            className="block py-2 text-sm font-medium text-[var(--color-text-secondary)] hover:text-[var(--color-navy)]"
+            className="flex items-center min-h-[44px] py-2.5 text-sm font-medium text-[var(--color-text-secondary)] hover:text-[var(--color-navy)]"
           >
             Preguntas
           </a>
@@ -136,37 +136,37 @@ export function Navbar({ onOpenPrequalification, onOpenPrivacy }: NavbarProps) {
               setMobileMenuOpen(false);
               onOpenPrivacy();
             }}
-            className="block py-2 text-sm font-medium text-[var(--color-text-muted)] hover:text-[var(--color-text)] text-left w-full"
+            className="flex items-center min-h-[44px] py-2.5 text-sm font-medium text-[var(--color-text-muted)] hover:text-[var(--color-text)] text-left w-full cursor-pointer"
           >
             Aviso de Privacidad
           </button>
 
           {/* Redes Sociales en Móvil */}
           {hasSocial && (
-            <div className="pt-2 border-t border-[var(--color-border)]">
+            <div className="pt-3 border-t border-[var(--color-border)]">
               <span className="label-caps text-[var(--color-text-muted)] block mb-2 text-[10px]">Redes sociales</span>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2.5">
                 {social?.facebook && (
-                  <a href={social.facebook} target="_blank" rel="noopener noreferrer"
-                    className="w-9 h-9 rounded-lg bg-[var(--color-surface-alt)] hover:bg-[#1877F2] text-[var(--color-text-secondary)] hover:text-white flex items-center justify-center transition">
+                  <a href={social.facebook} target="_blank" rel="noopener noreferrer" aria-label="Facebook"
+                    className="w-11 h-11 min-w-[44px] min-h-[44px] rounded-lg bg-[var(--color-surface-alt)] hover:bg-[#1877F2] text-[var(--color-text-secondary)] hover:text-white flex items-center justify-center transition">
                     <FacebookIcon className="w-4 h-4" />
                   </a>
                 )}
                 {social?.instagram && (
-                  <a href={social.instagram} target="_blank" rel="noopener noreferrer"
-                    className="w-9 h-9 rounded-lg bg-[var(--color-surface-alt)] hover:bg-pink-600 text-[var(--color-text-secondary)] hover:text-white flex items-center justify-center transition">
+                  <a href={social.instagram} target="_blank" rel="noopener noreferrer" aria-label="Instagram"
+                    className="w-11 h-11 min-w-[44px] min-h-[44px] rounded-lg bg-[var(--color-surface-alt)] hover:bg-pink-600 text-[var(--color-text-secondary)] hover:text-white flex items-center justify-center transition">
                     <InstagramIcon className="w-4 h-4" />
                   </a>
                 )}
                 {social?.tiktok && (
-                  <a href={social.tiktok} target="_blank" rel="noopener noreferrer"
-                    className="w-9 h-9 rounded-lg bg-[var(--color-surface-alt)] hover:bg-black text-[var(--color-text-secondary)] hover:text-white flex items-center justify-center transition">
+                  <a href={social.tiktok} target="_blank" rel="noopener noreferrer" aria-label="TikTok"
+                    className="w-11 h-11 min-w-[44px] min-h-[44px] rounded-lg bg-[var(--color-surface-alt)] hover:bg-black text-[var(--color-text-secondary)] hover:text-white flex items-center justify-center transition">
                     <TikTokIcon className="w-4 h-4" />
                   </a>
                 )}
                 {social?.youtube && (
-                  <a href={social.youtube} target="_blank" rel="noopener noreferrer"
-                    className="w-9 h-9 rounded-lg bg-[var(--color-surface-alt)] hover:bg-red-600 text-[var(--color-text-secondary)] hover:text-white flex items-center justify-center transition">
+                  <a href={social.youtube} target="_blank" rel="noopener noreferrer" aria-label="YouTube"
+                    className="w-11 h-11 min-w-[44px] min-h-[44px] rounded-lg bg-[var(--color-surface-alt)] hover:bg-red-600 text-[var(--color-text-secondary)] hover:text-white flex items-center justify-center transition">
                     <YouTubeIcon className="w-4 h-4" />
                   </a>
                 )}

@@ -68,14 +68,14 @@ export default function Home() {
       {/* CTA Final */}
       <section className="py-20 px-4 sm:px-6 bg-[var(--color-navy)] dark:bg-[var(--color-navy-deep)]">
         <div className="max-w-[1220px] mx-auto text-center space-y-6">
-          <span className="label-caps text-[var(--color-accent)] tracking-[0.18em]">
+          <span className="label-caps text-[#E0BD76] tracking-[0.18em]">
             Atención personalizada y directa
           </span>
           <h2 className="font-serif text-2xl sm:text-3xl lg:text-4xl font-bold text-[#F0ECE4] max-w-2xl mx-auto leading-tight">
             ¿Listo para conocer qué opciones se adaptan a{' '}
-            <em className="font-serif italic text-[var(--color-accent)]">tus planes?</em>
+            <em className="font-serif italic text-[#E0BD76]">tus planes?</em>
           </h2>
-          <p className="text-[#9CA3AF] text-sm sm:text-base max-w-xl mx-auto leading-relaxed">
+          <p className="text-[#D1D5DB] text-sm sm:text-base max-w-xl mx-auto leading-relaxed">
             Cuéntanos qué buscas para coordinar tu atención y solicitar una visita a las casas muestra con acompañamiento de tu asesor.
           </p>
           <div className="pt-2">

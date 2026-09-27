@@ -52,7 +52,7 @@ export function PropertiesSection({ onSelectPropertyForPrequalification }: Prope
         {/* Encabezado */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div className="space-y-3 max-w-2xl">
-            <span className="label-caps text-[var(--color-accent)]">
+            <span className="label-caps text-[var(--color-accent-text)]">
               {properties.length > 1 ? 'Modelos Residenciales en Venta' : 'Modelo Insignia en Venta'}
             </span>
             <h2 className="font-serif text-2xl sm:text-3xl lg:text-4xl font-bold text-[var(--color-navy)] leading-tight">
@@ -120,7 +120,8 @@ export function PropertiesSection({ onSelectPropertyForPrequalification }: Prope
                 fill
                 className="object-cover object-[center_25%] transition-all duration-300"
                 sizes="(max-width: 1024px) 100vw, 700px"
-                priority
+                loading="lazy"
+                quality={75}
               />
 
               {/* Botones de navegación */}
@@ -169,8 +170,10 @@ export function PropertiesSection({ onSelectPropertyForPrequalification }: Prope
                     src={img}
                     alt={`Miniatura ${idx + 1}`}
                     fill
+                    loading="lazy"
+                    quality={60}
                     className="object-cover"
-                    sizes="64px"
+                    sizes="(max-width: 768px) 93px, 100px"
                   />
                 </button>
               ))}
@@ -182,7 +185,7 @@ export function PropertiesSection({ onSelectPropertyForPrequalification }: Prope
             <div className="space-y-5">
               {/* Encabezado y Precio */}
               <div>
-                <span className="label-caps text-[var(--color-accent)] text-[10px]">
+                <span className="label-caps text-[var(--color-accent-text)] text-[10px]">
                   {property.development} · Salinas Victoria, N.L.
                 </span>
                 <h3 className="font-serif text-2xl sm:text-3xl font-bold text-[var(--color-navy)] mt-1.5">

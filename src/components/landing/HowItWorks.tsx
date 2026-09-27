@@ -39,7 +39,7 @@ export function HowItWorks({ onOpenPrequalification }: HowItWorksProps) {
     <section id="como-funciona" className="py-20 px-4 sm:px-6 bg-[var(--color-bg)] border-b border-[var(--color-border)] transition-colors">
       <div className="max-w-[1220px] mx-auto space-y-14">
         <div className="text-center max-w-2xl mx-auto space-y-3">
-          <span className="label-caps text-[var(--color-accent)]">
+          <span className="label-caps text-[var(--color-accent-text)]">
             Proceso transparente y directo
           </span>
           <h2 className="font-serif text-2xl sm:text-3xl lg:text-4xl font-bold text-[var(--color-navy)] leading-tight">
@@ -60,8 +60,8 @@ export function HowItWorks({ onOpenPrequalification }: HowItWorksProps) {
               >
                 <div>
                   <div className="flex items-center justify-between mb-6">
-                    <span className="font-serif text-3xl font-bold text-[var(--color-border)]">{step.number}</span>
-                    <div className="w-12 h-12 rounded-lg bg-[var(--color-navy)] dark:bg-[var(--color-surface-alt)] text-[var(--color-accent)] flex items-center justify-center">
+                    <span className="font-serif text-3xl font-bold text-[var(--color-accent-text)]">{step.number}</span>
+                    <div className="w-12 h-12 rounded-lg bg-[var(--color-navy)] dark:bg-[var(--color-surface-alt)] text-[var(--color-accent-text)] flex items-center justify-center">
                       <IconComponent className="w-5 h-5" />
                     </div>
                   </div>

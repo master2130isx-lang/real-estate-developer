@@ -27,7 +27,7 @@ export function Hero({ onOpenPrequalification }: HeroProps) {
   const heroImage =
     heroProperty?.image ||
     heroProperty?.images?.[0] ||
-    '/images/properties/aguila-premier/facade.jpg';
+    '/images/properties/aguila-premier/01-facade.jpg';
 
   const heroModelName = heroProperty?.model || heroProperty?.name || 'Modelo Águila Premier';
   const heroPrice = heroProperty?.priceFormatted || '$1,180,000 MXN';
@@ -40,7 +40,7 @@ export function Hero({ onOpenPrequalification }: HeroProps) {
           {/* Columna Izquierda: Mensaje editorial */}
           <div className="space-y-6 text-left order-2 lg:order-1">
             {/* Etiqueta superior */}
-            <span className="label-caps text-[var(--color-accent)] tracking-[0.18em]">
+            <span className="label-caps text-[var(--color-accent-text)] tracking-[0.18em]">
               COLECCIÓN RESIDENCIAL 2026
             </span>
 
@@ -48,7 +48,7 @@ export function Hero({ onOpenPrequalification }: HeroProps) {
             <h1 className="font-serif text-4xl sm:text-5xl md:text-[3.5rem] lg:text-[3.75rem] font-bold leading-[1.1] tracking-tight text-[var(--color-navy)]">
               Una casa que{' '}
               <br className="hidden sm:block" />
-              <em className="font-serif italic text-[var(--color-accent)]">se siente tuya.</em>
+              <em className="font-serif italic text-[var(--color-accent-text)]">se siente tuya.</em>
             </h1>
 
             {/* Descripción */}
@@ -86,8 +86,9 @@ export function Hero({ onOpenPrequalification }: HeroProps) {
                 alt={`Casa Muestra ${heroModelName} en Valle de los Encinos, Salinas Victoria`}
                 fill
                 priority
+                fetchPriority="high"
                 className="object-cover object-[center_20%] transition-transform duration-500 group-hover:scale-105"
-                sizes="(max-width: 768px) 100vw, 600px"
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 600px"
               />
 
               {/* Placa elegante sobre la foto */}

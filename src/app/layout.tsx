@@ -41,6 +41,15 @@ export default async function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} ${playfairDisplay.variable} h-full antialiased`}
       suppressHydrationWarning
     >
+      <head>
+        <link
+          rel="preload"
+          as="image"
+          href="/images/properties/aguila-premier/01-facade.jpg"
+          // @ts-expect-error fetchpriority is a modern HTML attribute
+          fetchpriority="high"
+        />
+      </head>
       <body className="min-h-full flex flex-col font-sans transition-colors duration-200">
         <ThemeProvider>
           <AppProvider initialConfig={initialConfig}>{children}</AppProvider>
