@@ -37,13 +37,12 @@ El asistente leerá este archivo automáticamente y tendrá el 100% del contexto
 - Botón flotante de WhatsApp responsive (optimizado para celular sin encimarse con botones de navegación ni CTA fijo).
 - Sección de Ubicación y Rutas GPS directas (Google Maps y Waze) hacia la caseta principal de Valle de los Encinos.
 
-### 2. Formulario de Precalificación Simplificado (`PrequalificationForm`)
-- Proceso guiado en pasos sin fricción:
-  - **Paso 1:** Presupuesto y forma de adquisición.
-  - **Paso 2:** Datos de contacto directos (Nombre, Teléfono / WhatsApp, Canal de confirmación y Correo opcional). *Se eliminó la duplicidad de horarios.*
-  - **Paso 3 (Prioritario):** Captura y validación de **NSS e Infonavit** con consentimiento expreso de privacidad (LFPDPPP). Este paso blinda la exclusividad de 15 días del asesor ante la constructora antes de la visita física.
-  - **Paso 4:** Modalidad de visita (Casa Muestra vs Virtual) con **atajos rápidos de 1-clic** (*⚡ Mañana* y *📅 Próximo Fin de Semana*) y fecha tentativa preseleccionada.
-- **Corrección de interfaz:** Encabezado con espaciado optimizado para que el indicador de avance (`100%`) no se solape con el botón de cerrar (`X`).
+### 2. Formulario de Precalificación Optimizado a 3 Pasos (`PrequalificationForm`)
+- Proceso ultra optimizado sin fricción:
+  - **Paso 1: Modelo y Forma de Compra:** Selección directa de la vivienda en inventario y esquema de crédito (Infonavit, FOVISSSTE / ISSSTE, Bancario, Contado). Se eliminaron campos innecesarios (ubicación fija en Valle de los Encinos, rango de presupuesto y plazo de compra).
+  - **Paso 2: Datos de Contacto y Validación Crediticia:** Nombre completo y WhatsApp con atributos semánticos de autocompletado nativo del navegador (`autoComplete="name"`, `autoComplete="tel"`). Validación adaptativa: solicita **NSS (11 dígitos)** para Infonavit o **CURP (18 car.)** para derechohabientes del ISSSTE/FOVISSSTE con alternativa de orientación previa.
+  - **Paso 3: Cita para Visitar la Casa Muestra:** Selección directa de fecha (sin atajos innecesarios) y **hora exacta de visita** (10:00 AM a 6:00 PM) con atención simultánea sin límites de cupo.
+- **Encuadre visual inteligente:** Se configuró el punto focal de fotografías arquitectónicas en `object-[center_20%]` para que fotos tomadas en vertical desde el celular muestren la fachada completa, segundo piso y techo sin cortes.
 - Compatibilidad total con modo oscuro y modo claro.
 
 ### 3. Autenticación y Seguridad del Panel del Asesor (`/login` y Middleware)
@@ -94,6 +93,13 @@ El asistente leerá este archivo automáticamente y tendrá el 100% del contexto
 - **Sincronización en Tiempo Real:**
   - APIs REST dedicadas: `/api/properties`, `/api/properties/[id]`, `/api/properties/upload`.
   - Integración inmediata con la sección pública de propiedades en la Landing (`PropertiesSection`) y con el selector de modelos del formulario de precalificación.
+
+### 8. Landing Flash Express para Redes Sociales (`/registro`)
+- **Página Dedicada Flash:** Diseñada específicamente para enlaces en anuncios de **Facebook Ads**, videos de **TikTok** o biografía de Instagram.
+- **Formulario de 1 Solo Paso:** Ultra ligero y sin distracciones (Nombre, WhatsApp, Esquema de crédito, NSS/CURP opcional y Día/Hora tentativa).
+- **Autocompletado Nativo del Navegador:** Configurado con atributos semánticos estándar (`name="name"`, `name="tel"`, `autoComplete="name"`, `autoComplete="tel"`, `inputMode="tel"`) para rellenado automático con 1 solo toque en navegadores móviles (Chrome, Safari, Edge).
+- **Notificación y Conversión:** Dispara inmediatamente la alerta a Telegram del asesor y muestra botón de WhatsApp con mensaje pre-armado y folio único.
+- **Sincronización Dinámica de Identidad:** Todos los textos de la inmobiliaria y desarrollo se sincronizan en vivo desde la configuración del panel comercial.
 
 ---
 
