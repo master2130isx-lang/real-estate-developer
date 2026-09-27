@@ -18,7 +18,12 @@ import {
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const redirectPath = searchParams.get('redirect') || '/panel';
+  const rawRedirect = searchParams.get('redirect') || '/panel';
+  // Sanitizar redirección: solo permitir rutas relativas internas para prevenir Open Redirect
+  const redirectPath =
+    rawRedirect.startsWith('/') && !rawRedirect.startsWith('//') && !rawRedirect.includes('\\')
+      ? rawRedirect
+      : '/panel';
 
   // Pre-configurado con el correo del asesor por defecto
   const [email, setEmail] = useState('master2130.isx@gmail.com');

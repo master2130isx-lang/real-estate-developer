@@ -1,11 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { updateServerLeadAppointment, getServerLeadById } from '@/lib/leadsServerStore';
+import { requireAuth } from '@/lib/auth';
 
 export async function GET(
   req: NextRequest,
   context: { params: Promise<{ id: string }> }
 ) {
   try {
+    const authError = requireAuth(req);
+    if (authError) return authError;
+
     const { id } = await context.params;
     const lead = await getServerLeadById(id);
     if (!lead) {
@@ -22,6 +26,9 @@ export async function PATCH(
   context: { params: Promise<{ id: string }> }
 ) {
   try {
+    const authError = requireAuth(req);
+    if (authError) return authError;
+
     const { id } = await context.params;
     const body = await req.json();
     const { appointmentStatus, confirmedDate, confirmedTime } = body;

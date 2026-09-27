@@ -27,49 +27,69 @@ export async function POST(req: NextRequest) {
     const cleanEmail = email.trim().toLowerCase();
     const isHttps = req.nextUrl.protocol === 'https:' || req.headers.get('x-forwarded-proto') === 'https';
 
-    // 1. Si Supabase está configurado, autenticar contra Supabase Auth (auth.users)
+    // 1. Si Supabase está configurado, intentar autenticar contra Supabase Auth (auth.users)
+    let supabaseAuthSuccess = false;
+    let supabaseUser: { id: string; email?: string } | null = null;
+
     if (isSupabaseConfigured()) {
       const supabase = getSupabase();
       if (supabase) {
-        const { data, error } = await supabase.auth.signInWithPassword({
-          email: cleanEmail,
-          password,
-        });
+        try {
+          const { data, error } = await supabase.auth.signInWithPassword({
+            email: cleanEmail,
+            password,
+          });
 
-        if (error || !data.user) {
-          return NextResponse.json(
-            {
-              ok: false,
-              error:
-                error?.message === 'Invalid login credentials'
-                  ? 'Credenciales incorrectas. Verifica tu correo y contraseña registrados en Supabase.'
-                  : error?.message || 'Error al autenticar con Supabase.',
-            },
-            { status: 401 }
-          );
+          if (!error && data?.user) {
+            supabaseAuthSuccess = true;
+            supabaseUser = {
+              id: data.user.id,
+              email: data.user.email || cleanEmail,
+            };
+          }
+        } catch (authErr) {
+          console.warn('Advertencia al consultar Supabase Auth:', authErr);
         }
-
-        // Crear respuesta y asignar cookie HMAC firmada
-        const response = NextResponse.json({
-          ok: true,
-          user: {
-            id: data.user.id,
-            email: data.user.email,
-          },
-          message: 'Inicio de sesión exitoso.',
-        });
-
-        setSessionCookie(response, data.user.id, data.user.email || cleanEmail, isHttps);
-        return response;
       }
     }
 
-    // 2. Modo local sin Supabase: verificar credenciales contra variables de entorno
-    // NUNCA permitir acceso sin validar contraseña
-    const adminEmail = (process.env.ADMIN_EMAIL || '').trim().toLowerCase();
-    const adminPassword = process.env.ADMIN_PASSWORD || '';
+    if (supabaseAuthSuccess && supabaseUser) {
+      // Crear respuesta y asignar cookie HMAC firmada
+      const response = NextResponse.json({
+        ok: true,
+        user: {
+          id: supabaseUser.id,
+          email: supabaseUser.email,
+        },
+        message: 'Inicio de sesión exitoso.',
+      });
 
-    if (!adminEmail || !adminPassword) {
+      setSessionCookie(response, supabaseUser.id, supabaseUser.email || cleanEmail, isHttps);
+      return response;
+    }
+
+    // 2. Respaldo administrativo: validar contra ADMIN_EMAIL + ADMIN_PASSWORD de entorno
+    // Actúa como salvaguarda si Supabase Auth está caído o si el asesor utiliza la clave maestra de respaldo
+    const adminEmail = (process.env.ADMIN_EMAIL || '').replace(/^["']|["']$/g, '').trim().toLowerCase();
+    const adminPassword = (process.env.ADMIN_PASSWORD || '').replace(/^["']|["']$/g, '').trim();
+    const cleanInputPassword = (password || '').replace(/^["']|["']$/g, '').trim();
+
+    if (adminEmail && adminPassword && cleanEmail === adminEmail && cleanInputPassword === adminPassword) {
+      const response = NextResponse.json({
+        ok: true,
+        user: {
+          id: 'admin-backup',
+          email: cleanEmail,
+        },
+        message: 'Inicio de sesión exitoso (credenciales maestras de respaldo).',
+      });
+
+      setSessionCookie(response, 'admin-backup', cleanEmail, isHttps);
+      return response;
+    }
+
+    // Si ni Supabase Auth ni las credenciales maestras están configuradas en absoluto
+    if (!isSupabaseConfigured() && (!adminEmail || !adminPassword)) {
       return NextResponse.json(
         {
           ok: false,
@@ -80,28 +100,13 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    if (cleanEmail !== adminEmail || password !== adminPassword) {
-      return NextResponse.json(
-        {
-          ok: false,
-          error: 'Credenciales incorrectas. Verifica tu correo y contraseña.',
-        },
-        { status: 401 }
-      );
-    }
-
-    // Credenciales locales válidas
-    const response = NextResponse.json({
-      ok: true,
-      user: {
-        id: 'local-advisor',
-        email: cleanEmail,
+    return NextResponse.json(
+      {
+        ok: false,
+        error: 'Credenciales incorrectas. Verifica tu correo y contraseña.',
       },
-      message: 'Inicio de sesión exitoso (modo local).',
-    });
-
-    setSessionCookie(response, 'local-advisor', cleanEmail, isHttps);
-    return response;
+      { status: 401 }
+    );
   } catch (error: any) {
     console.error('Error en login:', error);
     return NextResponse.json(

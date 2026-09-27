@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabase } from '@/lib/supabaseClient';
+import { requireAuth } from '@/lib/auth';
 import fs from 'fs';
 import path from 'path';
 
@@ -30,6 +31,10 @@ async function ensureSupabaseBucket(supabase: any) {
 
 export async function POST(req: NextRequest) {
   try {
+    // 0. Validación de autenticación (defensa en profundidad)
+    const authError = requireAuth(req);
+    if (authError) return authError;
+
     const formData = await req.formData();
     const file = formData.get('file') as File | null;
     // Sanitizar propertyId para prevenir path traversal (eliminar .., /, \, y caracteres no seguros)

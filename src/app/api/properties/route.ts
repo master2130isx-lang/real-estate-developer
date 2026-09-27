@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerProperties, saveServerProperty } from '@/lib/propertiesServerStore';
 import { Property } from '@/types';
+import { requireAuth } from '@/lib/auth';
 
 export async function GET() {
   try {
@@ -14,6 +15,9 @@ export async function GET() {
 
 export async function POST(req: NextRequest) {
   try {
+    const authError = requireAuth(req);
+    if (authError) return authError;
+
     const body = await req.json();
     const prop = body as Partial<Property>;
 

@@ -51,39 +51,37 @@ function validateSessionCookie(request: NextRequest): boolean {
 const PROTECTED_API_ROUTES: Array<{
   path: string;
   methods?: string[]; // Si vacío o undefined, protege TODOS los métodos
+  exact?: boolean;
 }> = [
-  // /api/leads: GET y DELETE requieren sesión; POST es público (registro de prospectos)
-  { path: '/api/leads', methods: ['GET', 'DELETE'] },
-  // /api/leads/[id]: GET y PATCH requieren sesión
-  { path: '/api/leads/', methods: ['GET', 'PATCH'] },
-  // /api/config: POST requiere sesión; GET es público
-  { path: '/api/config', methods: ['POST'] },
-  // /api/properties: POST requiere sesión; GET es público
-  { path: '/api/properties', methods: ['POST'] },
-  // /api/properties/[id]: PUT y DELETE requieren sesión; GET es público
-  { path: '/api/properties/', methods: ['PUT', 'DELETE'] },
-  // /api/properties/upload: POST requiere sesión
-  { path: '/api/properties/upload', methods: ['POST'] },
-  // /api/telegram/test: todos los métodos
+  // 1. Rutas específicas primero (evitar colisión con prefijos)
+  { path: '/api/properties/upload', methods: ['POST'], exact: true },
   { path: '/api/telegram/test' },
-  // /api/telegram/setup-webhook: todos los métodos
   { path: '/api/telegram/setup-webhook' },
-  // /api/db/status: todos los métodos
   { path: '/api/db/status' },
+
+  // 2. Rutas base con coincidencia exacta
+  { path: '/api/config', methods: ['POST'], exact: true },
+  { path: '/api/leads', methods: ['GET', 'DELETE'], exact: true },
+  { path: '/api/properties', methods: ['POST'], exact: true },
+
+  // 3. Rutas dinámicas por prefijo
+  { path: '/api/leads/', methods: ['GET', 'PATCH'] },
+  { path: '/api/properties/', methods: ['PUT', 'DELETE'] },
 ];
 
 function isProtectedApiRoute(pathname: string, method: string): boolean {
   for (const route of PROTECTED_API_ROUTES) {
-    // Coincidencia exacta o coincidencia de prefijo para rutas dinámicas
-    const matches =
-      pathname === route.path ||
-      (route.path.endsWith('/') && pathname.startsWith(route.path));
+    const matches = route.exact
+      ? pathname === route.path
+      : pathname === route.path ||
+        (route.path.endsWith('/') && pathname.startsWith(route.path));
 
     if (matches) {
-      // Si no hay métodos específicos, proteger todos
+      // Si no hay métodos específicos, protege todos los métodos
       if (!route.methods || route.methods.length === 0) return true;
-      // Verificar si el método está en la lista de protegidos
-      return route.methods.includes(method.toUpperCase());
+      // Si el método coincide con uno protegido, denegar acceso no autenticado
+      if (route.methods.includes(method.toUpperCase())) return true;
+      // Si la ruta coincidió pero no el método, continuar evaluando otras reglas posibles
     }
   }
   return false;

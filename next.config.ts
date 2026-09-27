@@ -11,7 +11,8 @@ const securityHeaders = [
       "img-src 'self' data: blob: https://*.supabase.co https://maps.googleapis.com https://maps.gstatic.com",
       "frame-src https://www.google.com https://maps.google.com",
       "connect-src 'self' https://*.supabase.co https://api.telegram.org https://www.google-analytics.com",
-      "navigate-to 'self' https://wa.me https://www.waze.com https://www.google.com/maps",
+      "object-src 'none'",
+      "base-uri 'self'",
     ].join("; "),
   },
   {

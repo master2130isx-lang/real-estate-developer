@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerPropertyById, saveServerProperty, deleteServerProperty } from '@/lib/propertiesServerStore';
 import { Property } from '@/types';
+import { requireAuth } from '@/lib/auth';
 
 export async function GET(
   req: NextRequest,
@@ -25,6 +26,9 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const authError = requireAuth(req);
+    if (authError) return authError;
+
     const { id } = await params;
     const existing = await getServerPropertyById(id);
 
@@ -58,6 +62,9 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const authError = requireAuth(req);
+    if (authError) return authError;
+
     const { id } = await params;
     const success = await deleteServerProperty(id);
 

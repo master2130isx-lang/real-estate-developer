@@ -2,11 +2,14 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerLeads, saveServerLead, purgeAllServerLeads, resetServerLeadsToDemo } from '@/lib/leadsServerStore';
 import { notifyNewAppointmentTelegram } from '@/lib/telegramService';
 import { Lead } from '@/types';
-import { isDeveloperSession } from '@/lib/auth';
+import { isDeveloperSession, requireAuth } from '@/lib/auth';
 import { checkRateLimit, getClientIp, LEAD_CREATION_RATE_LIMIT } from '@/lib/rateLimit';
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
+    const authError = requireAuth(req);
+    if (authError) return authError;
+
     const leads = await getServerLeads();
     return NextResponse.json({ ok: true, leads });
   } catch (error: any) {

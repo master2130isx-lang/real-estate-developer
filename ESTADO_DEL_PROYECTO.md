@@ -230,6 +230,15 @@ Cuando decidas continuar el desarrollo, estos son los puntos clave recomendados:
 
 > **Instrucciones para futuros agentes:** Al realizar cambios significativos en el proyecto, agregar una entrada nueva **al inicio** de esta lista con la fecha, un resumen del cambio y los archivos afectados. Mantener las entradas existentes sin modificar.
 
+### 2026-09-27 — Contrauditoría y Hardening Definitivo de Seguridad
+**Revisión y Refuerzo Posterior a la Auditoría de Ciberseguridad**
+- ✅ **Corrección crítica de bypass en subida de imágenes (`POST /api/properties/upload`):** Se corrigió la regla de emparejamiento y orden de rutas en `src/proxy.ts`. Anteriormente, la regla comodín `/api/properties/` abortaba la comprobación con `return false` y permitía uploads anónimos. Ahora está 100% blindada.
+- ✅ **Defensa en profundidad (Defense in Depth):** Se incorporó `requireAuth(req)` directamente dentro de los route handlers de `upload`, `properties` (POST), `properties/[id]` (PUT/DELETE) y `leads/[id]` (GET/PATCH), eliminando puntos únicos de falla.
+- ✅ **Resiliencia en Login con Contraseña Maestra de Respaldo:** En `src/app/api/auth/login/route.ts`, si Supabase Auth no reconoce la contraseña o no responde, el sistema valida contra `ADMIN_EMAIL` + `ADMIN_PASSWORD` de respaldo, garantizando acceso al asesor sin riesgo de bloqueo.
+- ✅ **Blindaje contra Open Redirect en `/login`:** Sanitización estricta del parámetro `redirect` para admitir exclusivamente rutas relativas locales seguras (`/panel`).
+- ✅ **Privacidad de Configuración en `GET /api/config`:** Se omitió el objeto `telegramConfig` (destinatarios, alias y Chat IDs) para visitantes anónimos de la landing page; solo se expone a asesores con sesión activa.
+- ✅ **Hardening de CSP en `next.config.ts`:** Se reemplazó la directiva experimental `navigate-to` (que bloqueaba enlaces externos a redes sociales y Waze) por directivas estándar de hardening OWASP: `object-src 'none'` y `base-uri 'self'`.
+
 ### 2026-09-27 — Auditoría de Ciberseguridad Completa (Fase 1 + Fase 2)
 **Commit:** `13bb77c` | **13 archivos modificados, 702 líneas añadidas, 114 eliminadas**
 

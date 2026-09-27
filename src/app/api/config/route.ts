@@ -1,10 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerCommercialConfig, saveServerCommercialConfig } from '@/lib/commercialConfigStore';
+import { getSessionFromRequest } from '@/lib/auth';
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
     const config = await getServerCommercialConfig();
-    // Protección absoluta: nunca exponer secretos de bot o tokens al frontend
+    const session = getSessionFromRequest(req);
+
+    // Si el usuario no tiene sesión autenticada de asesor, omitir telegramConfig
+    // para evitar exponer Chat IDs o alias a visitantes anónimos de la landing
+    if (!session) {
+      const { telegramConfig, ...publicConfig } = config;
+      return NextResponse.json({ ok: true, config: publicConfig });
+    }
+
+    // Para asesores autenticados, incluir telegramConfig pero asegurar que nunca exponga el botToken
     if (config.telegramConfig) {
       delete (config.telegramConfig as any).botToken;
     }
