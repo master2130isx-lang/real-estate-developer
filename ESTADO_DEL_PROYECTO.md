@@ -131,8 +131,18 @@ El asistente leerá este archivo automáticamente y tendrá el 100% del contexto
 - **Página Dedicada Flash:** Diseñada específicamente para enlaces en anuncios de **Facebook Ads**, videos de **TikTok** o biografía de Instagram.
 - **Formulario de 1 Solo Paso:** Ultra ligero y sin distracciones (Nombre, WhatsApp, Esquema de crédito, NSS/CURP opcional y Día/Hora tentativa).
 - **Autocompletado Nativo del Navegador:** Configurado con atributos semánticos estándar (`name="name"`, `name="tel"`, `autoComplete="name"`, `autoComplete="tel"`, `inputMode="tel"`) para rellenado automático con 1 solo toque en navegadores móviles (Chrome, Safari, Edge).
+- **Ajuste Móvil Responsive (WebKit/iOS):** Inputs de fecha y hora protegidos contra desbordamiento de caja (`max-w-full`, `min-w-0`, `box-sizing: border-box`, `appearance: none`, `min-height: 44px`) en Safari y Chrome iOS.
 - **Notificación y Conversión:** Dispara inmediatamente la alerta a Telegram del asesor y muestra botón de WhatsApp con mensaje pre-armado y folio único.
 - **Sincronización Dinámica de Identidad:** Todos los textos de la inmobiliaria y desarrollo se sincronizan en vivo desde la configuración del panel comercial.
+
+---
+
+## 🛡️ Protocolo de Seguridad y Blindaje del Bot de Telegram
+
+- **Aislamiento Total de Credenciales:** `TELEGRAM_BOT_TOKEN` se gestiona **única y exclusivamente** desde variables de entorno del servidor (`process.env.TELEGRAM_BOT_TOKEN`). Nunca se serializa ni se envía al navegador en respuestas JSON (`/api/config` ni `commercial_config`).
+- **Sanitización de APIs:** La ruta pública `GET /api/config` purga automáticamente cualquier campo sensible antes de emitir JSON.
+- **Validación de Webhook:** Soporte para validación de cabecera `X-Telegram-Bot-Api-Secret-Token` vía `TELEGRAM_WEBHOOK_SECRET`.
+- **Rotación de Token Comprometido:** Instrucciones en `@BotFather` para revocar tokens expuestos de forma instantánea.
 
 ---
 
@@ -142,6 +152,7 @@ El asistente leerá este archivo automáticamente y tendrá el 100% del contexto
 | :--- | :--- | :--- |
 | `TELEGRAM_BOT_TOKEN` | Token del bot HTTP de Telegram (`@RED192142_bot`) | Vercel & `.env.local` |
 | `TELEGRAM_ADVISOR_CHAT_ID` | ID de Chat de Telegram (`948786976`) | Vercel & `.env.local` |
+| `TELEGRAM_WEBHOOK_SECRET` | Token secreto para validar requests del webhook de Telegram (Opcional) | Vercel & `.env.local` |
 | `NEXT_PUBLIC_SUPABASE_URL` | URL del proyecto Supabase (`https://...supabase.co`) | Vercel & `.env.local` |
 | `SUPABASE_SERVICE_ROLE_KEY` | Clave secreta service_role de Supabase para backend | Vercel & `.env.local` |
 | `ADMIN_EMAIL` | Correo del administrador (`master2130.isx@gmail.com`) | Vercel & `.env.local` |

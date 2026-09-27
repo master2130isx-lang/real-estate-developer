@@ -69,13 +69,35 @@
     line-height: 1.6;
   }
 
-  /* Asegurar controles táctiles mínimos de 44px en móviles */
+  /* Asegurar controles táctiles mínimos de 44px en móviles y ajuste perfecto de inputs de fecha/hora en iOS WebKit */
   button,
   a.btn,
   input[type="button"],
   input[type="submit"],
   select {
     min-height: 44px;
+  }
+
+  input[type="date"],
+  input[type="time"],
+  input[type="datetime-local"] {
+    min-height: 44px;
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+  }
+
+  input[type="date"]::-webkit-date-and-time-value,
+  input[type="time"]::-webkit-date-and-time-value,
+  input[type="datetime-local"]::-webkit-date-and-time-value {
+    text-align: left;
+    min-height: 1.25em;
+    padding: 0;
+    margin: 0;
   }
 
   /* Selection color */

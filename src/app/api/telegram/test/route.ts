@@ -6,7 +6,7 @@ export async function POST(req: NextRequest) {
     const body = await req.json().catch(() => ({}));
     const config = await getServerCommercialConfig();
 
-    const token = body.token?.trim() || config.telegramConfig?.botToken?.trim() || process.env.TELEGRAM_BOT_TOKEN;
+    const token = process.env.TELEGRAM_BOT_TOKEN;
     const chatId =
       body.chatId?.trim() ||
       config.telegramConfig?.recipients?.find((r) => r.isActive)?.chatId ||

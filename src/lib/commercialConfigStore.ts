@@ -49,6 +49,12 @@ function writeConfigToLocalStorage(config: CommercialConfig): void {
   }
 }
 
+function sanitizeTelegramConfig(tgConfig?: any) {
+  if (!tgConfig) return undefined;
+  const { botToken, ...safe } = tgConfig;
+  return safe;
+}
+
 export async function getServerCommercialConfig(): Promise<CommercialConfig> {
   const supabase = getSupabase();
 
@@ -69,7 +75,7 @@ export async function getServerCommercialConfig(): Promise<CommercialConfig> {
           coverageZone: data.coverage_zone || COMMERCIAL_CONFIG.coverageZone,
           contactChannels: data.contact_channels || COMMERCIAL_CONFIG.contactChannels,
           socialLinks: data.social_links || COMMERCIAL_CONFIG.socialLinks,
-          telegramConfig: data.telegram_config || COMMERCIAL_CONFIG.telegramConfig,
+          telegramConfig: sanitizeTelegramConfig(data.telegram_config) || COMMERCIAL_CONFIG.telegramConfig,
           featuredPrice: data.featured_price || COMMERCIAL_CONFIG.featuredPrice,
         };
         inMemoryConfig = loadedConfig;
@@ -86,7 +92,7 @@ export async function getServerCommercialConfig(): Promise<CommercialConfig> {
           coverage_zone: COMMERCIAL_CONFIG.coverageZone,
           contact_channels: COMMERCIAL_CONFIG.contactChannels,
           social_links: COMMERCIAL_CONFIG.socialLinks,
-          telegram_config: COMMERCIAL_CONFIG.telegramConfig,
+          telegram_config: sanitizeTelegramConfig(COMMERCIAL_CONFIG.telegramConfig),
           featured_price: COMMERCIAL_CONFIG.featuredPrice,
         });
         return COMMERCIAL_CONFIG;
@@ -96,7 +102,11 @@ export async function getServerCommercialConfig(): Promise<CommercialConfig> {
     }
   }
 
-  return readConfigFromLocalStorage();
+  const local = readConfigFromLocalStorage();
+  if (local.telegramConfig) {
+    local.telegramConfig = sanitizeTelegramConfig(local.telegramConfig);
+  }
+  return local;
 }
 
 export async function saveServerCommercialConfig(
@@ -114,10 +124,10 @@ export async function saveServerCommercialConfig(
       ...current.socialLinks,
       ...(configUpdate.socialLinks || {}),
     },
-    telegramConfig: {
+    telegramConfig: sanitizeTelegramConfig({
       ...current.telegramConfig,
       ...(configUpdate.telegramConfig || {}),
-    },
+    }),
     featuredPrice: {
       ...current.featuredPrice,
       ...(configUpdate.featuredPrice || {}),

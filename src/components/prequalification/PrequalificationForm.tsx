@@ -666,7 +666,7 @@ export function PrequalificationForm({
                     value={preferredDate}
                     min={new Date().toISOString().split('T')[0]}
                     onChange={(e) => setPreferredDate(e.target.value)}
-                    className={`w-full px-4 py-3.5 rounded-xl border text-sm sm:text-base font-semibold bg-white dark:bg-[#0B1E30] text-slate-900 dark:text-white focus:border-[var(--color-accent)] focus:ring-2 focus:ring-[var(--color-accent)]/20 focus:outline-none shadow-xs ${
+                    className={`w-full max-w-full block min-w-0 box-border appearance-none px-4 py-3.5 rounded-xl border text-sm sm:text-base font-semibold bg-white dark:bg-[#0B1E30] text-slate-900 dark:text-white focus:border-[var(--color-accent)] focus:ring-2 focus:ring-[var(--color-accent)]/20 focus:outline-none shadow-xs ${
                       errors.preferredDate ? 'border-red-500 bg-red-50/10' : 'border-slate-300 dark:border-slate-600'
                     }`}
                   />

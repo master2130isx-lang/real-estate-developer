@@ -75,7 +75,6 @@ export const COMMERCIAL_CONFIG: CommercialConfig = {
     youtube: '',
   },
   telegramConfig: {
-    botToken: process.env.TELEGRAM_BOT_TOKEN || '',
     advisorChatId: process.env.TELEGRAM_ADVISOR_CHAT_ID || '948786976',
     activeChatId: '948786976',
     recipients: [

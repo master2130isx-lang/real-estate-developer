@@ -6,6 +6,15 @@ import { handleTelegramCallbackQuery } from '@/lib/telegramService';
  */
 export async function POST(req: NextRequest) {
   try {
+    // Si se configuró un secret_token en setWebhook, validar que coincida
+    const expectedSecret = process.env.TELEGRAM_WEBHOOK_SECRET;
+    if (expectedSecret) {
+      const incomingSecret = req.headers.get('x-telegram-bot-api-secret-token');
+      if (incomingSecret !== expectedSecret) {
+        return NextResponse.json({ ok: false, error: 'Unauthorized secret token' }, { status: 401 });
+      }
+    }
+
     const update = await req.json();
 
     // Procesar evento de botón pulsado (callback_query)

@@ -354,8 +354,8 @@ export default function ExpressRegistrationPage() {
               )}
 
               {/* Fecha y Hora de Visita */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div className="space-y-1">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 min-w-0">
+                <div className="space-y-1 min-w-0">
                   <label
                     htmlFor="visit_date"
                     className="block text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1"
@@ -370,11 +370,11 @@ export default function ExpressRegistrationPage() {
                     value={preferredDate}
                     min={new Date().toISOString().split('T')[0]}
                     onChange={(e) => setPreferredDate(e.target.value)}
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 text-xs sm:text-sm font-semibold bg-slate-50 dark:bg-[#0A1726] text-slate-900 dark:text-white focus:outline-none focus:border-[#C09B53]"
+                    className="w-full max-w-full block min-w-0 box-border appearance-none px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 text-xs sm:text-sm font-semibold bg-slate-50 dark:bg-[#0A1726] text-slate-900 dark:text-white focus:outline-none focus:border-[#C09B53]"
                   />
                 </div>
 
-                <div className="space-y-1">
+                <div className="space-y-1 min-w-0">
                   <label
                     htmlFor="visit_time"
                     className="block text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1"
@@ -387,7 +387,7 @@ export default function ExpressRegistrationPage() {
                     name="visit_time"
                     value={preferredTime}
                     onChange={(e) => setPreferredTime(e.target.value)}
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 text-xs sm:text-sm font-semibold bg-slate-50 dark:bg-[#0A1726] text-slate-900 dark:text-white focus:outline-none focus:border-[#C09B53]"
+                    className="w-full max-w-full block min-w-0 box-border px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 text-xs sm:text-sm font-semibold bg-slate-50 dark:bg-[#0A1726] text-slate-900 dark:text-white focus:outline-none focus:border-[#C09B53]"
                   >
                     {['10:00 AM', '11:00 AM', '12:00 PM', '01:00 PM', '02:00 PM', '03:00 PM', '04:00 PM', '05:00 PM', '06:00 PM'].map((h) => (
                       <option key={h} value={h}>{h}</option>

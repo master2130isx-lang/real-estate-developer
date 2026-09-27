@@ -7,10 +7,6 @@ import { getServerCommercialConfig } from './commercialConfigStore';
 const TELEGRAM_API_BASE = 'https://api.telegram.org';
 
 async function getBotToken(): Promise<string | undefined> {
-  const config = await getServerCommercialConfig();
-  if (config.telegramConfig?.botToken && config.telegramConfig.botToken.trim()) {
-    return config.telegramConfig.botToken.trim();
-  }
   return process.env.TELEGRAM_BOT_TOKEN;
 }
 

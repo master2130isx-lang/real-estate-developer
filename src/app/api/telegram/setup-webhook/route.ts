@@ -2,9 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerCommercialConfig } from '@/lib/commercialConfigStore';
 
 async function getBotToken(): Promise<string> {
-  if (process.env.TELEGRAM_BOT_TOKEN) return process.env.TELEGRAM_BOT_TOKEN;
-  const config = await getServerCommercialConfig();
-  return config.telegramConfig?.botToken || '';
+  return process.env.TELEGRAM_BOT_TOKEN || '';
 }
 
 export async function GET() {
