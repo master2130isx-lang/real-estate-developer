@@ -386,7 +386,7 @@ export function PrequalificationForm({
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                     {[
                       { id: 'infonavit', label: 'Crédito Infonavit', desc: 'Tradicional, Total o Segundo Crédito' },
-                      { id: 'fovissste', label: 'FOVISSSTE / ISSSTE', desc: 'Para trabajadores del Estado' },
+                      { id: 'fovissste', label: 'ISSSTE', desc: 'Para trabajadores del Estado' },
                       { id: 'bancario', label: 'Crédito Bancario', desc: 'Con cualquier banco o Cofinavit' },
                       { id: 'contado', label: 'Recursos Propios / Contado', desc: 'Liquidación directa sin financiamiento' },
                     ].map((f) => (
@@ -429,7 +429,7 @@ export function PrequalificationForm({
                     {requiresNss
                       ? 'Ingresa tu NSS para consultar tus puntos Infonavit y blindar tu atención con el asesor.'
                       : requiresCurp
-                      ? 'Ingresa tu CURP para consultar tu crédito FOVISSSTE / ISSSTE disponible.'
+                      ? 'Ingresa tu CURP para consultar tu crédito ISSSTE disponible.'
                       : 'Datos para comunicarnos y recibirte personalmente en la casa muestra.'}
                   </p>
                 </div>
@@ -575,7 +575,7 @@ export function PrequalificationForm({
                           }`}
                         />
                         <div className="flex justify-between text-xs text-slate-500 dark:text-slate-400">
-                          <span>Requerido para precalificación FOVISSSTE</span>
+                          <span>Requerido para precalificación ISSSTE</span>
                           <span className={curpInput.trim().length === 18 ? 'text-emerald-600 dark:text-emerald-400 font-bold' : ''}>
                             {curpInput.trim().length} / 18 caracteres
                           </span>
@@ -593,7 +593,7 @@ export function PrequalificationForm({
                     ) : (
                       <div className="text-xs text-slate-600 dark:text-slate-300 space-y-1">
                         <p className="font-semibold text-slate-900 dark:text-white">Has elegido orientación previa sin CURP.</p>
-                        <p>Tu asesor te ayudará a precalificar tu crédito FOVISSSTE directamente.</p>
+                        <p>Tu asesor te ayudará a precalificar tu crédito ISSSTE directamente.</p>
                         <button
                           type="button"
                           onClick={() => setSkipIdentifierForOrientation(false)}

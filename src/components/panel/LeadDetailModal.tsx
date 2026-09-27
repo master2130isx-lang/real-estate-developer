@@ -300,7 +300,7 @@ Folio Web: ${lead.folio || 'N/A'}`;
                   <Lock className="w-4 h-4 text-amber-400" />
                   <span className="font-bold text-xs uppercase tracking-wider text-slate-200">
                     {lead.financingType === 'fovissste' || lead.curpValue
-                      ? 'CURP (FOVISSSTE / ISSSTE) • Expediente Protegido'
+                      ? 'CURP (ISSSTE) • Expediente Protegido'
                       : 'NSS Recibido en Web (Expediente Protegido)'}
                   </span>
                 </div>

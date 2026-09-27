@@ -124,8 +124,8 @@ export async function notifyNewAppointmentTelegram(
   let identifierSection = '';
   if (lead.financingType === 'fovissste' || lead.curpValue) {
     identifierSection = curpRaw
-      ? `🏛️ *CURP (ISSSTE/FOVISSSTE):* ${curpDisplay}\n⚡ _(Listo para precalificar y activar exclusividad)_\n`
-      : `⚠️ *CURP (ISSSTE/FOVISSSTE):* Pendiente de solicitar al cliente\n`;
+      ? `🏛️ *CURP (ISSSTE):* ${curpDisplay}\n⚡ _(Listo para precalificar y activar exclusividad)_\n`
+      : `⚠️ *CURP (ISSSTE):* Pendiente de solicitar al cliente\n`;
   } else if (nssRaw) {
     identifierSection = `🔢 *NSS (Infonavit):* ${nssDisplay}\n⚡ _(Listo para registrar en constructora y activar 15 días de comisión)_\n`;
   } else if (lead.financingType === 'infonavit') {
