@@ -73,13 +73,27 @@ El asistente leerá este archivo automáticamente y tendrá el 100% del contexto
   - Sincronizador de Webhook con un solo clic para producción en Vercel o modo local.
 
 ### 6. Base de Datos Definitiva en la Nube (Supabase PostgreSQL)
-- Mapeo nativo de tablas `leads`, `commercial_config` y `funnel_events`.
+- Mapeo nativo de tablas `leads`, `commercial_config`, `properties` y `funnel_events`.
 - **Arquitectura de Resiliencia con Fallback Híbrido:** Si Supabase no está configurado o pierde conectividad temporalmente, el sistema opera automáticamente con almacenamiento local en `/tmp` y JSON sin interrumpir al usuario.
-- **Auto-sembrado inteligente:** Si la tabla `leads` está vacía, el servidor precarga los prospectos base para que el panel esté operativo desde el primer segundo.
+- **Auto-sembrado inteligente:** Si la tabla `leads` o `properties` está vacía, el servidor precarga los datos base para que el panel esté operativo desde el primer segundo.
 - Herramientas incluidas:
-  - `supabase/schema.sql`: Script DDL listo para ejecutar en Supabase con 1 clic.
+  - `supabase/schema.sql`: Script DDL listo para ejecutar en Supabase con 1 clic (incluye tabla `properties` y políticas RLS).
   - `/api/db/status`: Endpoint de diagnóstico en tiempo real de salud, latencia y conteo de prospectos.
   - Pestaña **"Base de Datos"** con semáforo de conexión en vivo y botón para copiar el script SQL.
+
+### 7. Gestor Dinámico de Modelos de Casas y Catálogo Multi-Modelo (`PropertyManagerView` & `PropertyEditorModal`)
+- **Panel Administrativo de Propiedades:** Vista dedicada en `/panel` con pestañas para alternar entre *Prospectos* y *Modelos de Casas*.
+- **Editor Integral de Modelos (`PropertyEditorModal`):**
+  - Creación y edición completa de modelos (Nombre, Subtítulo, Precio, Superficie m² terreno/construcción, Recámaras, Baños, Niveles, Cocheras).
+  - Marcador de **Modelo Destacado** e indicador de estado de disponibilidad (Disponible, Últimas Ubicaciones, Preventa, Agotado).
+  - Lista de amenidades y características dinámicas personalizables.
+- **Carga y Optimización de Fotografías:**
+  - Selector de imágenes con compresión automática a formato **WebP** en el navegador para máxima velocidad de carga.
+  - Soporte de subida a backend vía `/api/properties/upload` con almacenamiento persistente y fallback seguro.
+  - Selección visual interactiva de la fotografía de portada principal.
+- **Sincronización en Tiempo Real:**
+  - APIs REST dedicadas: `/api/properties`, `/api/properties/[id]`, `/api/properties/upload`.
+  - Integración inmediata con la sección pública de propiedades en la Landing (`PropertiesSection`) y con el selector de modelos del formulario de precalificación.
 
 ---
 
@@ -112,13 +126,13 @@ El asistente leerá este archivo automáticamente y tendrá el 100% del contexto
 
 ## 📋 Próximos Pasos Sugeridos al Reanudar
 
-Cuando decidas retomar el desarrollo, estos son los siguientes puntos clave recomendados:
+Cuando decidas continuar el desarrollo, estos son los puntos clave recomendados:
 
-1. **Validación del Flujo de Login en Producción (Vercel):**
-   - Iniciar sesión en el dominio público de Vercel con `master2130.isx@gmail.com` para confirmar la autenticación de usuarios.
-2. **Notificaciones por Correo Electrónico (Email Transaccional):**
-   - Integrar Resend o Nodemailer para enviar automáticamente un correo formal al cliente con su confirmación de cita y una copia inmediata al correo del asesor.
-3. **Catálogo Multi-Modelo:**
-   - Incorporar fichas técnicas, galerías y calculadoras de los modelos adicionales conforme la desarrolladora entregue el material gráfico.
-4. **Métricas y Píxeles de Conversión:**
+1. **Notificaciones por Correo Electrónico (Email Transaccional):**
+   - Integrar Resend o Nodemailer para enviar automáticamente un correo formal al cliente con su confirmación de cita y una copia inmediata al correo del asesor (`master2130.isx@gmail.com`).
+2. **Métricas y Píxeles de Conversión:**
    - Agregar Meta Pixel (Facebook Ads) y Google Tag Manager para trackear eventos de conversión (`Lead`, `ScheduleAppointment`, `NSSCaptured`).
+3. **Validación del Flujo de Login en Producción (Vercel):**
+   - Iniciar sesión en el dominio público de Vercel con `master2130.isx@gmail.com` para confirmar la autenticación de usuarios.
+4. **Calculadora Financiera Dinámica por Modelo:**
+   - Conectar las mensualidades y enganches estimados automáticamente según el precio del modelo seleccionado en el catálogo.
