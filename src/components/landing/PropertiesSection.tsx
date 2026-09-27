@@ -88,19 +88,19 @@ export function PropertiesSection({ onSelectPropertyForPrequalification }: Prope
                   }}
                   className={`px-4 py-2 rounded-xl border text-xs font-semibold transition cursor-pointer flex items-center gap-2.5 whitespace-nowrap ${
                     isSelected
-                      ? 'bg-[var(--color-navy)] text-white border-[var(--color-accent)] shadow-xs'
-                      : 'bg-[var(--color-bg)] text-[var(--color-text-secondary)] border-[var(--color-border)] hover:border-[var(--color-accent)]/50'
+                      ? 'bg-[#0F2C40] dark:bg-[#C09B53] text-white dark:text-[#071A2C] border-[#C09B53] shadow-xs'
+                      : 'bg-[var(--color-surface)] dark:bg-[#112236] text-[var(--color-text-secondary)] dark:text-slate-300 border-[var(--color-border)] dark:border-[#1E3A55] hover:border-[#C09B53]/60'
                   }`}
                 >
                   <span
-                    className="w-2 h-2 rounded-full shrink-0"
-                    style={{
-                      backgroundColor: isSelected ? 'var(--color-accent)' : 'transparent',
-                      border: '1px solid var(--color-accent)',
-                    }}
+                    className={`w-2 h-2 rounded-full shrink-0 ${
+                      isSelected
+                        ? 'bg-[var(--color-accent)] dark:bg-[#071A2C] border border-[var(--color-accent)] dark:border-[#071A2C]'
+                        : 'border border-[var(--color-accent)]'
+                    }`}
                   ></span>
-                  <span>{p.model}</span>
-                  <span className="font-mono text-[11px] opacity-80">
+                  <span className="font-bold">{p.model}</span>
+                  <span className="font-mono text-[11px] opacity-90 font-medium">
                     {p.priceFormatted || `$${p.price.toLocaleString('es-MX')} MXN`}
                   </span>
                 </button>

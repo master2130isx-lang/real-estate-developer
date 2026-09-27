@@ -14,7 +14,7 @@ export default function SolicitarVisitaPage() {
   return (
     <div className="min-h-screen bg-[var(--color-bg)] flex flex-col justify-between transition-colors">
       {/* Barra superior */}
-      <header className="bg-[var(--color-navy)] text-white py-3.5 px-4 border-b border-white/10 shadow-sm">
+      <header className="bg-[#0F2C40] dark:bg-[#071A2C] text-white py-3.5 px-4 border-b border-white/10 shadow-sm">
         <div className="max-w-4xl mx-auto flex justify-between items-center">
           <Link
             href="/"

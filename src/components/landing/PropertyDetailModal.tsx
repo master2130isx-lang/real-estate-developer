@@ -74,7 +74,7 @@ export function PropertyDetailModal({
         {/* Botón de cierre flotante */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 z-20 w-9 h-9 rounded-full bg-[var(--color-navy)]/85 hover:bg-[var(--color-navy)] text-white flex items-center justify-center transition cursor-pointer shadow-lg"
+          className="absolute top-4 right-4 z-20 w-9 h-9 rounded-full bg-black/60 hover:bg-black/80 text-white flex items-center justify-center transition cursor-pointer shadow-lg backdrop-blur-xs"
           aria-label="Cerrar modal"
         >
           <X className="w-5 h-5" />
@@ -113,12 +113,12 @@ export function PropertyDetailModal({
           {/* Badges superiores / inferiores en la foto */}
           <div className="absolute top-3 left-3 flex flex-wrap gap-2">
             {isVerifiedReal ? (
-              <span className="bg-[var(--color-navy)]/90 text-[var(--color-accent)] text-xs font-semibold px-3 py-1 rounded shadow-md flex items-center gap-1.5 border border-white/10">
+              <span className="bg-black/60 text-[var(--color-accent)] text-xs font-semibold px-3 py-1 rounded shadow-md flex items-center gap-1.5 border border-white/10 backdrop-blur-xs">
                 <Sparkles className="w-3.5 h-3.5 text-[var(--color-accent)]" />
                 <span>Fotografías Reales de Casa Muestra</span>
               </span>
             ) : (
-              <span className="bg-[var(--color-navy)]/90 text-white/80 text-xs font-medium px-2.5 py-1 rounded">
+              <span className="bg-black/60 text-white/90 text-xs font-medium px-2.5 py-1 rounded backdrop-blur-xs">
                 Recurso Demostrativo
               </span>
             )}
@@ -126,10 +126,10 @@ export function PropertyDetailModal({
 
           <div className="absolute bottom-3 left-4 right-4 flex flex-wrap items-center justify-between gap-2">
             <div className="flex flex-wrap gap-2">
-              <span className="bg-[var(--color-navy)]/90 text-white text-xs font-medium px-3 py-1 rounded backdrop-blur-sm shadow">
+              <span className="bg-black/60 text-white text-xs font-medium px-3 py-1 rounded backdrop-blur-xs shadow">
                 {property.name}
               </span>
-              <span className="bg-[var(--color-accent)] text-[var(--color-navy)] text-xs font-bold px-3 py-1 rounded shadow">
+              <span className="bg-[var(--color-accent)] text-[#071A2C] text-xs font-bold px-3 py-1 rounded shadow">
                 {property.priceFormatted}
               </span>
             </div>
