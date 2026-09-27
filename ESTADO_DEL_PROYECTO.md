@@ -57,7 +57,7 @@ El asistente leerá este archivo automáticamente y tendrá el 100% del contexto
 - **Conmutador de Modo Oscuro:** Botón integrado en la barra de acciones para alternar temas sin recargar.
 - **Tira Ejecutiva de Métricas:** Visitas de hoy, Visitas por confirmar, NSS pendientes de registrar en inmobiliaria, Exclusividades de 15 días activas y Total de cartera.
 - **Botón "Agendar Cita":** Rediseñado con estética limpia y minimalista (eliminando el doble signo `++`).
-- **Agenda de Citas:** Tarjetas compactas con filtros (*Todas, Hoy, Por Confirmar, Confirmadas, Canceladas, Archivadas*). Acciones de confirmación, reagendado y WhatsApp directo.
+- **Agenda de Citas:** Tarjetas compactas con filtros (*Todas, Hoy, Por Confirmar, Confirmadas, Canceladas, Archivadas*). Gestión 100% interna de operaciones (confirmar, reprogramar, cancelar y archivar sin redirecciones automáticas a WhatsApp; contacto por WhatsApp exclusivamente bajo selección manual explícita del asesor).
 - **Cartera de Prospectos:** Tabla completa con buscador en tiempo real, filtros por estado comercial y prioridad de atribución.
 - **Expediente del Prospecto (`LeadDetailModal`):** Resumen de contacto, estado de atribución de 15 días, detalles de visita, notas internas y bitácora de auditoría con protocolo seguro de revelado de NSS.
 - **Generador de Mensajes de WhatsApp (`WhatsAppDraftModal`):** 6 plantillas de alta conversión (confirmación de cita, ubicación GPS, recordatorio, ficha técnica con fotos, asesoría Infonavit y mensaje libre).
