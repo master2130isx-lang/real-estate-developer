@@ -46,7 +46,7 @@ export default function Home() {
       />
 
       {/* Hero y propuesta de valor inicial */}
-      <Hero onOpenPrequalification={() => handleOpenPrequalification()} />
+      <Hero onOpenPrequalification={(prop) => handleOpenPrequalification(prop)} />
 
       {/* Opciones disponibles con transparencia total de precios y gastos */}
       <PropertiesSection

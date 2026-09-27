@@ -33,6 +33,7 @@ export interface CommercialConfig {
     hasSupportingOffer: boolean;
     referenceNote: string;
   };
+  heroPropertyId?: string; // ID de la casa mostrada en la portada principal (Hero)
   attributionRules: {
     durationDays: number;
     requireNssForInfonavit: boolean;
@@ -43,6 +44,7 @@ export interface CommercialConfig {
 
 export const COMMERCIAL_CONFIG: CommercialConfig = {
   isDemoMode: false,
+  heroPropertyId: 'prop-aguila-premier',
   agencyName: 'Valle de los Encinos - Salinas Victoria',
   agencyLegalStatus: 'confirmado',
   advisorName: 'Ismael Zapata',

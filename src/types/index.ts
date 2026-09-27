@@ -84,6 +84,7 @@ export interface Property {
   amenities?: string[]; // Pet park, canchas, palapa, acceso controlado
   nearbyServices?: string[]; // Escuelas, comercios, transporte
   isIllustrativeDemo: boolean;
+  isHero?: boolean; // Destacado en la portada principal (Hero)
 }
 
 export interface AppointmentRequest {

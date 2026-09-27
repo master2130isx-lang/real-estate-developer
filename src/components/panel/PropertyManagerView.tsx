@@ -17,6 +17,7 @@ import {
   CheckCircle2,
   AlertCircle,
   Sparkles,
+  Star,
 } from 'lucide-react';
 import { Property } from '@/types';
 import { useApp } from '@/context/AppContext';
@@ -24,7 +25,7 @@ import { PropertyEditorModal } from './PropertyEditorModal';
 import { PropertyDetailModal } from '../landing/PropertyDetailModal';
 
 export function PropertyManagerView() {
-  const { properties, deleteProperty, reloadProperties } = useApp();
+  const { properties, deleteProperty, reloadProperties, commercialConfig, setHeroProperty } = useApp();
   const [selectedPropertyForEdit, setSelectedPropertyForEdit] = useState<Property | null>(null);
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   const [previewProperty, setPreviewProperty] = useState<Property | null>(null);
@@ -114,10 +115,16 @@ export function PropertyManagerView() {
             const coverImage = prop.images?.[0] || prop.image || '/images/properties/aguila-premier/01-facade.jpg';
             const statusConfig = statusBadge[prop.availabilityStatus] || statusBadge.disponible;
 
+            const isHero = commercialConfig?.heroPropertyId === prop.id || (Boolean(prop.isHero) && !commercialConfig?.heroPropertyId);
+
             return (
               <div
                 key={prop.id}
-                className="rounded-3xl bg-[#102033] border border-[#1E354D] overflow-hidden flex flex-col shadow-lg hover:border-[#C09B53]/40 transition group"
+                className={`rounded-3xl bg-[#102033] border overflow-hidden flex flex-col shadow-lg transition group ${
+                  isHero
+                    ? 'border-[#C09B53] ring-2 ring-[#C09B53]/20 shadow-amber-950/20'
+                    : 'border-[#1E354D] hover:border-[#C09B53]/40'
+                }`}
               >
                 {/* Imagen de Portada con Badges */}
                 <div className="relative aspect-16/10 w-full bg-[#0B1522] overflow-hidden">
@@ -129,8 +136,18 @@ export function PropertyManagerView() {
                     sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                   />
 
+                  {/* Badge de Portada Hero */}
+                  {isHero && (
+                    <div className="absolute top-3 left-3 z-10">
+                      <span className="text-[10px] font-bold px-2.5 py-1 rounded-xl border border-amber-400/80 bg-amber-400 text-slate-950 shadow-md flex items-center gap-1 font-sans">
+                        <Star className="w-3 h-3 fill-slate-950" />
+                        <span>En Portada Principal</span>
+                      </span>
+                    </div>
+                  )}
+
                   {/* Estatus */}
-                  <div className="absolute top-3 left-3">
+                  <div className={`absolute ${isHero ? 'top-10' : 'top-3'} left-3 transition-all`}>
                     <span
                       className={`text-[10px] font-bold px-2.5 py-1 rounded-xl border backdrop-blur-md ${statusConfig.bg} ${statusConfig.text} ${statusConfig.border}`}
                     >
@@ -226,8 +243,24 @@ export function PropertyManagerView() {
                     )}
                   </div>
 
+                  {/* Botón de Portada Principal (Hero) */}
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      await setHeroProperty(prop.id);
+                    }}
+                    className={`w-full py-2 px-3 rounded-xl text-xs font-semibold transition flex items-center justify-center gap-2 cursor-pointer border ${
+                      isHero
+                        ? 'bg-[#C09B53]/20 border-[#C09B53] text-[#D4AF37] shadow-xs'
+                        : 'bg-[#0B1522] hover:bg-[#162D47] border-[#1E354D] text-slate-300 hover:text-white'
+                    }`}
+                  >
+                    <Star className={`w-3.5 h-3.5 ${isHero ? 'fill-[#D4AF37] text-[#D4AF37]' : 'text-slate-400'}`} />
+                    <span>{isHero ? '⭐ Casa Mostrada en Portada' : 'Poner como Portada Principal'}</span>
+                  </button>
+
                   {/* Acciones de Tarjeta */}
-                  <div className="pt-2 flex items-center justify-between gap-2">
+                  <div className="pt-1 flex items-center justify-between gap-2">
                     <button
                       onClick={() => setPreviewProperty(prop)}
                       className="flex-1 py-2 px-3 rounded-xl bg-[#0F2C40] hover:bg-[#153E5A] text-slate-200 hover:text-white text-xs font-semibold transition flex items-center justify-center gap-1.5 cursor-pointer"

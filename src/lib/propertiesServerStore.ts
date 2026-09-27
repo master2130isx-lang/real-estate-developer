@@ -44,6 +44,7 @@ function propertyToDbRow(prop: Property): Record<string, any> {
     amenities: prop.amenities || [],
     nearby_services: prop.nearbyServices || [],
     is_illustrative_demo: !!prop.isIllustrativeDemo,
+    is_hero: !!prop.isHero,
     updated_at: new Date().toISOString(),
   };
 }
@@ -78,6 +79,7 @@ function dbRowToProperty(row: any): Property {
     amenities: Array.isArray(row.amenities) ? row.amenities : [],
     nearbyServices: Array.isArray(row.nearby_services) ? row.nearby_services : [],
     isIllustrativeDemo: !!row.is_illustrative_demo,
+    isHero: !!row.is_hero,
   };
 }
 

@@ -15,6 +15,7 @@ interface AppContextType {
   updateProperty: (id: string, updates: Partial<Property>) => Promise<Property | null>;
   deleteProperty: (id: string) => Promise<boolean>;
   reloadProperties: () => Promise<void>;
+  setHeroProperty: (propertyId: string) => Promise<void>;
   archiveLead: (leadId: string, archive: boolean) => void;
   createLeadFromPrequalification: (leadData: Partial<Lead>, rawNss?: string, rawCurp?: string) => Lead;
   scheduleNewAppointment: (appointmentData: {
@@ -911,6 +912,10 @@ export function AppProvider({
     }
   };
 
+  const setHeroProperty = async (propertyId: string) => {
+    await updateCommercialConfig({ heroPropertyId: propertyId });
+  };
+
   return (
     <AppContext.Provider
       value={{
@@ -923,6 +928,7 @@ export function AppProvider({
         updateProperty,
         deleteProperty,
         reloadProperties,
+        setHeroProperty,
         archiveLead,
         createLeadFromPrequalification,
         scheduleNewAppointment,

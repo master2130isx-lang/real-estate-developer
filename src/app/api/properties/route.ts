@@ -59,6 +59,7 @@ export async function POST(req: NextRequest) {
       amenities: prop.amenities || [],
       nearbyServices: prop.nearbyServices || [],
       isIllustrativeDemo: false,
+      isHero: !!prop.isHero,
     };
 
     const saved = await saveServerProperty(newProperty);

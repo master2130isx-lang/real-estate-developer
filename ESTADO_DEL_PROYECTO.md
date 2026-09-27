@@ -30,8 +30,13 @@ El asistente leerá este archivo automáticamente y tendrá el 100% del contexto
 
 ### 1. Landing Page Pública (`/`)
 - Header con navegación directa a modelos, amenidades, ubicación, contacto y acceso al panel comercial.
+- Cintillo superior de alta legibilidad (*Top Bar*): `"VISITAS PRIVADAS · MONTERREY, NUEVO LEÓN"` optimizado con tipografía nítida en negrita y color profundo de alto contraste (`dark:text-[#071A2C] font-bold`), resolviendo el problema de bajo contraste anterior.
+- **Portada Principal Dinámica e Interactiva (`Hero`):**
+  - Ya no depende de una imagen estática fija. Permite seleccionar qué modelo de casa y qué imagen se exhiben en la portada principal.
+  - Muestra una ficha flotante con el nombre del modelo, su precio en tiempo real y el badge *"Casa Muestra en Exhibición"*.
+  - El botón *"Conocer la casa muestra"* abre automáticamente el formulario de precalificación con ese modelo preseleccionado.
 - Conmutador de **Modo Claro / Modo Oscuro** integrado con persistencia automática en `localStorage`.
-- Galería interactiva con **11 fotografías reales en alta resolución** de la casa muestra del *Modelo Águila Premier*.
+- Galería interactiva con fotografías reales en alta resolución.
 - Calculadora interactiva de crédito Infonavit / bancario con estimación de mensualidad y enganche.
 - Sección de Confianza del Asesor (*AdvisorTrust*) y Footer con redes sociales dinámicas (Facebook, Instagram, TikTok, YouTube).
 - Botón flotante de WhatsApp responsive (optimizado para celular sin encimarse con botones de navegación ni CTA fijo).

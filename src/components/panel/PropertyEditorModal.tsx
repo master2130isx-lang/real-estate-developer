@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import { Property, FinancingType } from '@/types';
 import { compressImageInBrowser } from '@/lib/imageCompressor';
+import { useApp } from '@/context/AppContext';
 
 interface PropertyEditorModalProps {
   property: Property | null; // null si es creación nueva
@@ -57,6 +58,7 @@ export function PropertyEditorModal({
   onSave,
 }: PropertyEditorModalProps) {
   const isEditing = !!property;
+  const { commercialConfig, setHeroProperty } = useApp();
 
   // Estados del Formulario
   const [activeTab, setActiveTab] = useState<'general' | 'medidas' | 'fotos' | 'amenidades'>('general');
@@ -64,6 +66,9 @@ export function PropertyEditorModal({
   const [uploadingPhotos, setUploadingPhotos] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
+  const [isHero, setIsHero] = useState<boolean>(
+    property ? commercialConfig?.heroPropertyId === property.id || Boolean(property.isHero) : false
+  );
 
   // Campos
   const [model, setModel] = useState(property?.model || '');
@@ -264,6 +269,7 @@ export function PropertyEditorModal({
         admittedFinancing,
         image: images[0],
         images,
+        isHero,
         description: description.trim(),
         amenities,
         keyFeatures,
@@ -282,6 +288,10 @@ export function PropertyEditorModal({
       const data = await res.json();
       if (!res.ok || !data.ok) {
         throw new Error(data.error || 'No se pudo guardar la propiedad');
+      }
+
+      if (isHero && data.property?.id) {
+        await setHeroProperty(data.property.id);
       }
 
       setSuccessMessage('¡Modelo guardado con éxito!');
@@ -522,6 +532,29 @@ export function PropertyEditorModal({
                     className="w-full px-3.5 py-2.5 rounded-xl bg-[#102033] border border-[#1E354D] text-white text-xs focus:ring-2 focus:ring-[#C09B53] focus:outline-none"
                   />
                 </div>
+              </div>
+
+              {/* Opción de Portada Principal */}
+              <div className="p-3.5 bg-[#0B1522] border border-[#1E354D] rounded-2xl flex items-center justify-between gap-3">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center border border-amber-500/20">
+                    <Star className="w-4 h-4 fill-amber-400" />
+                  </div>
+                  <div>
+                    <span className="text-xs font-bold text-white block">
+                      Mostrar como Casa Principal en Portada (Hero)
+                    </span>
+                    <span className="text-[11px] text-slate-400 block">
+                      Su fotografía de fachada, nombre y precio se exhibirán en la portada principal de la web.
+                    </span>
+                  </div>
+                </div>
+                <input
+                  type="checkbox"
+                  checked={isHero}
+                  onChange={(e) => setIsHero(e.target.checked)}
+                  className="w-4 h-4 rounded text-amber-500 focus:ring-amber-500 cursor-pointer accent-[#C09B53]"
+                />
               </div>
 
               {/* Esquemas de Financiamiento */}

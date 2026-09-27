@@ -3,13 +3,35 @@
 import React from 'react';
 import Image from 'next/image';
 import { ArrowRight, ChevronDown } from 'lucide-react';
-import { COMMERCIAL_CONFIG } from '@/config/commercialConfig';
+import { useApp } from '@/context/AppContext';
+import { Property } from '@/types';
 
 interface HeroProps {
-  onOpenPrequalification: () => void;
+  onOpenPrequalification: (property?: Property) => void;
 }
 
 export function Hero({ onOpenPrequalification }: HeroProps) {
+  const { properties, commercialConfig } = useApp();
+
+  // Encontrar el modelo destacado en portada:
+  // 1. Por ID en commercialConfig.heroPropertyId
+  // 2. Por propiedad marcada con isHero === true
+  // 3. Fallback a la primera propiedad del catálogo
+  const heroProperty =
+    (commercialConfig?.heroPropertyId
+      ? properties.find((p) => p.id === commercialConfig.heroPropertyId)
+      : null) ||
+    properties.find((p) => p.isHero) ||
+    properties[0];
+
+  const heroImage =
+    heroProperty?.image ||
+    heroProperty?.images?.[0] ||
+    '/images/properties/aguila-premier/facade.jpg';
+
+  const heroModelName = heroProperty?.model || heroProperty?.name || 'Modelo Águila Premier';
+  const heroPrice = heroProperty?.priceFormatted || '$1,180,000 MXN';
+
   return (
     <section className="relative bg-[var(--color-bg)] pt-12 pb-16 sm:pt-16 sm:pb-24 px-4 sm:px-6 overflow-hidden">
       <div className="max-w-[1220px] mx-auto">
@@ -38,8 +60,8 @@ export function Hero({ onOpenPrequalification }: HeroProps) {
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-2">
               {/* CTA Principal — ocre sólido */}
               <button
-                onClick={onOpenPrequalification}
-                className="bg-[var(--color-accent)] hover:bg-[var(--color-accent-hover)] text-[var(--color-navy)] dark:text-[#0B1929] font-semibold py-3.5 px-7 rounded text-base transition flex items-center justify-center gap-2 cursor-pointer"
+                onClick={() => onOpenPrequalification(heroProperty)}
+                className="bg-[var(--color-accent)] hover:bg-[var(--color-accent-hover)] text-[var(--color-navy)] dark:text-[#0B1929] font-semibold py-3.5 px-7 rounded text-base transition flex items-center justify-center gap-2 cursor-pointer shadow-sm"
               >
                 <span>Conocer la casa muestra</span>
                 <ArrowRight className="w-4 h-4" />
@@ -58,15 +80,32 @@ export function Hero({ onOpenPrequalification }: HeroProps) {
 
           {/* Columna Derecha: Fotografía arquitectónica */}
           <div className="order-1 lg:order-2">
-            <div className="relative rounded-2xl overflow-hidden aspect-[4/3] sm:aspect-[16/11] lg:aspect-[4/3] bg-[var(--color-surface-alt)] shadow-lg border border-[var(--color-border)]">
+            <div className="relative rounded-2xl overflow-hidden aspect-[4/3] sm:aspect-[16/11] lg:aspect-[4/3] bg-[var(--color-surface-alt)] shadow-lg border border-[var(--color-border)] group">
               <Image
-                src="/images/properties/aguila-premier/facade.jpg"
-                alt="Casa Muestra Modelo Águila Premier en Valle de los Encinos, Salinas Victoria"
+                src={heroImage}
+                alt={`Casa Muestra ${heroModelName} en Valle de los Encinos, Salinas Victoria`}
                 fill
                 priority
-                className="object-cover object-[center_20%]"
+                className="object-cover object-[center_20%] transition-transform duration-500 group-hover:scale-105"
                 sizes="(max-width: 768px) 100vw, 600px"
               />
+
+              {/* Placa elegante sobre la foto */}
+              <div className="absolute bottom-3 left-3 sm:bottom-4 sm:left-4 bg-[#0F2C40]/90 dark:bg-[#071526]/95 backdrop-blur-md text-white px-3.5 py-2 rounded-xl border border-white/15 shadow-lg flex items-center gap-3">
+                <div>
+                  <span className="text-[#C09B53] font-bold text-[9px] sm:text-[10px] tracking-wider uppercase block">
+                    Casa Muestra en Exhibición
+                  </span>
+                  <span className="font-serif font-bold text-xs sm:text-sm text-white">
+                    {heroModelName}
+                  </span>
+                </div>
+                {heroPrice && (
+                  <span className="text-[11px] sm:text-xs font-mono font-semibold text-slate-200 bg-white/10 px-2 py-1 rounded-lg">
+                    {heroPrice}
+                  </span>
+                )}
+              </div>
             </div>
           </div>
         </div>

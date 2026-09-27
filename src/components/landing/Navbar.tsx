@@ -22,9 +22,9 @@ export function Navbar({ onOpenPrequalification, onOpenPrivacy }: NavbarProps) {
 
   return (
     <header className="sticky top-0 z-40 transition-colors">
-      {/* Top bar — navy, centrado, label-caps */}
-      <div className="bg-[var(--color-navy)] text-center py-2.5 px-4">
-        <span className="label-caps text-[#C09B53] dark:text-[var(--color-accent)] tracking-[0.18em] text-[10px] sm:text-[11px]">
+      {/* Top bar — navy en claro, crema con texto oscuro en modo noche */}
+      <div className="bg-[var(--color-navy)] text-center py-2.5 px-4 transition-colors">
+        <span className="label-caps text-[#C09B53] dark:text-[#071A2C] font-bold tracking-[0.18em] text-[10px] sm:text-[11px]">
           VISITAS PRIVADAS · {commercialConfig.coverageZone.toUpperCase()}
         </span>
       </div>
