@@ -60,13 +60,25 @@ El asistente leerá este archivo automáticamente y tendrá el 100% del contexto
 - **Encuadre visual inteligente:** Se configuró el punto focal de fotografías arquitectónicas en `object-[center_20%]` para que fotos tomadas en vertical desde el celular muestren la fachada completa, segundo piso y techo sin cortes.
 - Compatibilidad total con modo oscuro y modo claro.
 
-### 3. Autenticación y Seguridad del Panel del Asesor (`/login` y Middleware)
-- Ruta `/panel` y APIs administrativas protegidas con validación de sesión (`auth_token`).
+### 3. Autenticación, Seguridad y Blindaje del Panel del Asesor (`/login`, `proxy.ts`, `auth.ts`)
+- **Proxy de Seguridad (Next.js 16):** Archivo `src/proxy.ts` actúa como gateway centralizado que intercepta todas las peticiones antes de llegar a las rutas:
+  - `/panel/*` → Redirige a `/login` si no hay sesión válida.
+  - APIs administrativas (`GET /api/leads`, `PATCH /api/leads/[id]`, `POST /api/config`, `POST /api/properties`, `PUT/DELETE /api/properties/[id]`, `/api/telegram/test`, `/api/telegram/setup-webhook`, `/api/db/status`) → Retorna `401 JSON` sin sesión.
+  - Rutas públicas preservadas: `POST /api/leads` (registro de prospectos), `GET /api/config`, `GET /api/properties`, `POST /api/telegram/webhook`.
+- **Cookies Firmadas con HMAC-SHA256:** Módulo centralizado `src/lib/auth.ts` que firma y verifica todas las cookies de sesión con criptografía HMAC. Comparación en tiempo constante (`timingSafeEqual`) contra ataques de temporización. Soporte de compatibilidad retroactiva con cookies legacy JSON.
+- **Login Blindado:** Eliminado el bypass que aceptaba cualquier contraseña cuando Supabase no respondía. Ahora **siempre** requiere credenciales válidas:
+  - Modo Supabase Auth (producción): `supabase.auth.signInWithPassword()`.
+  - Modo local (desarrollo): Valida contra `ADMIN_EMAIL` + `ADMIN_PASSWORD` de variables de entorno.
+- **Tokens HMAC para URLs de Acción de Telegram:** Las URLs de "Confirmar Cita" y "Cancelar Cita" incluyen un token criptográfico firmado con HMAC que expira en 48 horas. Sin token válido → `403 Forbidden`.
+- **Prevención de XSS:** Todos los datos de usuario (nombre, teléfono, fechas) se escapan con `escapeHtml()` antes de interpolarse en HTML.
+- **Content-Security-Policy (CSP):** Header completo en `next.config.ts` que restringe scripts, estilos, fuentes, imágenes, iframes y conexiones a dominios autorizados.
+- **Rate Limiting:** Protección contra fuerza bruta y spam con ventana deslizante en memoria (`src/lib/rateLimit.ts`):
+  - Login: 5 intentos/minuto por IP.
+  - Registro de leads: 10/minuto por IP.
+  - Telegram test: 3/minuto por IP.
+- **Sanitización de Upload:** `propertyId` sanitizado con regex para prevenir path traversal (`[^a-zA-Z0-9_-]` → eliminado).
 - Pantalla de inicio de sesión moderna y responsiva en `/login` configurada para el usuario principal (`master2130.isx@gmail.com`).
-- Soporte dual para autenticación:
-  - Vía Supabase Auth (conectado a la nube).
-  - Vía variables de entorno administrativas de respaldo en el servidor.
-- Redirección automática y cookies seguras de sesión.
+- Redirección automática post-login con cookies firmadas `httpOnly` + `secure`.
 
 ### 4. Panel de Productividad del Asesor Comercial (`/panel`)
 - **Conmutador de Modo Oscuro:** Botón integrado en la barra de acciones para alternar temas sin recargar.
@@ -137,12 +149,34 @@ El asistente leerá este archivo automáticamente y tendrá el 100% del contexto
 
 ---
 
-## 🛡️ Protocolo de Seguridad y Blindaje del Bot de Telegram
+## 🛡️ Protocolo de Seguridad y Blindaje Integral
 
+### Seguridad del Bot de Telegram
 - **Aislamiento Total de Credenciales:** `TELEGRAM_BOT_TOKEN` se gestiona **única y exclusivamente** desde variables de entorno del servidor (`process.env.TELEGRAM_BOT_TOKEN`). Nunca se serializa ni se envía al navegador en respuestas JSON (`/api/config` ni `commercial_config`).
 - **Sanitización de APIs:** La ruta pública `GET /api/config` purga automáticamente cualquier campo sensible antes de emitir JSON.
 - **Validación de Webhook:** Soporte para validación de cabecera `X-Telegram-Bot-Api-Secret-Token` vía `TELEGRAM_WEBHOOK_SECRET`.
+- **URLs de Acción Firmadas:** Los botones web de "Confirmar/Cancelar Cita" usan tokens HMAC-SHA256 con expiración de 48 horas para impedir manipulación no autorizada.
 - **Rotación de Token Comprometido:** Instrucciones en `@BotFather` para revocar tokens expuestos de forma instantánea.
+
+### Seguridad de Sesiones y Autenticación
+- **Cookies HMAC-SHA256:** Las sesiones se firman criptográficamente en `src/lib/auth.ts`, imposibilitando la fabricación de cookies falsas.
+- **Proxy Gateway:** `src/proxy.ts` protege todas las rutas administrativas (panel + APIs) a nivel de infraestructura, antes de que lleguen al código de la aplicación.
+- **Login sin Bypass:** El fallback local **siempre** requiere `ADMIN_EMAIL` + `ADMIN_PASSWORD`; nunca acepta credenciales arbitrarias.
+- **Rate Limiting:** Protección contra fuerza bruta (login 5/min, leads 10/min, Telegram test 3/min) en `src/lib/rateLimit.ts`.
+
+### Seguridad de Base de Datos (Supabase RLS)
+- **Políticas RLS estrictas:** Tabla `leads` solo permite `INSERT` anónimo (registro); `SELECT/UPDATE/DELETE` requieren `authenticated` o `service_role`.
+- **Vista pública segura:** `public_commercial_config` excluye la columna `telegram_config` para accesos directos con `anon_key` desde el cliente.
+- **Cabeceras HTTP de seguridad:** HSTS (preload), X-Frame-Options (SAMEORIGIN), X-Content-Type-Options (nosniff), Referrer-Policy, Cross-Origin-Opener-Policy y **Content-Security-Policy** completo.
+
+### Archivos Clave de Seguridad
+| Archivo | Responsabilidad |
+| :--- | :--- |
+| `src/proxy.ts` | Gateway de autenticación (protección de rutas y APIs) |
+| `src/lib/auth.ts` | Firma HMAC-SHA256 de cookies, validación de sesiones, tokens de acción |
+| `src/lib/rateLimit.ts` | Rate limiting en memoria con ventana deslizante |
+| `next.config.ts` | Headers HTTP de seguridad incluyendo CSP |
+| `supabase/schema.sql` | Políticas RLS y vista pública segura |
 
 ---
 
@@ -157,6 +191,7 @@ El asistente leerá este archivo automáticamente y tendrá el 100% del contexto
 | `SUPABASE_SERVICE_ROLE_KEY` | Clave secreta service_role de Supabase para backend | Vercel & `.env.local` |
 | `ADMIN_EMAIL` | Correo del administrador (`master2130.isx@gmail.com`) | Vercel & `.env.local` |
 | `ADMIN_PASSWORD` | Contraseña administrativa de respaldo para `/login` | Vercel & `.env.local` |
+| `HMAC_SESSION_SECRET` | Clave de 32+ chars para firmar cookies (Opcional: se deriva de `SUPABASE_SERVICE_ROLE_KEY` si no se define) | Vercel & `.env.local` |
 
 > [!TIP]
 > En Vercel todas las variables anteriores deben registrarse en **Project Settings > Environment Variables** para los entornos *Production*, *Preview* y *Development*.
@@ -182,7 +217,45 @@ Cuando decidas continuar el desarrollo, estos son los puntos clave recomendados:
    - Integrar Resend o Nodemailer para enviar automáticamente un correo formal al cliente con su confirmación de cita y una copia inmediata al correo del asesor (`master2130.isx@gmail.com`).
 2. **Métricas y Píxeles de Conversión:**
    - Agregar Meta Pixel (Facebook Ads) y Google Tag Manager para trackear eventos de conversión (`Lead`, `ScheduleAppointment`, `NSSCaptured`).
-3. **Validación del Flujo de Login en Producción (Vercel):**
-   - Iniciar sesión en el dominio público de Vercel con `master2130.isx@gmail.com` para confirmar la autenticación de usuarios.
-4. **Calculadora Financiera Dinámica por Modelo:**
+3. **Calculadora Financiera Dinámica por Modelo:**
    - Conectar las mensualidades y enganches estimados automáticamente según el precio del modelo seleccionado en el catálogo.
+4. **Migración de Rate Limiting a Redis (Upstash):**
+   - El rate limiter actual opera en memoria (por instancia serverless). Para producción de alto tráfico, migrar a `@upstash/ratelimit` con Redis compartido entre instancias.
+5. **Ejecutar Migración de RLS en Supabase:**
+   - Ejecutar en SQL Editor de Supabase las instrucciones de `supabase/schema.sql` para crear la vista `public_commercial_config` y las nuevas políticas.
+
+---
+
+## 📝 Historial de Cambios (Changelog)
+
+> **Instrucciones para futuros agentes:** Al realizar cambios significativos en el proyecto, agregar una entrada nueva **al inicio** de esta lista con la fecha, un resumen del cambio y los archivos afectados. Mantener las entradas existentes sin modificar.
+
+### 2026-09-27 — Auditoría de Ciberseguridad Completa (Fase 1 + Fase 2)
+**Commit:** `13bb77c` | **13 archivos modificados, 702 líneas añadidas, 114 eliminadas**
+
+**Fase 1 — Vulnerabilidades Críticas Corregidas:**
+- ✅ Restaurado `src/proxy.ts` como gateway de seguridad (protege `/panel` y 9 API routes administrativas).
+- ✅ Creado `src/lib/auth.ts` — módulo centralizado de autenticación con cookies HMAC-SHA256.
+- ✅ Eliminado bypass de login sin contraseña cuando Supabase no responde (`src/app/api/auth/login/route.ts`).
+- ✅ Tokens HMAC firmados de 48h para URLs de acción de Telegram (`src/app/api/telegram/action/route.ts`).
+- ✅ Corrección de XSS: `escapeHtml()` en todos los datos interpolados en HTML.
+- ✅ Agregado header `Content-Security-Policy` en `next.config.ts`.
+- ✅ Sanitización de `propertyId` en upload para prevenir path traversal.
+
+**Fase 2 — Protecciones Adicionales:**
+- ✅ Creado `src/lib/rateLimit.ts` — rate limiting en memoria con ventana deslizante.
+- ✅ Rate limiting aplicado a: login (5/min), registro de leads (10/min), Telegram test (3/min).
+- ✅ RLS actualizado en `supabase/schema.sql`: vista pública `public_commercial_config` sin `telegram_config`.
+- ✅ Actualizado `src/app/api/auth/me/route.ts` para soportar cookies firmadas.
+- ✅ Actualizado `src/app/api/leads/route.ts` para usar `isDeveloperSession()` centralizado.
+- ✅ Actualizado `.env.example` con nuevas variables de seguridad.
+
+**Archivos creados:**
+- `src/lib/auth.ts` (firma HMAC, validación de sesiones, tokens de acción)
+- `src/lib/rateLimit.ts` (rate limiting en memoria)
+
+**Archivos modificados:**
+- `src/proxy.ts`, `src/app/api/auth/login/route.ts`, `src/app/api/auth/me/route.ts`
+- `src/app/api/leads/route.ts`, `src/app/api/telegram/action/route.ts`, `src/app/api/telegram/test/route.ts`
+- `src/app/api/properties/upload/route.ts`, `src/lib/telegramService.ts`
+- `next.config.ts`, `supabase/schema.sql`, `.env.example`
