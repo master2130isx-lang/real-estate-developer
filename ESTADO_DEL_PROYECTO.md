@@ -88,12 +88,16 @@ El asistente leerá este archivo automáticamente y tendrá el 100% del contexto
 ### 7. Gestor Dinámico de Modelos de Casas y Catálogo Multi-Modelo (`PropertyManagerView` & `PropertyEditorModal`)
 - **Panel Administrativo de Propiedades:** Vista dedicada en `/panel` con pestañas para alternar entre *Prospectos* y *Modelos de Casas*.
 - **Editor Integral de Modelos (`PropertyEditorModal`):**
-  - Creación y edición completa de modelos (Nombre, Subtítulo, Precio, Superficie m² terreno/construcción, Recámaras, Baños, Niveles, Cocheras).
-  - Marcador de **Modelo Destacado** e indicador de estado de disponibilidad (Disponible, Últimas Ubicaciones, Preventa, Agotado).
-  - Lista de amenidades y características dinámicas personalizables.
+  - **Flujo Guiado por Pestañas (Wizard Secuencial 1 → 4):**
+    - Paso 1: *Datos & Ubicación* (Nombre de modelo, Fraccionamiento, Precio, Código, Dirección). Botón *"Siguiente: Medidas →"*.
+    - Paso 2: *Medidas & Distribución* (Recámaras, Baños, m² de Construcción y Terreno, Estancia). Botones *"← Anterior"* y *"Siguiente: Fotos →"*.
+    - Paso 3: *Galería de Fotos* (Carga optimizada de fotos en WebP, selector de foto de portada). Requiere al menos 1 foto antes de avanzar. Botones *"← Anterior"* y *"Siguiente: Amenidades →"*.
+    - Paso 4: *Amenidades & Ficha* (Descripción comercial, amenidades del fraccionamiento y ficha técnica). Único paso con el botón final *"✓ Registrar y Publicar Modelo"*.
+  - **Diseño Responsivo Limpio:** Reemplazo de barras horizontales nativas por un grid responsive (`grid grid-cols-2 sm:grid-cols-4`) con indicadores visuales de completado en cada pestaña.
+  - Marcador de **Modelo Destacado** y botón de 1 solo clic para definirlo como Portada Principal en el Hero.
 - **Carga y Optimización de Fotografías:**
   - Selector de imágenes con compresión automática a formato **WebP** en el navegador para máxima velocidad de carga.
-  - Soporte de subida a backend vía `/api/properties/upload` con almacenamiento persistente y fallback seguro.
+  - Soporte de subida a backend vía `/api/properties/upload` con almacenamiento persistente en **Supabase Storage** (bucket `property-images`) y fallback seguro.
   - Selección visual interactiva de la fotografía de portada principal.
 - **Sincronización en Tiempo Real:**
   - APIs REST dedicadas: `/api/properties`, `/api/properties/[id]`, `/api/properties/upload`.

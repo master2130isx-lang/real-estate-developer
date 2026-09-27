@@ -126,9 +126,13 @@ CREATE TABLE IF NOT EXISTS properties (
   amenities JSONB DEFAULT '[]'::jsonb,
   nearby_services JSONB DEFAULT '[]'::jsonb,
   is_illustrative_demo BOOLEAN DEFAULT FALSE,
+  is_hero BOOLEAN DEFAULT FALSE,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
+
+-- Asegurar columna is_hero si la tabla ya había sido creada previamente
+ALTER TABLE properties ADD COLUMN IF NOT EXISTS is_hero BOOLEAN DEFAULT FALSE;
 
 CREATE INDEX IF NOT EXISTS idx_properties_price ON properties (price);
 CREATE INDEX IF NOT EXISTS idx_properties_status ON properties (availability_status);

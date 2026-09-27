@@ -189,9 +189,12 @@ CREATE TABLE IF NOT EXISTS properties (
   amenities JSONB DEFAULT '[]'::jsonb,
   nearby_services JSONB DEFAULT '[]'::jsonb,
   is_illustrative_demo BOOLEAN DEFAULT FALSE,
+  is_hero BOOLEAN DEFAULT FALSE,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
+
+ALTER TABLE properties ADD COLUMN IF NOT EXISTS is_hero BOOLEAN DEFAULT FALSE;
 
 ALTER TABLE leads ENABLE ROW LEVEL SECURITY;
 ALTER TABLE commercial_config ENABLE ROW LEVEL SECURITY;

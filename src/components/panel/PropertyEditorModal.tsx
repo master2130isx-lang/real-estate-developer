@@ -229,17 +229,83 @@ export function PropertyEditorModal({
     setKeyFeatures((prev) => prev.filter((f) => f !== item));
   };
 
+  // Validación por paso individual
+  const validateStep = (step: 'general' | 'medidas' | 'fotos' | 'amenidades'): boolean => {
+    setErrorMessage('');
+    if (step === 'general') {
+      if (!model.trim()) {
+        setErrorMessage('Por favor especifica el nombre del modelo.');
+        return false;
+      }
+      if (!development.trim()) {
+        setErrorMessage('Por favor especifica el nombre del desarrollo/fraccionamiento.');
+        return false;
+      }
+      if (!price || price < 100000) {
+        setErrorMessage('El precio de venta debe ser de al menos $100,000 MXN.');
+        return false;
+      }
+      return true;
+    }
+    if (step === 'medidas') {
+      if (constructionM2 <= 0 || landM2 <= 0) {
+        setErrorMessage('Los metros de construcción y terreno deben ser mayores a 0.');
+        return false;
+      }
+      return true;
+    }
+    if (step === 'fotos') {
+      if (images.length === 0) {
+        setErrorMessage('Por favor agrega al menos una foto de fachada antes de continuar.');
+        return false;
+      }
+      return true;
+    }
+    return true;
+  };
+
+  const handleNextStep = () => {
+    if (activeTab === 'general') {
+      if (validateStep('general')) setActiveTab('medidas');
+    } else if (activeTab === 'medidas') {
+      if (validateStep('medidas')) setActiveTab('fotos');
+    } else if (activeTab === 'fotos') {
+      if (validateStep('fotos')) setActiveTab('amenidades');
+    }
+  };
+
+  const handlePrevStep = () => {
+    setErrorMessage('');
+    if (activeTab === 'amenidades') setActiveTab('fotos');
+    else if (activeTab === 'fotos') setActiveTab('medidas');
+    else if (activeTab === 'medidas') setActiveTab('general');
+  };
+
+  const handleTabClick = (targetTab: 'general' | 'medidas' | 'fotos' | 'amenidades') => {
+    const tabOrder: ('general' | 'medidas' | 'fotos' | 'amenidades')[] = ['general', 'medidas', 'fotos', 'amenidades'];
+    const currentIndex = tabOrder.indexOf(activeTab);
+    const targetIndex = tabOrder.indexOf(targetTab);
+
+    // Si salta hacia adelante en creación nueva, validar el paso actual
+    if (targetIndex > currentIndex) {
+      if (!validateStep(activeTab)) return;
+    }
+    setErrorMessage('');
+    setActiveTab(targetTab);
+  };
+
   // Guardar Propiedad
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!model.trim()) {
-      setErrorMessage('Por favor especifica el nombre del modelo.');
+    if (!validateStep('general')) {
       setActiveTab('general');
       return;
     }
-
-    if (images.length === 0) {
-      setErrorMessage('Por favor agrega al menos una foto de fachada.');
+    if (!validateStep('medidas')) {
+      setActiveTab('medidas');
+      return;
+    }
+    if (!validateStep('fotos')) {
       setActiveTab('fotos');
       return;
     }
@@ -333,58 +399,67 @@ export function PropertyEditorModal({
           </button>
         </div>
 
-        {/* Pestañas de Navegación del Modal */}
-        <div className="flex border-b border-[#1E354D] bg-[#0B1929] px-6 gap-1 sm:gap-4 overflow-x-auto text-xs font-semibold">
+        {/* Pestañas de Navegación del Modal (Sin scrollbars toscas de Windows, diseño responsive) */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 border-b border-[#1E354D] bg-[#0B1929] px-2 sm:px-4 text-xs font-semibold">
           <button
             type="button"
-            onClick={() => setActiveTab('general')}
-            className={`py-3 px-3 border-b-2 transition cursor-pointer flex items-center gap-1.5 whitespace-nowrap ${
+            onClick={() => handleTabClick('general')}
+            className={`py-3 px-2 border-b-2 transition cursor-pointer flex items-center justify-center gap-1.5 ${
               activeTab === 'general'
-                ? 'border-[#C09B53] text-[#C09B53]'
+                ? 'border-[#C09B53] text-[#C09B53] bg-[#C09B53]/5'
+                : model.trim()
+                ? 'border-transparent text-emerald-400/90 hover:text-emerald-300'
                 : 'border-transparent text-slate-400 hover:text-slate-200'
             }`}
           >
-            <Building2 className="w-3.5 h-3.5" />
-            <span>1. Datos & Ubicación</span>
+            <Building2 className="w-3.5 h-3.5 shrink-0" />
+            <span className="truncate">1. Datos & Ubicación</span>
+            {model.trim() && <Check className="w-3 h-3 text-emerald-400 shrink-0" />}
           </button>
 
           <button
             type="button"
-            onClick={() => setActiveTab('medidas')}
-            className={`py-3 px-3 border-b-2 transition cursor-pointer flex items-center gap-1.5 whitespace-nowrap ${
+            onClick={() => handleTabClick('medidas')}
+            className={`py-3 px-2 border-b-2 transition cursor-pointer flex items-center justify-center gap-1.5 ${
               activeTab === 'medidas'
-                ? 'border-[#C09B53] text-[#C09B53]'
+                ? 'border-[#C09B53] text-[#C09B53] bg-[#C09B53]/5'
+                : constructionM2 > 0
+                ? 'border-transparent text-emerald-400/90 hover:text-emerald-300'
                 : 'border-transparent text-slate-400 hover:text-slate-200'
             }`}
           >
-            <Maximize2 className="w-3.5 h-3.5" />
-            <span>2. Medidas & Distribución</span>
+            <Maximize2 className="w-3.5 h-3.5 shrink-0" />
+            <span className="truncate">2. Medidas</span>
+            {constructionM2 > 0 && <Check className="w-3 h-3 text-emerald-400 shrink-0" />}
           </button>
 
           <button
             type="button"
-            onClick={() => setActiveTab('fotos')}
-            className={`py-3 px-3 border-b-2 transition cursor-pointer flex items-center gap-1.5 whitespace-nowrap ${
+            onClick={() => handleTabClick('fotos')}
+            className={`py-3 px-2 border-b-2 transition cursor-pointer flex items-center justify-center gap-1.5 ${
               activeTab === 'fotos'
-                ? 'border-[#C09B53] text-[#C09B53]'
+                ? 'border-[#C09B53] text-[#C09B53] bg-[#C09B53]/5'
+                : images.length > 0
+                ? 'border-transparent text-emerald-400/90 hover:text-emerald-300'
                 : 'border-transparent text-slate-400 hover:text-slate-200'
             }`}
           >
-            <Camera className="w-3.5 h-3.5" />
-            <span>3. Galería de Fotos ({images.length})</span>
+            <Camera className="w-3.5 h-3.5 shrink-0" />
+            <span className="truncate">3. Fotos ({images.length})</span>
+            {images.length > 0 && <Check className="w-3 h-3 text-emerald-400 shrink-0" />}
           </button>
 
           <button
             type="button"
-            onClick={() => setActiveTab('amenidades')}
-            className={`py-3 px-3 border-b-2 transition cursor-pointer flex items-center gap-1.5 whitespace-nowrap ${
+            onClick={() => handleTabClick('amenidades')}
+            className={`py-3 px-2 border-b-2 transition cursor-pointer flex items-center justify-center gap-1.5 ${
               activeTab === 'amenidades'
-                ? 'border-[#C09B53] text-[#C09B53]'
+                ? 'border-[#C09B53] text-[#C09B53] bg-[#C09B53]/5'
                 : 'border-transparent text-slate-400 hover:text-slate-200'
             }`}
           >
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>4. Amenidades & Ficha</span>
+            <Sparkles className="w-3.5 h-3.5 shrink-0" />
+            <span className="truncate">4. Amenidades</span>
           </button>
         </div>
 
@@ -932,40 +1007,86 @@ export function PropertyEditorModal({
             </div>
           )}
 
-          {/* Pie de Acciones del Modal */}
-          <div className="pt-4 border-t border-[#1E354D] flex items-center justify-between">
+          {/* Pie de Acciones del Modal con Navegación Secuencial */}
+          <div className="pt-4 border-t border-[#1E354D] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div className="text-[11px] text-slate-400 flex items-center gap-1.5">
-              <Info className="w-3.5 h-3.5 text-[#C09B53]" />
-              <span>Guardado directo en base de datos sin requerir despliegues</span>
+              <Info className="w-3.5 h-3.5 text-[#C09B53] shrink-0" />
+              <span>
+                {activeTab === 'general' && 'Paso 1 de 4: Configura el nombre, precio y ubicación básica.'}
+                {activeTab === 'medidas' && 'Paso 2 de 4: Define la distribución, m² y recámaras.'}
+                {activeTab === 'fotos' && 'Paso 3 de 4: Sube al menos una fotografía de fachada.'}
+                {activeTab === 'amenidades' && 'Paso 4 de 4: Agrega la descripción y amenidades para finalizar.'}
+              </span>
             </div>
 
-            <div className="flex gap-2">
-              <button
-                type="button"
-                onClick={onClose}
-                disabled={isSubmitting}
-                className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-xs transition cursor-pointer"
-              >
-                Cancelar
-              </button>
+            <div className="flex items-center gap-2 self-end sm:self-auto">
+              {/* Botón Anterior o Cancelar */}
+              {activeTab === 'general' ? (
+                <button
+                  type="button"
+                  onClick={onClose}
+                  disabled={isSubmitting}
+                  className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-xs transition cursor-pointer"
+                >
+                  Cancelar
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={handlePrevStep}
+                  disabled={isSubmitting}
+                  className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-xs transition cursor-pointer flex items-center gap-1"
+                >
+                  <span>← Anterior</span>
+                </button>
+              )}
 
-              <button
-                type="submit"
-                disabled={isSubmitting || uploadingPhotos}
-                className="px-5 py-2 rounded-xl bg-[#C09B53] hover:bg-[#D4AF37] disabled:opacity-50 text-[#0F2C40] font-bold text-xs transition flex items-center gap-2 cursor-pointer shadow-md"
-              >
-                {isSubmitting ? (
-                  <>
-                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                    <span>Guardando...</span>
-                  </>
-                ) : (
-                  <>
-                    <span>{isEditing ? 'Guardar Cambios' : 'Crear Modelo'}</span>
-                    <ArrowRight className="w-3.5 h-3.5" />
-                  </>
-                )}
-              </button>
+              {/* Si está en modo edición y no es la última pestaña, permitir guardado directo */}
+              {isEditing && activeTab !== 'amenidades' && (
+                <button
+                  type="submit"
+                  disabled={isSubmitting || uploadingPhotos}
+                  className="px-3.5 py-2 rounded-xl border border-[#C09B53]/40 text-[#C09B53] hover:bg-[#C09B53]/10 font-semibold text-xs transition cursor-pointer"
+                >
+                  Guardar Cambios
+                </button>
+              )}
+
+              {/* Botón Siguiente en Pasos 1, 2 y 3 */}
+              {activeTab !== 'amenidades' ? (
+                <button
+                  type="button"
+                  onClick={handleNextStep}
+                  disabled={isSubmitting || uploadingPhotos}
+                  className="px-5 py-2 rounded-xl bg-[#C09B53] hover:bg-[#D4AF37] disabled:opacity-50 text-[#0F2C40] font-bold text-xs transition flex items-center gap-1.5 cursor-pointer shadow-md"
+                >
+                  <span>
+                    {activeTab === 'general' && 'Siguiente: Medidas'}
+                    {activeTab === 'medidas' && 'Siguiente: Fotos'}
+                    {activeTab === 'fotos' && 'Siguiente: Amenidades'}
+                  </span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </button>
+              ) : (
+                /* Botón Final solo en el Paso 4 (Amenidades & Ficha) */
+                <button
+                  type="submit"
+                  disabled={isSubmitting || uploadingPhotos}
+                  className="px-6 py-2.5 rounded-xl bg-[#C09B53] hover:bg-[#D4AF37] disabled:opacity-50 text-[#0F2C40] font-bold text-xs transition flex items-center gap-2 cursor-pointer shadow-lg shadow-amber-500/10"
+                >
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      <span>Publicando en Catálogo...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Check className="w-4 h-4 stroke-[3]" />
+                      <span>{isEditing ? 'Guardar Cambios' : '✓ Registrar y Publicar Modelo'}</span>
+                    </>
+                  )}
+                </button>
+              )}
             </div>
           </div>
         </form>

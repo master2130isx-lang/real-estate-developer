@@ -22,8 +22,8 @@
       "contado"
     ],
     "availabilityStatus": "disponible",
-    "lastUpdated": "Septiembre 2026 (Inventario y Fotos Reales)",
-    "estimatedClosingCosts": "Aprox. 5% a 7% (Escrituración y aranceles notariales en N.L.)",
+    "lastUpdated": "Septiembre 2026",
+    "estimatedClosingCosts": "Aprox. 5% a 7%",
     "image": "/images/properties/aguila-premier/01-facade.jpg",
     "images": [
       "/images/properties/aguila-premier/01-facade.jpg",
@@ -47,36 +47,85 @@
     "tags": [
       "Valle de los Encinos",
       "Pet Park",
-      "Canchas Sintéticas",
-      "Palapa",
-      "Acceso Controlado"
+      "Canchas Sintéticas"
     ],
-    "description": "Vive en la mejor zona de Salinas Victoria, N.L. Casa de dos plantas con 2 recámaras, estancia en planta alta, 1.5 baños, acabados con vitropiso, patio con pasillo lateral y estacionamiento para 2 autos en fraccionamiento privado.",
+    "description": "Casa de dos plantas con 2 recámaras, estancia en planta alta, 1.5 baños, acabados con vitropiso, patio con pasillo lateral y estacionamiento para 2 autos en fraccionamiento privado.",
     "keyFeatures": [
-      "2 recámaras con espacio para clóset",
-      "Estancia familiar en planta alta",
-      "1.5 baños (medio baño en PB y baño completo en PA)",
-      "Sala - comedor y cocina independiente",
-      "Vitropiso de alta resistencia instalado",
-      "Patio posterior y pasillo lateral independiente",
-      "Estacionamiento para 2 autos",
-      "Preparación para minisplit",
-      "Terreno: 98 m² | Construcción: 74.39 m²",
-      "Amenidades: Pet Park, canchas con pasto sintético y palapa"
+      "2 recámaras con clóset",
+      "Estancia en planta alta",
+      "Vitropiso instalado",
+      "Patio con pasillo lateral"
     ],
     "amenities": [
       "Pet Park para mascotas",
-      "Canchas deportivas con pasto sintético",
-      "Palapa familiar para eventos",
-      "Acceso controlado con caseta 24/7",
-      "Áreas recreativas y verdes"
+      "Canchas sintéticas",
+      "Palapa familiar",
+      "Acceso controlado 24/7"
     ],
     "nearbyServices": [
-      "Escuelas cercanas",
-      "Comercios y tiendas de conveniencia",
-      "Fuentes de empleo industriales en la zona",
-      "Rutas de transporte público accesibles"
+      "Escuelas",
+      "Comercios",
+      "Rutas de transporte"
     ],
-    "isIllustrativeDemo": false
+    "isIllustrativeDemo": false,
+    "isHero": false
+  },
+  {
+    "id": "prop-milan",
+    "code": "VDE-MIL-01",
+    "name": "Valle de los Encinos",
+    "model": "Modelo Milán",
+    "development": "Valle de los Encinos",
+    "address": "Calzada del Sol, Salinas Victoria, N.L.",
+    "zone": "Salinas Victoria, N.L. (Valle de los Encinos)",
+    "city": "Salinas Victoria, N.L.",
+    "price": 1250000,
+    "priceFormatted": "$1,250,000 MXN",
+    "bedrooms": 2,
+    "bathrooms": 1.5,
+    "hasStayArea": true,
+    "constructionM2": 78.5,
+    "landM2": 98,
+    "parkingSpots": 2,
+    "admittedFinancing": [
+      "infonavit",
+      "bancario",
+      "contado"
+    ],
+    "availabilityStatus": "disponible",
+    "lastUpdated": "Septiembre 2026",
+    "estimatedClosingCosts": "Aprox. 5% a 7%",
+    "image": "https://jxipvyhigdjffrqrpuhf.supabase.co/storage/v1/object/public/property-images/milan/1790482176408-wjoq5n.webp",
+    "images": [
+      "https://jxipvyhigdjffrqrpuhf.supabase.co/storage/v1/object/public/property-images/milan/1790482176408-wjoq5n.webp",
+      "https://jxipvyhigdjffrqrpuhf.supabase.co/storage/v1/object/public/property-images/milan/1790482176556-vulv5h.webp",
+      "https://jxipvyhigdjffrqrpuhf.supabase.co/storage/v1/object/public/property-images/milan/1790482176707-3j0waq.webp",
+      "https://jxipvyhigdjffrqrpuhf.supabase.co/storage/v1/object/public/property-images/milan/1790482177072-rjkh6w.webp"
+    ],
+    "tags": [
+      "Valle de los Encinos",
+      "Fachada Contemporánea",
+      "Nuevo Modelo"
+    ],
+    "description": "Hermosa residencia contemporánea de 2 plantas en fraccionamiento privado con caseta de vigilancia 24/7 y amenidades familiares.",
+    "keyFeatures": [
+      "2 recámaras amplias",
+      "Estancia familiar",
+      "Cochera para 2 autos",
+      "Patio de servicio"
+    ],
+    "amenities": [
+      "Pet Park para mascotas",
+      "Canchas deportivas",
+      "Palapa para eventos",
+      "Acceso controlado"
+    ],
+    "nearbyServices": [
+      "Transporte público",
+      "Zonas comerciales",
+      "Escuelas"
+    ],
+    "isIllustrativeDemo": false,
+    "isHero": true
   }
 ]

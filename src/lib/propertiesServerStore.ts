@@ -200,7 +200,19 @@ export async function saveServerProperty(property: Property): Promise<Property> 
         .upsert(row, { onConflict: 'id' });
 
       if (error) {
-        console.error('Error al guardar propiedad en Supabase:', error.message);
+        // Fallback resiliente si la columna is_hero aún no ha sido agregada en Supabase
+        if (error.message && error.message.includes('is_hero')) {
+          const { is_hero, ...rowWithoutHero } = row;
+          const { error: retryErr } = await supabase
+            .from('properties')
+            .upsert(rowWithoutHero, { onConflict: 'id' });
+
+          if (retryErr) {
+            console.error('Error en reintento de guardar propiedad en Supabase:', retryErr.message);
+          }
+        } else {
+          console.error('Error al guardar propiedad en Supabase:', error.message);
+        }
       }
     } catch (err) {
       console.error('Fallo al persistir propiedad en Supabase:', err);
