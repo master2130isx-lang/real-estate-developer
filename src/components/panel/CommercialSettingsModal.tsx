@@ -19,11 +19,13 @@ import {
   ExternalLink,
   RefreshCw,
   ShieldCheck,
+  ShieldAlert,
   Info,
   Star,
 } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
 import { WhatsAppIcon } from '@/components/common/WhatsAppIcon';
+import { DeveloperPurgeModal } from './DeveloperPurgeModal';
 
 interface CommercialSettingsModalProps {
   isOpen: boolean;
@@ -70,6 +72,7 @@ export function CommercialSettingsModal({ isOpen, onClose }: CommercialSettingsM
   const [dbStatusData, setDbStatusData] = useState<any>(null);
   const [dbLoading, setDbLoading] = useState(false);
   const [copiedSql, setCopiedSql] = useState(false);
+  const [isDeveloperPurgeOpen, setIsDeveloperPurgeOpen] = useState(false);
 
   const [savedSuccess, setSavedSuccess] = useState(false);
 
@@ -936,20 +939,18 @@ CREATE POLICY "Permitir todo acceso properties" ON properties FOR ALL USING (tru
                 {/* Zona de Mantenimiento / Restablecimiento Protegido */}
                 <div className="pt-3 mt-2 border-t border-emerald-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                   <div>
-                    <span className="text-xs font-bold text-slate-800 block">Restablecer datos demostrativos</span>
-                    <span className="text-[10px] text-slate-500">Exclusivo para pruebas iniciales. Requiere confirmación expresa.</span>
+                    <span className="text-xs font-bold text-slate-800 block">Zona de Seguridad del Desarrollador</span>
+                    <span className="text-[10px] text-slate-500">
+                      Permite vaciar la base de citas a 0 o restablecer datos de prueba con código de seguridad.
+                    </span>
                   </div>
                   <button
                     type="button"
-                    onClick={() => {
-                      if (window.confirm("¿Seguro que deseas restablecer los datos de demostración iniciales? Se reiniciará tu almacenamiento local.")) {
-                        resetToDemoDefaults();
-                        onClose();
-                      }
-                    }}
-                    className="text-[11px] text-rose-700 hover:text-rose-900 font-semibold px-2.5 py-1 rounded-lg border border-rose-200 hover:bg-rose-50 transition cursor-pointer self-start sm:self-auto"
+                    onClick={() => setIsDeveloperPurgeOpen(true)}
+                    className="text-xs text-rose-700 hover:text-white hover:bg-rose-700 font-bold px-3 py-1.5 rounded-xl border border-rose-300 dark:border-rose-900 transition flex items-center gap-1.5 cursor-pointer self-start sm:self-auto shadow-xs"
                   >
-                    Restablecer datos de prueba
+                    <ShieldAlert className="w-3.5 h-3.5" />
+                    <span>Zona Developer: Purgar Citas / Limpiar DB</span>
                   </button>
                 </div>
               </div>
@@ -991,6 +992,12 @@ CREATE POLICY "Permitir todo acceso properties" ON properties FOR ALL USING (tru
           </div>
         </form>
       </div>
+
+      {/* Modal de Purga y Seguridad Developer */}
+      <DeveloperPurgeModal
+        isOpen={isDeveloperPurgeOpen}
+        onClose={() => setIsDeveloperPurgeOpen(false)}
+      />
     </div>
   );
 }

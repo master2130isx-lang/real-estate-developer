@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerLeads, saveServerLead } from '@/lib/leadsServerStore';
+import { getServerLeads, saveServerLead, purgeAllServerLeads, resetServerLeadsToDemo } from '@/lib/leadsServerStore';
 import { notifyNewAppointmentTelegram } from '@/lib/telegramService';
 import { Lead } from '@/types';
 
@@ -38,6 +38,86 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ ok: true, lead: savedLead }, { status: 201 });
   } catch (error: any) {
+    return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
+  }
+}
+
+/**
+ * PURGA DE BASE DE DATOS DE CITAS (ZONA DE SEGURIDAD DEVELOPER)
+ * Requiere:
+ * 1. Sesión activa de desarrollador (correo coincide con master2130.isx@gmail.com o ADMIN_EMAIL)
+ * 2. Frase de confirmación obligatoria: "BORRAR-CITAS-TEST"
+ */
+export async function DELETE(req: NextRequest) {
+  try {
+    // 1. Validar sesión del desarrollador
+    const sessionCookie = req.cookies.get('advisor_session');
+    let userEmail = '';
+
+    if (sessionCookie && sessionCookie.value) {
+      try {
+        const parsed = JSON.parse(sessionCookie.value);
+        userEmail = (parsed.email || '').trim().toLowerCase();
+      } catch {
+        // Sesión corrupta
+      }
+    }
+
+    const adminEmail = (process.env.ADMIN_EMAIL || 'master2130.isx@gmail.com').trim().toLowerCase();
+    const isDeveloper = userEmail === adminEmail || userEmail === 'master2130.isx@gmail.com';
+
+    // 2. Leer payload de seguridad
+    const body = await req.json().catch(() => ({}));
+    const { confirmationCode, action } = body;
+
+    // Si no es el desarrollador autenticado
+    if (!isDeveloper) {
+      return NextResponse.json(
+        {
+          ok: false,
+          error: 'Acceso Denegado: Solo el desarrollador principal (Master Developer) tiene autorización para purgar la base de datos.',
+        },
+        { status: 403 }
+      );
+    }
+
+    // 3. Validar código de confirmación estricto
+    if (action === 'reset_demo') {
+      if (confirmationCode !== 'RESTABLECER-DEMO') {
+        return NextResponse.json(
+          { ok: false, error: 'Código de confirmación incorrecto. Escribe exactamente: RESTABLECER-DEMO' },
+          { status: 400 }
+        );
+      }
+      const restored = await resetServerLeadsToDemo();
+      return NextResponse.json({
+        ok: true,
+        message: 'Base de datos restablecida a registros de demostración iniciales.',
+        leads: restored,
+      });
+    }
+
+    // Acción por defecto: Purga total
+    if (confirmationCode !== 'BORRAR-CITAS-TEST') {
+      return NextResponse.json(
+        {
+          ok: false,
+          error: 'Código de confirmación incorrecto para purga. Escribe exactamente: BORRAR-CITAS-TEST',
+        },
+        { status: 400 }
+      );
+    }
+
+    const deletedCount = await purgeAllServerLeads();
+
+    return NextResponse.json({
+      ok: true,
+      deletedCount,
+      message: `Base de datos de citas limpiada con éxito. Se eliminaron ${deletedCount} registros tanto de Supabase como del servidor local.`,
+      leads: [],
+    });
+  } catch (error: any) {
+    console.error('Error durante la purga de citas:', error);
     return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
   }
 }

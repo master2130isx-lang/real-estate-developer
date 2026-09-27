@@ -47,6 +47,8 @@ interface AppContextType {
   markAttributionConflict: (leadId: string, reason: string) => void;
   logFunnelEvent: (eventName: FunnelEvent['eventName'], metadata?: Record<string, string | number | boolean>) => void;
   resetToDemoDefaults: () => void;
+  purgeAllLeads: (confirmationCode: string) => Promise<{ ok: boolean; message: string; error?: string }>;
+  resetLeadsToDemo: (confirmationCode: string) => Promise<{ ok: boolean; message: string; error?: string }>;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -916,6 +918,51 @@ export function AppProvider({
     await updateCommercialConfig({ heroPropertyId: propertyId });
   };
 
+  const purgeAllLeads = async (confirmationCode: string): Promise<{ ok: boolean; message: string; error?: string }> => {
+    try {
+      const res = await fetch('/api/leads', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ confirmationCode }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.ok) {
+        return { ok: false, message: data.error || 'Error al purgar citas', error: data.error };
+      }
+      setLeads([]);
+      try {
+        localStorage.removeItem(STORAGE_KEY_LEADS);
+      } catch {}
+      return { ok: true, message: data.message || 'Citas eliminadas con éxito.' };
+    } catch (err: any) {
+      return { ok: false, message: err.message || 'Error de red al purgar citas', error: err.message };
+    }
+  };
+
+  const resetLeadsToDemo = async (confirmationCode: string): Promise<{ ok: boolean; message: string; error?: string }> => {
+    try {
+      const res = await fetch('/api/leads', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ confirmationCode, action: 'reset_demo' }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.ok) {
+        return { ok: false, message: data.error || 'Error al restablecer citas', error: data.error };
+      }
+      if (Array.isArray(data.leads)) {
+        const normalized = data.leads.map(normalizeLead);
+        setLeads(normalized);
+        try {
+          localStorage.setItem(STORAGE_KEY_LEADS, JSON.stringify(normalized));
+        } catch {}
+      }
+      return { ok: true, message: data.message || 'Citas restablecidas a datos de prueba.' };
+    } catch (err: any) {
+      return { ok: false, message: err.message || 'Error de red', error: err.message };
+    }
+  };
+
   return (
     <AppContext.Provider
       value={{
@@ -940,6 +987,8 @@ export function AppProvider({
         markAttributionConflict,
         logFunnelEvent,
         resetToDemoDefaults,
+        purgeAllLeads,
+        resetLeadsToDemo,
       }}
     >
       {children}

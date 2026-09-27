@@ -158,13 +158,7 @@ export async function getServerLeads(): Promise<Lead[]> {
         .order('created_at', { ascending: false });
 
       if (!error && Array.isArray(data)) {
-        // Si la tabla de Supabase está recién creada y vacía, auto-sembrar los leads de demostración
-        if (data.length === 0 && INITIAL_LEADS.length > 0) {
-          const rowsToSeed = INITIAL_LEADS.map(leadToDbRow);
-          await supabase.from('leads').insert(rowsToSeed);
-          return INITIAL_LEADS;
-        }
-
+        // Mapear filas existentes (si está vacía, devuelve [] respetando la limpieza del developer)
         return data.map(dbRowToLead);
       }
       if (error) {
@@ -176,6 +170,59 @@ export async function getServerLeads(): Promise<Lead[]> {
   }
 
   return readFromLocalStorage();
+}
+
+/**
+ * Purgado completo de prospectos y citas (Exclusivo Developer)
+ * Elimina todas las filas de la tabla leads en Supabase y vacía el almacenamiento local
+ */
+export async function purgeAllServerLeads(): Promise<number> {
+  const localList = readFromLocalStorage();
+  const count = localList.length;
+
+  // 1. Limpiar almacenamiento local y memoria
+  writeToLocalStorage([]);
+  inMemoryLeads = [];
+
+  // 2. Limpiar tabla en Supabase PostgreSQL
+  const supabase = getSupabase();
+  if (supabase) {
+    try {
+      const { error } = await supabase
+        .from('leads')
+        .delete()
+        .neq('id', '00000000-0000-0000-0000-000000000000');
+
+      if (error) {
+        console.error('Error al purgar leads en Supabase:', error.message);
+      }
+    } catch (err) {
+      console.error('Fallo al purgar leads en Supabase:', err);
+    }
+  }
+
+  return count;
+}
+
+/**
+ * Restablece los prospectos de demostración iniciales
+ */
+export async function resetServerLeadsToDemo(): Promise<Lead[]> {
+  writeToLocalStorage(INITIAL_LEADS);
+  inMemoryLeads = [...INITIAL_LEADS];
+
+  const supabase = getSupabase();
+  if (supabase) {
+    try {
+      await supabase.from('leads').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+      const rows = INITIAL_LEADS.map(leadToDbRow);
+      await supabase.from('leads').insert(rows);
+    } catch (err) {
+      console.error('Error al resetear leads a demo en Supabase:', err);
+    }
+  }
+
+  return INITIAL_LEADS;
 }
 
 export async function getServerLeadById(id: string): Promise<Lead | null> {

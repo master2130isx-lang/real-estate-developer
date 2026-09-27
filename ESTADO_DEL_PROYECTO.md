@@ -66,6 +66,14 @@ El asistente leerá este archivo automáticamente y tendrá el 100% del contexto
 - **Cartera de Prospectos:** Tabla completa con buscador en tiempo real, filtros por estado comercial y prioridad de atribución.
 - **Expediente del Prospecto (`LeadDetailModal`):** Resumen de contacto, estado de atribución de 15 días, detalles de visita, notas internas y bitácora de auditoría con protocolo seguro de revelado de NSS.
 - **Generador de Mensajes de WhatsApp (`WhatsAppDraftModal`):** 6 plantillas de alta conversión (confirmación de cita, ubicación GPS, recordatorio, ficha técnica con fotos, asesoría Infonavit y mensaje libre).
+- **Zona de Seguridad del Desarrollador / Purgado de Citas (`DeveloperPurgeModal`):**
+  - Botón de acceso protegido `Limpiar Pruebas (Dev)` en la barra superior de la Agenda y en la pestaña `Base de Datos` de Configuración Comercial.
+  - Validación de seguridad en múltiples capas:
+    1. Verificación de identidad administrativa en sesión (`master2130.isx@gmail.com`).
+    2. Frase de seguridad obligatoria (`BORRAR-CITAS-TEST`) que desbloquea el botón crítico.
+  - Purgado simultáneo en Supabase PostgreSQL (`DELETE FROM leads`) y almacenamiento local/memoria.
+  - Opción dual: Vaciar a 0 registros (tabla limpia) o restablecer los 7 prospectos iniciales de demostración con la clave `RESTABLECER-DEMO`.
+  - **Inmunidad de inventario:** Los modelos de viviendas creados en el catálogo (`properties`) quedan totalmente blindados y nunca se ven afectados.
 
 ### 5. Configuración Comercial y Seguridad de Telegram (`CommercialSettingsModal`)
 - Pestañas optimizadas sin desbordamiento horizontal: *Asesor, Redes, Inmobiliaria, Telegram, Base de Datos*.
