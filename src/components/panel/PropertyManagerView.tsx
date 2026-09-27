@@ -139,8 +139,8 @@ export function PropertyManagerView() {
                   {/* Badge de Portada Hero */}
                   {isHero && (
                     <div className="absolute top-3 left-3 z-10">
-                      <span className="text-[10px] font-bold px-2.5 py-1 rounded-xl border border-amber-400/80 bg-amber-400 text-slate-950 shadow-md flex items-center gap-1 font-sans">
-                        <Star className="w-3 h-3 fill-slate-950" />
+                      <span className="text-[11px] font-bold px-2.5 py-1 rounded-xl border border-amber-400/80 bg-amber-400 text-slate-950 shadow-md flex items-center gap-1 font-sans">
+                        <Star className="w-3 h-3 fill-slate-950" aria-hidden="true" />
                         <span>En Portada Principal</span>
                       </span>
                     </div>
@@ -149,7 +149,7 @@ export function PropertyManagerView() {
                   {/* Estatus */}
                   <div className={`absolute ${isHero ? 'top-10' : 'top-3'} left-3 transition-all`}>
                     <span
-                      className={`text-[10px] font-bold px-2.5 py-1 rounded-xl border backdrop-blur-md ${statusConfig.bg} ${statusConfig.text} ${statusConfig.border}`}
+                      className={`text-[11px] font-bold px-2.5 py-1 rounded-xl border backdrop-blur-md ${statusConfig.bg} ${statusConfig.text} ${statusConfig.border}`}
                     >
                       {statusConfig.label}
                     </span>
@@ -157,7 +157,7 @@ export function PropertyManagerView() {
 
                   {/* Contador de Fotos */}
                   <div className="absolute top-3 right-3 bg-black/60 backdrop-blur-md text-white text-[11px] font-medium px-2.5 py-1 rounded-xl flex items-center gap-1.5">
-                    <Camera className="w-3.5 h-3.5 text-[#C09B53]" />
+                    <Camera className="w-3.5 h-3.5 text-[#C09B53]" aria-hidden="true" />
                     <span>{galleryCount} fotos</span>
                   </div>
 
@@ -171,11 +171,11 @@ export function PropertyManagerView() {
                 <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
                   <div>
                     <div className="flex items-center justify-between gap-2 mb-1">
-                      <span className="text-[10px] font-bold tracking-wider text-[#C09B53] uppercase">
+                      <span className="text-[11px] font-bold tracking-wider text-[#C09B53] uppercase">
                         {prop.development || 'Valle de los Encinos'}
                       </span>
                       {prop.code && (
-                        <span className="text-[10px] font-mono text-slate-500">
+                        <span className="text-[11px] font-mono text-slate-500">
                           {prop.code}
                         </span>
                       )}
@@ -193,34 +193,34 @@ export function PropertyManagerView() {
                   {/* Especificaciones Arquitectónicas */}
                   <div className="grid grid-cols-4 gap-2 py-3 border-y border-[#1E354D]/70 text-center">
                     <div className="flex flex-col items-center">
-                      <Bed className="w-4 h-4 text-slate-400 mb-0.5" />
+                      <Bed className="w-4 h-4 text-slate-400 mb-0.5" aria-hidden="true" />
                       <span className="text-xs font-bold text-white">{prop.bedrooms}</span>
-                      <span className="text-[9px] text-slate-500">Recámaras</span>
+                      <span className="text-[11px] text-slate-400">Recámaras</span>
                     </div>
 
                     <div className="flex flex-col items-center">
-                      <Bath className="w-4 h-4 text-slate-400 mb-0.5" />
+                      <Bath className="w-4 h-4 text-slate-400 mb-0.5" aria-hidden="true" />
                       <span className="text-xs font-bold text-white">{prop.bathrooms}</span>
-                      <span className="text-[9px] text-slate-500">Baños</span>
+                      <span className="text-[11px] text-slate-400">Baños</span>
                     </div>
 
                     <div className="flex flex-col items-center">
-                      <Maximize2 className="w-4 h-4 text-slate-400 mb-0.5" />
+                      <Maximize2 className="w-4 h-4 text-slate-400 mb-0.5" aria-hidden="true" />
                       <span className="text-xs font-bold text-white">{prop.constructionM2}</span>
-                      <span className="text-[9px] text-slate-500">m² const</span>
+                      <span className="text-[11px] text-slate-400">m² const</span>
                     </div>
 
                     <div className="flex flex-col items-center">
-                      <Car className="w-4 h-4 text-slate-400 mb-0.5" />
+                      <Car className="w-4 h-4 text-slate-400 mb-0.5" aria-hidden="true" />
                       <span className="text-xs font-bold text-white">{prop.parkingSpots}</span>
-                      <span className="text-[9px] text-slate-500">Autos</span>
+                      <span className="text-[11px] text-slate-400">Autos</span>
                     </div>
                   </div>
 
                   {/* Ubicación y Amenidades */}
                   <div className="space-y-2">
                     <div className="flex items-center gap-1.5 text-[11px] text-slate-400">
-                      <MapPin className="w-3.5 h-3.5 text-[#C09B53] shrink-0" />
+                      <MapPin className="w-3.5 h-3.5 text-[#C09B53] shrink-0" aria-hidden="true" />
                       <span className="truncate">{prop.address || prop.zone}</span>
                     </div>
 
@@ -229,13 +229,13 @@ export function PropertyManagerView() {
                         {prop.amenities.slice(0, 3).map((am, i) => (
                           <span
                             key={i}
-                            className="text-[10px] px-2 py-0.5 rounded-lg bg-[#0F2C40] text-slate-300 border border-[#1E354D]"
+                            className="text-[11px] px-2 py-0.5 rounded-lg bg-[#0F2C40] text-slate-300 border border-[#1E354D]"
                           >
                             {am}
                           </span>
                         ))}
                         {prop.amenities.length > 3 && (
-                          <span className="text-[10px] px-1.5 py-0.5 rounded-lg text-slate-400">
+                          <span className="text-[11px] px-1.5 py-0.5 rounded-lg text-slate-400">
                             +{prop.amenities.length - 3} más
                           </span>
                         )}
