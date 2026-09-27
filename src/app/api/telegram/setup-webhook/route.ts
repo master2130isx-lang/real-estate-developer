@@ -48,7 +48,14 @@ export async function POST(req: NextRequest) {
         ? webhookUrl
         : `${webhookUrl.replace(/\/$/, '')}/api/telegram/webhook`;
 
-      const res = await fetch(`https://api.telegram.org/bot${token}/setWebhook?url=${encodeURIComponent(fullUrl)}`);
+      const res = await fetch(`https://api.telegram.org/bot${token}/setWebhook`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          url: fullUrl,
+          allowed_updates: ['message', 'callback_query'],
+        }),
+      });
       const data = await res.json();
       return NextResponse.json(data);
     }

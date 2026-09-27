@@ -30,6 +30,7 @@ export function DeveloperPurgeModal({
 }: DeveloperPurgeModalProps) {
   const { purgeAllLeads, resetLeadsToDemo } = useApp();
 
+  const [adminPassword, setAdminPassword] = useState('');
   const [confirmationInput, setConfirmationInput] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
@@ -38,17 +39,40 @@ export function DeveloperPurgeModal({
 
   if (!isOpen) return null;
 
-  const isPurgeReady = confirmationInput.trim() === REQUIRED_CONFIRMATION_CODE;
-  const isResetReady = confirmationInput.trim() === REQUIRED_RESET_CODE;
+  const isPurgeReady = confirmationInput.trim() === REQUIRED_CONFIRMATION_CODE && adminPassword.trim().length > 0;
+  const isResetReady = confirmationInput.trim() === REQUIRED_RESET_CODE && adminPassword.trim().length > 0;
 
   const handleExecute = async () => {
     setErrorMessage('');
     setSuccessMessage('');
+
+    if (!adminPassword.trim()) {
+      setErrorMessage('Por seguridad, debes ingresar tu contraseña de acceso para autorizar esta operación.');
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
+      // 1. Validar contraseña contra el servidor / Supabase Auth
+      const authRes = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: currentUserEmail,
+          password: adminPassword.trim(),
+        }),
+      });
+
+      const authData = await authRes.json();
+      if (!authRes.ok || !authData.ok) {
+        setErrorMessage(authData.error || 'Contraseña incorrecta. Solo el administrador puede autorizar este cambio.');
+        setIsSubmitting(false);
+        return;
+      }
+
       if (mode === 'purge') {
-        if (!isPurgeReady) {
+        if (confirmationInput.trim() !== REQUIRED_CONFIRMATION_CODE) {
           setErrorMessage(`Debes escribir exactamente "${REQUIRED_CONFIRMATION_CODE}" para confirmar.`);
           setIsSubmitting(false);
           return;
@@ -64,7 +88,7 @@ export function DeveloperPurgeModal({
           }, 1500);
         }
       } else {
-        if (!isResetReady) {
+        if (confirmationInput.trim() !== REQUIRED_RESET_CODE) {
           setErrorMessage(`Debes escribir exactamente "${REQUIRED_RESET_CODE}" para confirmar.`);
           setIsSubmitting(false);
           return;
@@ -81,7 +105,7 @@ export function DeveloperPurgeModal({
         }
       }
     } catch (err: any) {
-      setErrorMessage(err.message || 'Ocurrió un error inesperado.');
+      setErrorMessage(err.message || 'Ocurrió un error inesperado al validar credenciales.');
     } finally {
       setIsSubmitting(false);
     }
@@ -183,6 +207,24 @@ export function DeveloperPurgeModal({
               </div>
             </div>
           )}
+
+          {/* Campo de Contraseña de Administrador */}
+          <div className="space-y-1.5 pt-1">
+            <label className="block text-xs font-semibold text-slate-300 flex items-center justify-between">
+              <span>Contraseña de Administrador:</span>
+              <span className="text-[10px] text-slate-400">Verifica tu cuenta ({currentUserEmail})</span>
+            </label>
+            <div className="relative">
+              <Lock className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+              <input
+                type="password"
+                value={adminPassword}
+                onChange={(e) => setAdminPassword(e.target.value)}
+                placeholder="Ingresa tu contraseña de acceso"
+                className="w-full pl-9 pr-3.5 py-2.5 rounded-xl bg-[#102033] border border-[#1E354D] text-white text-xs focus:ring-2 focus:ring-rose-500 focus:outline-none placeholder:text-slate-500"
+              />
+            </div>
+          </div>
 
           {/* Caja de Código de Confirmación */}
           <div className="space-y-2 pt-1">

@@ -19,12 +19,10 @@ import {
   Archive,
   ArchiveRestore,
   MessageSquare,
-  ShieldAlert,
 } from 'lucide-react';
 import { Lead } from '@/types';
 import { useApp } from '@/context/AppContext';
 import { WhatsAppIcon } from '@/components/common/WhatsAppIcon';
-import { DeveloperPurgeModal } from './DeveloperPurgeModal';
 
 interface AppointmentAgendaViewProps {
   leads: Lead[];
@@ -45,7 +43,6 @@ export function AppointmentAgendaView({
     'todas' | 'hoy' | 'pendientes' | 'confirmadas' | 'canceladas' | 'archivadas'
   >('todas');
 
-  const [isPurgeModalOpen, setIsPurgeModalOpen] = useState(false);
   const [rescheduleLead, setRescheduleLead] = useState<Lead | null>(null);
   const [newDate, setNewDate] = useState('');
   const [newTime, setNewTime] = useState('11:00 AM');
@@ -243,16 +240,6 @@ export function AppointmentAgendaView({
         </div>
 
         <div className="flex items-center gap-2 w-full sm:w-auto">
-          <button
-            type="button"
-            onClick={() => setIsPurgeModalOpen(true)}
-            title="Zona de Desarrollador: Purgar citas de prueba"
-            className="p-1.5 sm:px-2.5 sm:py-1.5 rounded-xl border border-rose-300 dark:border-rose-900/60 bg-rose-50 dark:bg-rose-950/30 text-rose-700 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-900/50 text-xs font-semibold flex items-center gap-1.5 transition cursor-pointer"
-          >
-            <ShieldAlert className="w-3.5 h-3.5 text-rose-600 dark:text-rose-400 shrink-0" />
-            <span className="hidden md:inline">Limpiar Pruebas (Dev)</span>
-          </button>
-
           <button
             onClick={onOpenNewAppointment}
             className="flex-1 sm:flex-initial bg-[#0F2C40] hover:bg-[#163E5B] dark:bg-[#C09B53] dark:hover:bg-[#D4AF37] text-white dark:text-[#0F2C40] font-semibold px-3.5 py-1.5 rounded-xl text-xs transition flex items-center justify-center gap-1.5 shadow-xs cursor-pointer"
@@ -591,12 +578,6 @@ export function AppointmentAgendaView({
           </div>
         </div>
       )}
-
-      {/* Modal de Purga y Seguridad Developer */}
-      <DeveloperPurgeModal
-        isOpen={isPurgeModalOpen}
-        onClose={() => setIsPurgeModalOpen(false)}
-      />
     </div>
   );
 }

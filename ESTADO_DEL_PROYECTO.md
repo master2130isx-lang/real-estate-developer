@@ -67,27 +67,28 @@ El asistente leerá este archivo automáticamente y tendrá el 100% del contexto
 - **Expediente del Prospecto (`LeadDetailModal`):** Resumen de contacto, estado de atribución de 15 días, detalles de visita, notas internas y bitácora de auditoría con protocolo seguro de revelado de NSS.
 - **Generador de Mensajes de WhatsApp (`WhatsAppDraftModal`):** 6 plantillas de alta conversión (confirmación de cita, ubicación GPS, recordatorio, ficha técnica con fotos, asesoría Infonavit y mensaje libre).
 - **Zona de Seguridad del Desarrollador / Purgado de Citas (`DeveloperPurgeModal`):**
-  - Botón de acceso protegido `Limpiar Pruebas (Dev)` en la barra superior de la Agenda y en la pestaña `Base de Datos` de Configuración Comercial.
-  - Validación de seguridad en múltiples capas:
-    1. Verificación de identidad administrativa en sesión (`master2130.isx@gmail.com`).
-    2. Frase de seguridad obligatoria (`BORRAR-CITAS-TEST`) que desbloquea el botón crítico.
+  - **Oculto de la vista del agente:** Retirado de la barra principal de la agenda para evitar confusiones al equipo de ventas; accesible discretamente desde la pestaña de Base de Datos en Configuración Comercial.
+  - **Doble candado de seguridad:**
+    1. Verificación en tiempo real de la **Contraseña de Administrador** (autenticada contra Supabase Auth con la cuenta `master2130.isx@gmail.com`).
+    2. Frase de seguridad obligatoria (`BORRAR-CITAS-TEST`) para desbloquear la ejecución crítica.
   - Purgado simultáneo en Supabase PostgreSQL (`DELETE FROM leads`) y almacenamiento local/memoria.
   - Opción dual: Vaciar a 0 registros (tabla limpia) o restablecer los 7 prospectos iniciales de demostración con la clave `RESTABLECER-DEMO`.
   - **Inmunidad de inventario:** Los modelos de viviendas creados en el catálogo (`properties`) quedan totalmente blindados y nunca se ven afectados.
 
 ### 5. Configuración Comercial y Directorio Multi-Destinatario de Telegram (`CommercialSettingsModal`)
-- Pestañas optimizadas sin desbordamiento horizontal: *Asesor, Redes, Inmobiliaria, Telegram, Base de Datos*.
+- **Interfaz Perfeccionada y Adaptativa:**
+  - Estructura con cabecera fija, cuerpo con scroll interno y pie de página fijo (`rounded-3xl overflow-hidden`), eliminando el recorte de esquinas y garantizando un radio simétrico perfecto en todos los ángulos.
+  - Pestañas optimizadas: *Asesor, Redes, Inmobiliaria, Telegram, Base de Datos*.
 - **Directorio de Destinatarios de Telegram con Alias y Alternancia a Voluntad:**
   - Permite registrar múltiples Chat IDs asociados a un alias descriptivo (ej. *"Mi Celular (Developer)"*, *"Carlos Cantú (Asesor)"*).
   - **Alternancia con 1 solo clic:** Selecciona qué destinatario recibe las alertas en vivo de citas y nuevos prospectos, ideal para alternar entre desarrollo/pruebas y asesores en producción sin tocar variables de entorno.
   - **Pruebas de envío individuales:** Cada destinatario registrado cuenta con su propio botón de prueba para verificar que el bot `@RED192142_bot` pueda entregarle mensajes antes de activarlo.
   - **Gestión completa:** Agregar nuevos destinatarios, eliminarlos (con protección para no dejar la lista vacía) y marcar como activo de inmediato.
   - **Persistencia bidireccional:** Se guarda permanentemente en Supabase PostgreSQL (`commercial_config`), respaldado en `localStorage` y en archivo local.
-- **Seguridad del Bot Móvil de Telegram:**
-  - El token (`TELEGRAM_BOT_TOKEN`) permanece 100% blindado en variables de entorno del servidor.
-  - Tarjeta de auditoría en vivo que resalta el destinatario activo en servicio.
-  - Guía integrada de 30 segundos para obtener el Chat ID de cualquier nuevo asesor mediante `@userinfobot`.
-  - Sincronizador de Webhook con un solo clic para producción en Vercel o modo local.
+- **Botones Interactivos de Telegram y Webhook Automático en Producción:**
+  - Blindaje con `allowed_updates: ['message', 'callback_query']` para asegurar la respuesta inmediata de los botones *Confirmar Cita* y *Cancelar Cita*.
+  - Eliminación de campos manuales de URL y "Modo Local" en la interfaz: el sistema conecta y mantiene el webhook 100% en automático en segundo plano.
+  - Sincronización dinámica de los modelos de casas seleccionados (`lead.selectedPropertyTitle`) en todas las plantillas y notificaciones.
 
 ### 6. Base de Datos Definitiva en la Nube (Supabase PostgreSQL)
 - Mapeo nativo de tablas `leads`, `commercial_config`, `properties` y `funnel_events`.

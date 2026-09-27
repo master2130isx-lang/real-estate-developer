@@ -59,8 +59,9 @@ export function buildClientWhatsAppConfirmUrl(lead: Lead): string {
   const cleanPhone = lead.phone.replace(/\D/g, '');
   const date = lead.appointmentRequest?.confirmedDate || lead.appointmentRequest?.preferredDate || 'los próximos días';
   const time = lead.appointmentRequest?.confirmedTime || lead.appointmentRequest?.timeSlot || 'en horario por convenir';
+  const propertyTitle = lead.selectedPropertyTitle || 'Modelo Águila Premier';
 
-  const message = `¡Hola ${firstName}! Te escribe ${COMMERCIAL_CONFIG.advisorName}, tu asesor comercial de ${COMMERCIAL_CONFIG.agencyName}.\n\nTu visita para conocer el *Modelo Águila Premier* en *Valle de los Encinos (Salinas Victoria, N.L.)* ha quedado confirmada:\n\n• Día: ${date}\n• Horario: ${time}\n• Punto de reunión: Caseta principal con acceso controlado 24/7 en Calzada del Sol\n\n¿Me confirmas que recibiste estos datos para enviarte la ubicación exacta por GPS?`;
+  const message = `¡Hola ${firstName}! Te escribe ${COMMERCIAL_CONFIG.advisorName}, tu asesor comercial de ${COMMERCIAL_CONFIG.agencyName}.\n\nTu visita para conocer el *${propertyTitle}* en *Valle de los Encinos (Salinas Victoria, N.L.)* ha quedado confirmada:\n\n• Día: ${date}\n• Horario: ${time}\n• Punto de reunión: Caseta principal con acceso controlado 24/7 en Calzada del Sol\n\n¿Me confirmas que recibiste estos datos para enviarte la ubicación exacta por GPS?`;
 
   return `https://wa.me/52${cleanPhone}?text=${encodeURIComponent(message)}`;
 }
@@ -71,14 +72,16 @@ export function buildClientWhatsAppConfirmUrl(lead: Lead): string {
 export function buildClientWhatsAppCancelUrl(lead: Lead): string {
   const firstName = lead.fullName.split(' ')[0];
   const cleanPhone = lead.phone.replace(/\D/g, '');
+  const propertyTitle = lead.selectedPropertyTitle || 'Modelo Águila Premier';
 
-  const message = `¡Hola ${firstName}! Te escribe ${COMMERCIAL_CONFIG.advisorName} de Valle de los Encinos.\n\nTe confirmo la cancelación de tu visita para conocer el *Modelo Águila Premier*. Si más adelante deseas retomar tu asesoría o agendar un nuevo recorrido en las casas muestra, con mucho gusto estoy a tus órdenes por este medio. ¡Excelente día!`;
+  const message = `¡Hola ${firstName}! Te escribe ${COMMERCIAL_CONFIG.advisorName} de Valle de los Encinos.\n\nTe confirmo la cancelación de tu visita para conocer el *${propertyTitle}*. Si más adelante deseas retomar tu asesoría o agendar un nuevo recorrido en las casas muestra, con mucho gusto estoy a tus órdenes por este medio. ¡Excelente día!`;
 
   return `https://wa.me/52${cleanPhone}?text=${encodeURIComponent(message)}`;
 }
 
 /**
  * Asegura de forma automática que el webhook de Telegram esté registrado en el dominio de producción
+ * y que admita explícitamente eventos callback_query para los botones de aprobar/cancelar
  */
 export async function ensureTelegramWebhook(origin: string): Promise<{ ok: boolean; info?: any }> {
   if (!origin || !origin.startsWith('https://')) return { ok: false };
@@ -88,17 +91,26 @@ export async function ensureTelegramWebhook(origin: string): Promise<{ ok: boole
 
     const targetUrl = `${origin.replace(/\/$/, '')}/api/telegram/webhook`;
 
-    // 1. Verificar si ya está apuntando a la URL correcta
+    // 1. Verificar si ya está apuntando a la URL correcta y admite callback_query
     const checkRes = await fetch(`${TELEGRAM_API_BASE}/bot${token}/getWebhookInfo`);
     const checkData = await checkRes.json();
-    if (checkData.ok && checkData.result?.url === targetUrl) {
+    const hasCallbackQuery = Array.isArray(checkData.result?.allowed_updates)
+      ? checkData.result.allowed_updates.includes('callback_query')
+      : true;
+
+    if (checkData.ok && checkData.result?.url === targetUrl && hasCallbackQuery) {
       return { ok: true, info: checkData.result };
     }
 
-    // 2. Registrar el webhook automáticamente
-    const setRes = await fetch(
-      `${TELEGRAM_API_BASE}/bot${token}/setWebhook?url=${encodeURIComponent(targetUrl)}`
-    );
+    // 2. Registrar el webhook automáticamente con soporte explícito para botones interactivos
+    const setRes = await fetch(`${TELEGRAM_API_BASE}/bot${token}/setWebhook`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        url: targetUrl,
+        allowed_updates: ['message', 'callback_query'],
+      }),
+    });
     const setData = await setRes.json();
     return { ok: setData.ok, info: setData };
   } catch (err: any) {
@@ -177,7 +189,7 @@ export async function notifyNewAppointmentTelegram(
 👤 *Cliente:* ${lead.fullName}
 📱 *Teléfono:* \`${lead.phone}\`
 ${visitSection}💳 *Forma de compra:* ${financingLabel}
-${identifierSection}🏠 *Vivienda:* Modelo Águila Premier ($1,180,000 MXN)
+${identifierSection}🏠 *Vivienda:* ${lead.selectedPropertyTitle || 'Modelo Águila Premier ($1,180,000 MXN)'}
 📍 *Ubicación:* Valle de los Encinos, Salinas Victoria
 ${lead.appointmentRequest?.notes ? `📝 *Comentarios:* _${lead.appointmentRequest.notes}_\n` : ''}━━━━━━━━━━━━━━━━━━━━
 ${footerPrompt}`;
@@ -284,7 +296,7 @@ export async function handleTelegramCallbackQuery(callbackQuery: any): Promise<{
 📱 *Teléfono:* \`${updatedLead.phone}\`
 ${nssLine}📅 *Cita confirmada:* ${date} a las ${time}
 📍 *Punto de reunión:* Caseta principal Valle de los Encinos
-🏠 *Vivienda:* Modelo Águila Premier ($1.18M)
+🏠 *Vivienda:* ${updatedLead.selectedPropertyTitle || 'Modelo Águila Premier ($1.18M)'}
 ━━━━━━━━━━━━━━━━━━━━
 ✅ *Estado:* Confirmada en CRM y Base de Datos.
 💬 Toca el botón inferior para abrir WhatsApp con el mensaje pre-armado:`;

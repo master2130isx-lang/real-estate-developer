@@ -25,6 +25,7 @@ import {
   Smartphone,
   Plus,
   Trash2,
+  Lock,
 } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
 import { WhatsAppIcon } from '@/components/common/WhatsAppIcon';
@@ -200,15 +201,9 @@ export function CommercialSettingsModal({ isOpen, onClose }: CommercialSettingsM
     }
   };
 
-  // Webhook Producción
-  const [webhookUrl, setWebhookUrl] = useState('');
-  const [webhookStatus, setWebhookStatus] = useState<string>('');
-  const [webhookLoading, setWebhookLoading] = useState(false);
-
   // Diagnóstico de Base de Datos (Supabase)
   const [dbStatusData, setDbStatusData] = useState<any>(null);
   const [dbLoading, setDbLoading] = useState(false);
-  const [copiedSql, setCopiedSql] = useState(false);
   const [isDeveloperPurgeOpen, setIsDeveloperPurgeOpen] = useState(false);
 
   const [savedSuccess, setSavedSuccess] = useState(false);
@@ -233,168 +228,6 @@ export function CommercialSettingsModal({ isOpen, onClose }: CommercialSettingsM
   }, [activeTab]);
 
   if (!isOpen) return null;
-
-  const handleCopySql = () => {
-    const sqlContent = `-- ESQUEMA DE BASE DE DATOS DEFINITIVA (SUPABASE / POSTGRESQL)
-CREATE TABLE IF NOT EXISTS leads (
-  id TEXT PRIMARY KEY,
-  folio TEXT UNIQUE NOT NULL,
-  created_at TEXT NOT NULL,
-  full_name TEXT NOT NULL,
-  phone TEXT NOT NULL,
-  email TEXT,
-  preferred_channel TEXT DEFAULT 'whatsapp',
-  preferred_contact_time TEXT DEFAULT 'tarde',
-  interested_zone TEXT DEFAULT 'Salinas Victoria, N.L. (Valle de los Encinos)',
-  selected_property_id TEXT,
-  selected_property_title TEXT,
-  budget_range TEXT DEFAULT 'aun_no_lo_se',
-  purchase_timeline TEXT DEFAULT 'corto',
-  financing_type TEXT DEFAULT 'infonavit',
-  financing_subtype TEXT,
-  needs_orientation BOOLEAN DEFAULT FALSE,
-  privacy_consent_accepted BOOLEAN DEFAULT TRUE,
-  marketing_consent_accepted BOOLEAN DEFAULT FALSE,
-  nss_status TEXT DEFAULT 'no_aplica',
-  nss_value_encrypted_mock TEXT,
-  nss_last_four TEXT,
-  attribution_status TEXT DEFAULT 'no_aplica',
-  attribution_advisor TEXT,
-  attribution_confirmed_at TEXT,
-  attribution_expires_at TEXT,
-  attribution_reference TEXT,
-  attribution_confirmed_by TEXT,
-  attribution_notes TEXT,
-  commercial_status TEXT DEFAULT 'nuevo',
-  compatibility TEXT DEFAULT 'media',
-  next_action TEXT,
-  assigned_advisor TEXT,
-  appointment_request JSONB,
-  is_archived BOOLEAN DEFAULT FALSE,
-  internal_notes JSONB DEFAULT '[]'::jsonb,
-  audit_history JSONB DEFAULT '[]'::jsonb,
-  db_created_at TIMESTAMPTZ DEFAULT NOW(),
-  db_updated_at TIMESTAMPTZ DEFAULT NOW()
-);
-
-CREATE INDEX IF NOT EXISTS idx_leads_commercial_status ON leads (commercial_status);
-CREATE INDEX IF NOT EXISTS idx_leads_created_at ON leads (created_at DESC);
-
-CREATE TABLE IF NOT EXISTS commercial_config (
-  id TEXT PRIMARY KEY DEFAULT 'primary_config',
-  advisor_name TEXT NOT NULL,
-  advisor_role TEXT,
-  agency_name TEXT NOT NULL,
-  coverage_zone TEXT,
-  contact_channels JSONB NOT NULL,
-  social_links JSONB NOT NULL,
-  telegram_config JSONB,
-  featured_price JSONB,
-  updated_at TIMESTAMPTZ DEFAULT NOW()
-);
-
-CREATE TABLE IF NOT EXISTS funnel_events (
-  id BIGSERIAL PRIMARY KEY,
-  event_name TEXT NOT NULL,
-  timestamp TIMESTAMPTZ DEFAULT NOW(),
-  metadata JSONB
-);
-
-CREATE TABLE IF NOT EXISTS properties (
-  id TEXT PRIMARY KEY,
-  code TEXT UNIQUE NOT NULL,
-  name TEXT NOT NULL,
-  model TEXT NOT NULL,
-  development TEXT DEFAULT 'Valle de los Encinos',
-  address TEXT,
-  zone TEXT,
-  city TEXT,
-  price NUMERIC NOT NULL,
-  price_formatted TEXT,
-  bedrooms INTEGER DEFAULT 2,
-  bathrooms NUMERIC DEFAULT 1,
-  has_stay_area BOOLEAN DEFAULT FALSE,
-  construction_m2 NUMERIC,
-  land_m2 NUMERIC,
-  parking_spots INTEGER DEFAULT 1,
-  admitted_financing JSONB DEFAULT '["infonavit", "bancario", "contado"]'::jsonb,
-  availability_status TEXT DEFAULT 'disponible',
-  last_updated TEXT,
-  estimated_closing_costs TEXT,
-  image TEXT NOT NULL,
-  images JSONB DEFAULT '[]'::jsonb,
-  tags JSONB DEFAULT '[]'::jsonb,
-  description TEXT,
-  key_features JSONB DEFAULT '[]'::jsonb,
-  amenities JSONB DEFAULT '[]'::jsonb,
-  nearby_services JSONB DEFAULT '[]'::jsonb,
-  is_illustrative_demo BOOLEAN DEFAULT FALSE,
-  is_hero BOOLEAN DEFAULT FALSE,
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ DEFAULT NOW()
-);
-
-ALTER TABLE properties ADD COLUMN IF NOT EXISTS is_hero BOOLEAN DEFAULT FALSE;
-
-ALTER TABLE leads ENABLE ROW LEVEL SECURITY;
-ALTER TABLE commercial_config ENABLE ROW LEVEL SECURITY;
-ALTER TABLE funnel_events ENABLE ROW LEVEL SECURITY;
-ALTER TABLE properties ENABLE ROW LEVEL SECURITY;
-
-CREATE POLICY "Permitir todo acceso leads" ON leads FOR ALL USING (true) WITH CHECK (true);
-CREATE POLICY "Permitir todo acceso config" ON commercial_config FOR ALL USING (true) WITH CHECK (true);
-CREATE POLICY "Permitir todo acceso funnel" ON funnel_events FOR ALL USING (true) WITH CHECK (true);
-CREATE POLICY "Permitir todo acceso properties" ON properties FOR ALL USING (true) WITH CHECK (true);`;
-
-    navigator.clipboard.writeText(sqlContent);
-    setCopiedSql(true);
-    setTimeout(() => setCopiedSql(false), 2000);
-  };
-
-  const handleSetWebhook = async () => {
-    if (!webhookUrl.trim()) return;
-    setWebhookLoading(true);
-    setWebhookStatus('');
-    try {
-      const res = await fetch('/api/telegram/setup-webhook', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'set', webhookUrl: webhookUrl.trim() }),
-      });
-      const data = await res.json();
-      if (data.ok) {
-        setWebhookStatus('✅ Webhook conectado con éxito en Telegram.');
-      } else {
-        setWebhookStatus(`❌ Error: ${data.description || data.error}`);
-      }
-    } catch (e: any) {
-      setWebhookStatus(`❌ Error de conexión: ${e.message}`);
-    } finally {
-      setWebhookLoading(false);
-    }
-  };
-
-  const handleDeleteWebhook = async () => {
-    setWebhookLoading(true);
-    setWebhookStatus('');
-    try {
-      const res = await fetch('/api/telegram/setup-webhook', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'delete' }),
-      });
-      const data = await res.json();
-      if (data.ok) {
-        setWebhookStatus('✅ Webhook desactivado. Modo local activo.');
-      } else {
-        setWebhookStatus(`❌ Error: ${data.description || data.error}`);
-      }
-    } catch (e: any) {
-      setWebhookStatus(`❌ Error de conexión: ${e.message}`);
-    } finally {
-      setWebhookLoading(false);
-    }
-  };
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -464,107 +297,114 @@ CREATE POLICY "Permitir todo acceso properties" ON properties FOR ALL USING (tru
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/65 backdrop-blur-sm overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/70 backdrop-blur-xs">
       <div
-        className="relative bg-white rounded-3xl max-w-2xl w-full max-h-[92vh] overflow-y-auto shadow-2xl border border-slate-200 p-5 sm:p-7 text-slate-900"
+        className="relative bg-white rounded-3xl max-w-2xl w-full max-h-[90vh] shadow-2xl border border-slate-200 flex flex-col overflow-hidden text-slate-900 animate-in fade-in zoom-in-95"
         role="dialog"
         aria-modal="true"
       >
-        <button
-          onClick={onClose}
-          className="absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center transition cursor-pointer"
-        >
-          <X className="w-4 h-4" />
-        </button>
+        {/* Cabecera Fija (Pinned Header) */}
+        <div className="p-5 sm:p-6 pb-0 border-b border-slate-100 shrink-0 bg-white">
+          <div className="flex items-center justify-between gap-3 pb-3">
+            <div className="flex items-center gap-2.5 text-[#0d233a]">
+              <div className="w-9 h-9 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center shrink-0">
+                <Settings className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="text-base font-bold text-slate-900 leading-tight flex items-center gap-2">
+                  <span>Configuración Comercial y Plataforma</span>
+                  <span className="bg-emerald-100 text-emerald-800 text-[10px] px-2 py-0.5 rounded-full font-bold">
+                    White-Label
+                  </span>
+                </h3>
+                <p className="text-[11px] text-slate-500">
+                  Personaliza asesor, teléfonos, redes sociales, bot móvil y base de datos en la nube
+                </p>
+              </div>
+            </div>
 
-        {/* Cabecera */}
-        <div className="flex items-center gap-2.5 text-[#0d233a] border-b border-slate-100 pb-3">
-          <div className="w-9 h-9 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center">
-            <Settings className="w-5 h-5" />
+            <button
+              onClick={onClose}
+              className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center transition cursor-pointer shrink-0"
+              title="Cerrar modal"
+            >
+              <X className="w-4 h-4" />
+            </button>
           </div>
-          <div>
-            <h3 className="text-base font-bold text-slate-900 leading-tight flex items-center gap-2">
-              <span>Configuración Comercial y Plataforma</span>
-              <span className="bg-emerald-100 text-emerald-800 text-[10px] px-2 py-0.5 rounded-full font-bold">
-                White-Label
-              </span>
-            </h3>
-            <p className="text-[11px] text-slate-500">
-              Personaliza asesor, teléfonos, redes sociales, bot móvil y base de datos en la nube
-            </p>
+
+          {/* Pestañas de Ajustes */}
+          <div className="flex items-center justify-between gap-1 pt-1 text-xs font-semibold overflow-x-auto no-scrollbar">
+            <button
+              type="button"
+              onClick={() => setActiveTab('advisor')}
+              className={`pb-2 px-2.5 border-b-2 transition flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
+                activeTab === 'advisor'
+                  ? 'border-[#0d233a] text-[#0d233a] font-bold'
+                  : 'border-transparent text-slate-500 hover:text-slate-800'
+              }`}
+            >
+              <User className="w-3.5 h-3.5" />
+              <span>Asesor</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setActiveTab('social')}
+              className={`pb-2 px-2.5 border-b-2 transition flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
+                activeTab === 'social'
+                  ? 'border-[#0d233a] text-[#0d233a] font-bold'
+                  : 'border-transparent text-slate-500 hover:text-slate-800'
+              }`}
+            >
+              <Share2 className="w-3.5 h-3.5" />
+              <span>Redes</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setActiveTab('development')}
+              className={`pb-2 px-2.5 border-b-2 transition flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
+                activeTab === 'development'
+                  ? 'border-[#0d233a] text-[#0d233a] font-bold'
+                  : 'border-transparent text-slate-500 hover:text-slate-800'
+              }`}
+            >
+              <Building2 className="w-3.5 h-3.5" />
+              <span>Inmobiliaria</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setActiveTab('telegram')}
+              className={`pb-2 px-2.5 border-b-2 transition flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
+                activeTab === 'telegram'
+                  ? 'border-[#0d233a] text-[#0d233a] font-bold'
+                  : 'border-transparent text-slate-500 hover:text-slate-800'
+              }`}
+            >
+              <Send className="w-3.5 h-3.5 text-sky-600" />
+              <span>Telegram</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setActiveTab('database')}
+              className={`pb-2 px-2.5 border-b-2 transition flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
+                activeTab === 'database'
+                  ? 'border-[#0d233a] text-[#0d233a] font-bold'
+                  : 'border-transparent text-slate-500 hover:text-slate-800'
+              }`}
+            >
+              <Database className="w-3.5 h-3.5 text-emerald-600" />
+              <span>Base de Datos</span>
+            </button>
           </div>
         </div>
 
-        {/* Pestañas de Ajustes */}
-        <div className="flex items-center justify-between gap-1 pt-3 border-b border-slate-100 text-xs font-semibold">
-          <button
-            type="button"
-            onClick={() => setActiveTab('advisor')}
-            className={`pb-2 px-2.5 border-b-2 transition flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
-              activeTab === 'advisor'
-                ? 'border-[#0d233a] text-[#0d233a] font-bold'
-                : 'border-transparent text-slate-500 hover:text-slate-800'
-            }`}
-          >
-            <User className="w-3.5 h-3.5" />
-            <span>Asesor</span>
-          </button>
+        {/* Formulario y Contenedor con Scroll Interno Suave */}
+        <form onSubmit={handleSave} className="flex-1 flex flex-col min-h-0 overflow-hidden">
+          <div className="flex-1 overflow-y-auto px-5 sm:px-6 py-4 space-y-4">
 
-          <button
-            type="button"
-            onClick={() => setActiveTab('social')}
-            className={`pb-2 px-2.5 border-b-2 transition flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
-              activeTab === 'social'
-                ? 'border-[#0d233a] text-[#0d233a] font-bold'
-                : 'border-transparent text-slate-500 hover:text-slate-800'
-            }`}
-          >
-            <Share2 className="w-3.5 h-3.5" />
-            <span>Redes</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setActiveTab('development')}
-            className={`pb-2 px-2.5 border-b-2 transition flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
-              activeTab === 'development'
-                ? 'border-[#0d233a] text-[#0d233a] font-bold'
-                : 'border-transparent text-slate-500 hover:text-slate-800'
-            }`}
-          >
-            <Building2 className="w-3.5 h-3.5" />
-            <span>Inmobiliaria</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setActiveTab('telegram')}
-            className={`pb-2 px-2.5 border-b-2 transition flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
-              activeTab === 'telegram'
-                ? 'border-[#0d233a] text-[#0d233a] font-bold'
-                : 'border-transparent text-slate-500 hover:text-slate-800'
-            }`}
-          >
-            <Send className="w-3.5 h-3.5 text-sky-600" />
-            <span>Telegram</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setActiveTab('database')}
-            className={`pb-2 px-2.5 border-b-2 transition flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
-              activeTab === 'database'
-                ? 'border-[#0d233a] text-[#0d233a] font-bold'
-                : 'border-transparent text-slate-500 hover:text-slate-800'
-            }`}
-          >
-            <Database className="w-3.5 h-3.5 text-emerald-600" />
-            <span>Base de Datos</span>
-          </button>
-        </div>
-
-        {/* Formulario */}
-        <form onSubmit={handleSave} className="space-y-4 pt-3">
           {/* TAB 1: ASESOR Y TELÉFONOS */}
           {activeTab === 'advisor' && (
             <div className="space-y-3">
@@ -1021,70 +861,24 @@ CREATE POLICY "Permitir todo acceso properties" ON properties FOR ALL USING (tru
                 </ol>
               </div>
 
-              {/* Bot Oficial Verificado */}
-              <div className="p-3 bg-slate-50 rounded-2xl border border-slate-200 flex items-center justify-between gap-3 text-xs">
+              {/* Bot Oficial Verificado y Conectado en Segundo Plano */}
+              <div className="p-3.5 bg-slate-50 rounded-2xl border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 text-xs">
                 <div>
-                  <span className="font-bold text-slate-800 block">Bot Oficial de Notificaciones:</span>
-                  <span className="font-mono text-emerald-800 font-bold">@RED192142_bot</span>
+                  <div className="flex items-center gap-1.5 font-bold text-slate-800">
+                    <span>Bot Oficial de Alertas:</span>
+                    <span className="font-mono text-emerald-800 font-bold">@RED192142_bot</span>
+                  </div>
+                  <span className="text-[11px] text-slate-500">
+                    Botones interactivos de aprobación y cancelación activos 24/7 en la nube.
+                  </span>
                 </div>
-                <span className="text-[11px] text-emerald-700 font-semibold px-2 py-0.5 rounded-lg bg-emerald-100 border border-emerald-300">
-                  ✓ Token Protegido en Servidor
+                <span className="text-[10px] text-emerald-700 font-bold px-2.5 py-1 rounded-full bg-emerald-100 border border-emerald-300 flex items-center gap-1 self-start sm:self-auto">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse"></span>
+                  Conectado en Producción
                 </span>
               </div>
-
-              {/* Conexión de Webhook (Producción vs Local) */}
-              <div className="pt-3 mt-3 border-t border-slate-200/70 space-y-2.5">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h4 className="font-bold text-xs text-slate-800 flex items-center gap-1.5">
-                      <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                      <span>Receptor de Botones Interactivos del Bot</span>
-                    </h4>
-                    <p className="text-[11px] text-slate-500">
-                      En local, los botones interactivos se procesan al instante en tu equipo. Al publicar en Vercel, registra tu dominio aquí para que funcione en la nube sin servidores locales.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="bg-slate-50 p-3 rounded-2xl border border-slate-200 space-y-2">
-                  <label className="block text-[11px] font-semibold text-slate-700">
-                    URL del Dominio en Producción (Vercel o Dominio Propio):
-                  </label>
-                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
-                    <input
-                      type="url"
-                      value={webhookUrl}
-                      onChange={(e) => setWebhookUrl(e.target.value)}
-                      placeholder="https://tu-proyecto.vercel.app"
-                      className="flex-1 px-3 py-1.5 rounded-xl border border-slate-300 text-xs bg-white focus:ring-2 focus:ring-[#0d233a] focus:outline-none font-mono"
-                    />
-                    <button
-                      type="button"
-                      onClick={handleSetWebhook}
-                      disabled={!webhookUrl.trim() || webhookLoading}
-                      className="bg-slate-800 hover:bg-slate-900 disabled:bg-slate-300 text-white font-bold px-3 py-1.5 rounded-xl text-xs transition cursor-pointer"
-                    >
-                      {webhookLoading ? 'Conectando...' : 'Conectar Webhook'}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={handleDeleteWebhook}
-                      disabled={webhookLoading}
-                      className="bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold px-2.5 py-1.5 rounded-xl text-xs transition cursor-pointer"
-                      title="Desconectar Webhook para volver a Modo Local"
-                    >
-                      Modo Local
-                    </button>
-                  </div>
-                    {webhookStatus && (
-                      <div className="text-[11px] font-mono p-2 bg-white rounded-xl border border-slate-200 mt-1.5 text-slate-700">
-                        {webhookStatus}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            )}
+            </div>
+          )}
 
           {/* TAB 5: BASE DE DATOS (SUPABASE) */}
           {activeTab === 'database' && (
@@ -1166,85 +960,33 @@ CREATE POLICY "Permitir todo acceso properties" ON properties FOR ALL USING (tru
                 </div>
               </div>
 
-              {/* Guía en 3 Pasos para Conectar Supabase en Producción */}
-              <div className="bg-emerald-50/50 border border-emerald-200/80 rounded-2xl p-3.5 space-y-2.5 text-xs text-emerald-950">
-                <div className="flex items-center justify-between">
-                  <h4 className="font-bold flex items-center gap-1.5 text-emerald-900">
-                    <span>🚀 Cómo Activar Persistencia Permanente en Vercel (3 Pasos)</span>
-                  </h4>
-                  <a
-                    href="https://supabase.com"
-                    target="_blank"
-                    rel="noreferrer"
-                    className="text-[10px] font-bold text-emerald-700 hover:text-emerald-900 flex items-center gap-0.5 underline"
-                  >
-                    <span>Abrir Supabase</span>
-                    <ExternalLink className="w-3 h-3" />
-                  </a>
-                </div>
-
-                <ol className="space-y-2 text-[11px] list-decimal list-inside text-emerald-900/90 leading-relaxed">
-                  <li>
-                    <strong>Crea un proyecto gratis en Supabase</strong> (toma 1 minuto).
-                  </li>
-                  <li>
-                    Abre el <strong>SQL Editor</strong> de Supabase, pega el script de abajo y presiona <strong>Run</strong>.
-                  </li>
-                  <li>
-                    En tu panel de <strong>Vercel &gt; Settings &gt; Environment Variables</strong>, agrega:
-                    <div className="mt-1 bg-white p-2 rounded-xl border border-emerald-200 font-mono text-[10px] text-slate-700 space-y-0.5">
-                      <div>NEXT_PUBLIC_SUPABASE_URL = &quot;https://tu-proyecto.supabase.co&quot;</div>
-                      <div>SUPABASE_SERVICE_ROLE_KEY = &quot;tu-service-role-secret-key&quot;</div>
-                    </div>
-                  </li>
-                </ol>
-
-                <div className="pt-1 flex items-center justify-between">
-                  <span className="text-[10px] text-emerald-700">
-                    Script SQL listo para copiar (Tablas leads, config y telemetría):
-                  </span>
-                  <button
-                    type="button"
-                    onClick={handleCopySql}
-                    className="bg-emerald-700 hover:bg-emerald-800 text-white font-bold px-3 py-1.5 rounded-xl text-[11px] transition flex items-center gap-1 cursor-pointer shadow-xs"
-                  >
-                    {copiedSql ? (
-                      <>
-                        <Check className="w-3.5 h-3.5 text-amber-300" />
-                        <span>¡Script Copiado!</span>
-                      </>
-                    ) : (
-                      <>
-                        <Copy className="w-3.5 h-3.5" />
-                        <span>Copiar Script SQL</span>
-                      </>
-                    )}
-                  </button>
-                </div>
-
-                {/* Zona de Mantenimiento / Restablecimiento Protegido */}
-                <div className="pt-3 mt-2 border-t border-emerald-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                  <div>
-                    <span className="text-xs font-bold text-slate-800 block">Zona de Seguridad del Desarrollador</span>
-                    <span className="text-[10px] text-slate-500">
-                      Permite vaciar la base de citas a 0 o restablecer datos de prueba con código de seguridad.
-                    </span>
+              {/* Zona de Mantenimiento / Depuración Protegida */}
+              <div className="p-3.5 bg-slate-50 rounded-2xl border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+                <div>
+                  <div className="flex items-center gap-1.5 font-bold text-slate-800">
+                    <Lock className="w-3.5 h-3.5 text-slate-600" />
+                    <span>Mantenimiento del Sistema (Solo Administrador)</span>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => setIsDeveloperPurgeOpen(true)}
-                    className="text-xs text-rose-700 hover:text-white hover:bg-rose-700 font-bold px-3 py-1.5 rounded-xl border border-rose-300 dark:border-rose-900 transition flex items-center gap-1.5 cursor-pointer self-start sm:self-auto shadow-xs"
-                  >
-                    <ShieldAlert className="w-3.5 h-3.5" />
-                    <span>Zona Developer: Purgar Citas / Limpiar DB</span>
-                  </button>
+                  <span className="text-[11px] text-slate-500">
+                    Herramienta protegida por contraseña para depuración y reseteo de citas de prueba.
+                  </span>
                 </div>
+
+                <button
+                  type="button"
+                  onClick={() => setIsDeveloperPurgeOpen(true)}
+                  className="text-xs text-rose-700 hover:text-white hover:bg-rose-700 font-bold px-3.5 py-2 rounded-xl border border-rose-300 dark:border-rose-900 transition flex items-center gap-1.5 cursor-pointer self-start sm:self-auto shadow-xs"
+                >
+                  <Lock className="w-3.5 h-3.5" />
+                  <span>Gestionar Registros de Prueba</span>
+                </button>
               </div>
             </div>
           )}
+          </div>
 
-          {/* Botones del Formulario */}
-          <div className="flex items-center justify-between pt-3 border-t border-slate-100">
+          {/* Pie de Página Fijo (Pinned Footer) */}
+          <div className="px-5 sm:px-6 py-3.5 border-t border-slate-100 bg-slate-50/80 shrink-0 flex items-center justify-between">
             {savedSuccess ? (
               <span className="text-xs text-emerald-700 font-bold flex items-center gap-1.5 animate-in fade-in">
                 <CheckCircle2 className="w-4 h-4 text-emerald-600" />

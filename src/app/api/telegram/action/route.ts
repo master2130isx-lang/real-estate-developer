@@ -168,7 +168,7 @@ function renderHtmlPage(
       </div>
       <div class="details-row">
         <span class="details-label">Vivienda:</span>
-        <span class="details-val">Modelo Águila Premier ($1.18M)</span>
+        <span class="details-val">${lead?.selectedPropertyTitle || 'Modelo Águila Premier ($1.18M)'}</span>
       </div>
     </div>
     `
