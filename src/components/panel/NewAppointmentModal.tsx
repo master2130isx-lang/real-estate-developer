@@ -28,7 +28,8 @@ export function NewAppointmentModal({
   onClose,
   onAppointmentCreated,
 }: NewAppointmentModalProps) {
-  const { scheduleNewAppointment } = useApp();
+  const { scheduleNewAppointment, commercialConfig, properties } = useApp();
+  const cfg = commercialConfig || COMMERCIAL_CONFIG;
 
   // Estados del formulario
   const [fullName, setFullName] = useState('');
@@ -108,14 +109,20 @@ export function NewAppointmentModal({
     onClose();
   };
 
-  // Mensaje pre-armado para enviar confirmación por WhatsApp
+  // Mensaje pre-armado dinámico para enviar confirmación por WhatsApp
   const generateWhatsAppUrl = (lead: Lead) => {
     const firstName = lead.fullName.split(' ')[0];
     const cleanPhone = lead.phone.replace(/\D/g, '');
     const dateFormatted = lead.appointmentRequest?.confirmedDate || preferredDate;
     const timeFormatted = lead.appointmentRequest?.confirmedTime || timeSlot;
+    const propertyTitle = lead.selectedPropertyTitle || properties[0]?.name || 'la vivienda';
+    const development = cfg.agencyName;
+    const zone = lead.interestedZone || cfg.coverageZone;
+    const meetingPoint = properties[0]?.address
+      ? `Caseta principal en ${properties[0].address}`
+      : (cfg.contactChannels.officeAddressNote ? `Caseta principal (${cfg.contactChannels.officeAddressNote})` : 'Caseta principal con acceso controlado 24/7');
 
-    const message = `¡Hola ${firstName}! Te escribe ${COMMERCIAL_CONFIG.advisorName}, tu asesor comercial de ${COMMERCIAL_CONFIG.agencyName}.\n\nTu visita para conocer el *Modelo Águila Premier* en *Valle de los Encinos (Salinas Victoria, N.L.)* ha quedado agendada:\n\n• Día: ${dateFormatted}\n• Horario: ${timeFormatted}\n• Punto de reunión: Caseta principal con acceso controlado en Calzada del Sol\n\n¿Me confirmas que recibiste estos datos para enviarte la ubicación exacta por GPS?`;
+    const message = `¡Hola ${firstName}! Te escribe ${cfg.advisorName}, tu asesor comercial de ${development}.\n\nTu visita para conocer el *${propertyTitle}* en *${zone}* ha quedado agendada:\n\n• Día: ${dateFormatted}\n• Horario: ${timeFormatted}\n• Punto de reunión: ${meetingPoint}\n\n¿Me confirmas que recibiste estos datos para enviarte la ubicación exacta por GPS?`;
 
     return `https://wa.me/52${cleanPhone}?text=${encodeURIComponent(message)}`;
   };
@@ -306,7 +313,7 @@ export function NewAppointmentModal({
                   className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-xs bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-[#0d233a] dark:focus:ring-amber-500 focus:outline-none"
                 >
                   <option value="infonavit">Crédito Infonavit (Tradicional / Total)</option>
-                  <option value="fovissste">Crédito ISSSTE</option>
+                  <option value="fovissste">Crédito FOVISSSTE</option>
                   <option value="bancario">Crédito Hipotecario Bancario</option>
                   <option value="contado">Recursos Propios / Contado</option>
                   <option value="necesita_orientacion">Por definir / Asesoría previa</option>

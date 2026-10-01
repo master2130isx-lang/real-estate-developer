@@ -58,9 +58,6 @@ export function Navbar({ onOpenPrequalification, onOpenPrivacy }: NavbarProps) {
             <a href="#como-funciona" className="hover:text-[var(--color-navy)] transition">
               Financiamiento
             </a>
-            <a href="#preguntas" className="hover:text-[var(--color-navy)] transition">
-              Preguntas
-            </a>
 
             <ThemeToggle />
 
@@ -124,13 +121,6 @@ export function Navbar({ onOpenPrequalification, onOpenPrivacy }: NavbarProps) {
           >
             Atención
           </a>
-          <a
-            href="#preguntas"
-            onClick={() => setMobileMenuOpen(false)}
-            className="flex items-center min-h-[44px] py-2.5 text-sm font-medium text-[var(--color-text-secondary)] hover:text-[var(--color-navy)]"
-          >
-            Preguntas
-          </a>
           <button
             onClick={() => {
               setMobileMenuOpen(false);
@@ -176,7 +166,7 @@ export function Navbar({ onOpenPrequalification, onOpenPrivacy }: NavbarProps) {
 
           <div className="pt-2 border-t border-[var(--color-border)] flex flex-col gap-2">
             <a
-              href={`https://wa.me/${cleanWa}?text=${encodeURIComponent('¡Hola! Me gustaría recibir información sobre las viviendas disponibles.')}`}
+              href={`https://wa.me/${cleanWa}?text=${encodeURIComponent('¡Hola! Me interesa conocer más sobre las viviendas en la Zona Norte de Nuevo León, Por favor Me podrían brindar información.')}`}
               target="_blank"
               rel="noopener noreferrer"
               onClick={() => setMobileMenuOpen(false)}

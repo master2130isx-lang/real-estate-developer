@@ -60,11 +60,6 @@ export function Footer({ onOpenPrivacy }: FooterProps) {
                   Ubicación
                 </a>
               </li>
-              <li>
-                <a href="#preguntas" className="py-2.5 min-h-[44px] inline-flex items-center text-[#D1D5DB] hover:text-[var(--color-accent)] transition">
-                  Preguntas Frecuentes
-                </a>
-              </li>
             </ul>
           </div>
 
@@ -134,7 +129,7 @@ export function Footer({ onOpenPrivacy }: FooterProps) {
 
             <div className="space-y-2 pt-1">
               <a
-                href={`https://wa.me/${cleanWa}?text=${encodeURIComponent('Hola, me comunico desde su sitio web para solicitar informes.')}`}
+                href={`https://wa.me/${cleanWa}?text=${encodeURIComponent('¡Hola! Me interesa conocer más sobre las viviendas en la Zona Norte de Nuevo León, Por favor Me podrían brindar información.')}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="py-2.5 min-h-[44px] inline-flex items-center gap-2 text-[#25D366] hover:text-[#4ADE80] transition font-semibold text-xs"

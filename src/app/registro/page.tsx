@@ -301,7 +301,7 @@ export default function ExpressRegistrationPage() {
                 <div className="grid grid-cols-2 gap-2">
                   {[
                     { id: 'infonavit', label: 'Infonavit' },
-                    { id: 'fovissste', label: 'ISSSTE' },
+                    { id: 'fovissste', label: 'FOVISSSTE' },
                     { id: 'bancario', label: 'Bancario' },
                     { id: 'contado', label: 'Contado' },
                   ].map((f) => (

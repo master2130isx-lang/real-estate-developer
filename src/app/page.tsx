@@ -22,10 +22,6 @@ const LocationMapSection = dynamic(
   { ssr: false }
 );
 
-const FaqSection = dynamic(
-  () => import('@/components/landing/FaqSection').then((m) => m.FaqSection),
-  { ssr: false }
-);
 
 const PrequalificationForm = dynamic(
   () => import('@/components/prequalification/PrequalificationForm').then((m) => m.PrequalificationForm),
@@ -88,8 +84,7 @@ export default function Home() {
       {/* Identidad del asesor y compromisos de ética */}
       <AdvisorTrust />
 
-      {/* Preguntas frecuentes y explicación sobre el NSS */}
-      <FaqSection />
+
 
       {/* CTA Final */}
       <section className="py-20 px-4 sm:px-6 bg-[var(--color-navy)] dark:bg-[var(--color-navy-deep)]">

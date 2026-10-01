@@ -135,11 +135,11 @@ export interface Lead {
   privacyConsentAccepted: boolean;
   marketingConsentAccepted: boolean;
   
-  // Manejo de NSS y CURP (Infonavit / ISSSTE)
+  // Manejo de NSS y CURP (Infonavit / FOVISSSTE)
   nssStatus: NssStatus;
   nssValueEncryptedMock?: string; // Simulación de demostración (no guardar en claro en prod)
   nssLastFour?: string; // Para ofuscación segura
-  curpValue?: string; // Para derechohabientes ISSSTE
+  curpValue?: string; // Para derechohabientes FOVISSSTE
   curpLastFour?: string;
   
   // Seguimiento de atribución comercial interna (15 días)

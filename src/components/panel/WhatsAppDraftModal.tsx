@@ -34,7 +34,7 @@ type TemplateId =
   | 'personalizado';
 
 export function WhatsAppDraftModal({ lead, onClose }: WhatsAppDraftModalProps) {
-  const { updateLeadStatus, commercialConfig } = useApp();
+  const { updateLeadStatus, commercialConfig, properties } = useApp();
   const cfg = commercialConfig || COMMERCIAL_CONFIG;
 
   const [selectedTemplate, setSelectedTemplate] = useState<TemplateId>('confirmar');
@@ -42,7 +42,27 @@ export function WhatsAppDraftModal({ lead, onClose }: WhatsAppDraftModalProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [copied, setCopied] = useState(false);
 
+  // Reset al cambiar de prospecto
+  React.useEffect(() => {
+    setIsEditing(false);
+    setCopied(false);
+    setCustomText('');
+  }, [lead?.id]);
+
   if (!lead) return null;
+
+  // Propiedad vinculada al lead o destacada
+  const matchedProperty =
+    properties.find((p) => p.id === lead.selectedPropertyId) ||
+    (lead.selectedPropertyTitle
+      ? properties.find(
+          (p) =>
+            p.name.toLowerCase() === lead.selectedPropertyTitle?.toLowerCase() ||
+            p.model.toLowerCase() === lead.selectedPropertyTitle?.toLowerCase()
+        )
+      : undefined) ||
+    properties.find((p) => p.id === cfg.heroPropertyId) ||
+    properties[0];
 
   const firstName = (lead.fullName || 'Cliente').split(' ')[0];
   const cleanPhone = (lead.phone || '').replace(/\D/g, '');
@@ -50,47 +70,75 @@ export function WhatsAppDraftModal({ lead, onClose }: WhatsAppDraftModalProps) {
   const visitTime = lead.appointmentRequest?.confirmedTime || lead.appointmentRequest?.timeSlot || 'en horario por convenir';
   const siteUrl = typeof window !== 'undefined' ? window.location.origin : 'https://valledelosencinos.com';
 
-  // Plantillas Comerciales de Alta Conversión (Especializadas para el Asesor en N.L.)
+  const propertyTitle = lead.selectedPropertyTitle || matchedProperty?.name || 'la vivienda';
+  const propertyPrice = matchedProperty?.price
+    ? `$${matchedProperty.price.toLocaleString('es-MX')} MXN`
+    : (cfg.featuredPrice?.amountFormatted || '$1,253,000 MXN');
+  const developmentName = matchedProperty?.development || cfg.agencyName || 'el desarrollo';
+  const zoneName = matchedProperty?.zone || lead.interestedZone || cfg.coverageZone || 'la Zona Norte de Nuevo León';
+  const addressNote = matchedProperty?.address || cfg.contactChannels.officeAddressNote || 'caseta principal con acceso controlado';
+  const meetingPoint = matchedProperty?.address
+    ? `Caseta principal en ${matchedProperty.address}`
+    : (cfg.contactChannels.officeAddressNote ? `Caseta principal (${cfg.contactChannels.officeAddressNote})` : 'Caseta principal con acceso controlado 24/7');
+
+  const gpsQuery = encodeURIComponent(matchedProperty?.address || cfg.contactChannels.officeAddressNote || `${developmentName}, ${zoneName}`);
+  const mapsLink = `https://www.google.com/maps/search/?api=1&query=${gpsQuery}`;
+  const wazeLink = `https://waze.com/ul?q=${gpsQuery}&navigate=yes`;
+
+  const features = matchedProperty?.keyFeatures || matchedProperty?.tags || [];
+  const propertyFeaturesList = features.length > 0
+    ? features.slice(0, 5).map((f: string) => `• ${f}`).join('\n')
+    : `• ${matchedProperty?.bedrooms || 2} recámaras\n• ${matchedProperty?.bathrooms || 1.5} baños\n• Acabados de alta calidad\n• Fraccionamiento privado con acceso controlado`;
+
+  // Plantillas Comerciales Dinámicas de Alta Conversión (Especializadas para el Asesor)
   const templates: Record<TemplateId, { title: string; icon: React.ReactNode; text: string }> = {
     confirmar: {
       title: 'Confirmar Cita',
       icon: <Calendar className="w-3.5 h-3.5" />,
-      text: `¡Hola ${firstName}! Te escribe ${cfg.advisorName}, tu asesor comercial de ${cfg.agencyName}.\n\nTu visita para conocer el *Modelo Águila Premier* en *Valle de los Encinos (Salinas Victoria, N.L.)* ha quedado programada:\n\n• Día: ${visitDay}\n• Horario: ${visitTime}\n• Punto de reunión: Caseta principal con acceso controlado 24/7 en Calzada del Sol\n\n¿Me confirmas que recibiste estos datos para enviarte la ubicación exacta por GPS?`,
+      text: `¡Hola ${firstName}! Te escribe ${cfg.advisorName}, tu asesor comercial de ${cfg.agencyName}.\n\nTu visita para conocer el *${propertyTitle}* en *${developmentName} (${zoneName})* ha quedado programada:\n\n• Día: ${visitDay}\n• Horario: ${visitTime}\n• Punto de reunión: ${meetingPoint}\n\n¿Me confirmas que recibiste estos datos para enviarte la ubicación exacta por GPS?`,
     },
     ubicacion: {
       title: 'Ubicación GPS Caseta',
       icon: <MapPin className="w-3.5 h-3.5" />,
-      text: `¡Hola ${firstName}! Te comparto las rutas GPS directas para llegar a la caseta principal de *Valle de los Encinos (Salinas Victoria, N.L.)*:\n\n• Google Maps: https://www.google.com/maps/search/?api=1&query=25.9620,-100.2940\n• Waze: https://waze.com/ul?ll=25.9620,-100.2940&navigate=yes\n\nAl llegar a la caseta de acceso sobre Calzada del Sol, avisa a los guardias que tienes cita con ${cfg.advisorName} para que te abran la pluma a las casas muestra. ¡Buen viaje!`,
+      text: `¡Hola ${firstName}! Te comparto las rutas GPS directas para llegar a la caseta de acceso de *${developmentName} (${zoneName})*:\n\n• Google Maps: ${mapsLink}\n• Waze: ${wazeLink}\n\nAl llegar a la caseta (${addressNote}), avisa que tienes cita con ${cfg.advisorName} para que te permitan el acceso a las casas muestra. ¡Buen viaje!`,
     },
     recordatorio: {
       title: 'Recordatorio Pre-Visita',
       icon: <Clock className="w-3.5 h-3.5" />,
-      text: `¡Hola ${firstName}! Te recuerdo que hoy tenemos agendada tu visita a la casa muestra del *Modelo Águila Premier* en Valle de los Encinos a las ${visitTime}.\n\nTe espero en la caseta principal. Si requieres apoyo con indicaciones o necesitas ajustar minutos de llegada, avísame por aquí. ¡Nos vemos en un rato!`,
+      text: `¡Hola ${firstName}! Te recuerdo que hoy tenemos agendada tu visita a la casa muestra del *${propertyTitle}* en ${developmentName} a las ${visitTime}.\n\nTe espero en ${meetingPoint}. Si requieres apoyo con indicaciones o necesitas ajustar minutos de llegada, avísame por aquí. ¡Nos vemos en un rato!`,
     },
     pedir_nss: {
-      title: 'Pedir NSS para Precalificar',
+      title: lead.financingType === 'fovissste'
+        ? 'Pedir CURP (FOVISSSTE)'
+        : lead.financingType === 'bancario'
+        ? 'Pedir Datos Bancarios'
+        : 'Pedir NSS para Precalificar',
       icon: <CreditCard className="w-3.5 h-3.5" />,
-      text: `¡Hola ${firstName}! Para decirte con exactitud cuánto te presta Infonavit y ver si tu mensualidad te queda de $7,000 u $8,000 en el *Modelo Águila Premier* ($1,180,000 MXN en Salinas Victoria), solo requiero consultar tu precalificación oficial con tu *NSS (11 dígitos)* y tu *fecha de nacimiento*.\n\nEs una consulta 100% informativa y gratuita que no descuenta puntos ni te compromete a nada. ¿Los tienes a la mano para revisarlo ahora mismo?`,
+      text: lead.financingType === 'fovissste'
+        ? `¡Hola ${firstName}! Para decirte con exactitud cuánto te otorga tu crédito FOVISSSTE y revisar tu simulador para el *${propertyTitle}* (${propertyPrice} en ${zoneName}), solo requiero consultar tu estatus oficial con tu *CURP (18 caracteres)*.\n\nEs una consulta 100% informativa y sin costo que no te compromete a nada. ¿La tienes a la mano para revisarlo ahora mismo?`
+        : lead.financingType === 'bancario'
+        ? `¡Hola ${firstName}! Para apoyarte a cotizar tu crédito bancario o Cofinavit para el *${propertyTitle}* (${propertyPrice} en ${zoneName}), trabajamos con los principales bancos (BBVA, Banorte, Santander, HSBC) para conseguirte la tasa y mensualidad más baja sin costo de asesoría. ¿Tienes estimado cuánto deseas dar de enganche?`
+        : `¡Hola ${firstName}! Para decirte con exactitud cuánto te presta Infonavit y ver tu mensualidad estimada para el *${propertyTitle}* (${propertyPrice} en ${zoneName}), solo requiero consultar tu precalificación oficial con tu *NSS (11 dígitos)* y tu *fecha de nacimiento*.\n\nEs una consulta 100% informativa y gratuita que no descuenta puntos ni te compromete a nada. ¿Los tienes a la mano para revisarlo ahora mismo?`,
     },
     aprobado: {
       title: 'Crédito Pre-Aprobado',
       icon: <Check className="w-3.5 h-3.5" />,
-      text: `¡Excelente noticia ${firstName}! Ya revisé tu perfil en el sistema y *sí cuentas con el crédito suficiente* para estrenar tu casa de 2 plantas en *Valle de los Encinos* ($1,180,000 MXN).\n\nEl siguiente paso es que conozcas las casas muestra en Calzada del Sol, Salinas Victoria. ¿Te gustaría visitarnos este sábado o domingo a las 11:00 AM para apartar tu ubicación?`,
+      text: `¡Excelente noticia ${firstName}! Ya revisé tu perfil en el sistema y *sí cuentas con el crédito suficiente* para estrenar en *${developmentName}* (${propertyPrice}).\n\nEl siguiente paso es que conozcas las casas muestra en ${addressNote}. ¿Te gustaría visitarnos este fin de semana para apartar tu ubicación?`,
     },
     ficha: {
-      title: 'Ficha y Fotos ($1.18M)',
+      title: `Ficha y Fotos (${propertyPrice})`,
       icon: <FileText className="w-3.5 h-3.5" />,
-      text: `¡Hola ${firstName}! Te comparto los detalles del *Modelo Águila Premier* ($1,180,000 MXN) en Valle de los Encinos:\n\n• 2 plantas con vitropiso instalado\n• 2 recámaras y estancia familiar en planta alta\n• 1.5 baños (medio baño en PB y baño completo en PA)\n• Patio con pasillo lateral independiente y cochera 2 autos\n• Fraccionamiento con caseta 24/7, palapa familiar, canchas y pet park\n\nPuedes ver fotos reales y detalles aquí: ${siteUrl}\n\n¿Te gustaría que agendemos tu recorrido presencial este fin de semana?`,
+      text: `¡Hola ${firstName}! Te comparto los detalles del *${propertyTitle}* (${propertyPrice}) en ${developmentName}:\n\n${propertyFeaturesList}\n\nPuedes ver fotos reales y detalles aquí: ${siteUrl}\n\n¿Te gustaría que agendemos tu recorrido presencial este fin de semana?`,
     },
     credito: {
-      title: 'Asesoría Bancaria / Contado',
+      title: 'Asesoría de Financiamiento',
       icon: <CreditCard className="w-3.5 h-3.5" />,
-      text: `¡Hola ${firstName}! Con gusto te puedo apoyar a tramitar tu crédito bancario o Cofinavit para el *Modelo Águila Premier* ($1,180,000 MXN). Trabajamos con todos los bancos (BBVA, Banorte, Santander) para conseguirte la tasa más baja sin costo de asesoría. ¿Tienes alguna duda específica?`,
+      text: `¡Hola ${firstName}! Con gusto te puedo apoyar a tramitar tu financiamiento (${lead.financingType === 'fovissste' ? 'FOVISSSTE' : lead.financingType === 'bancario' ? 'Bancario / Cofinavit' : 'Infonavit o Bancario'}) para el *${propertyTitle}* (${propertyPrice}). Te acompañamos en todo el trámite sin costo de asesoría. ¿Tienes alguna duda específica?`,
     },
     personalizado: {
       title: 'Mensaje Libre',
       icon: <Edit3 className="w-3.5 h-3.5" />,
-      text: `Hola ${firstName}, te escribe ${cfg.advisorName} de Valle de los Encinos. `,
+      text: `Hola ${firstName}, te escribe ${cfg.advisorName} de ${cfg.agencyName}. `,
     },
   };
 
@@ -99,7 +147,7 @@ export function WhatsAppDraftModal({ lead, onClose }: WhatsAppDraftModalProps) {
   const handleSelectTemplate = (id: TemplateId) => {
     setSelectedTemplate(id);
     setIsEditing(false);
-    setCustomText(templates[id].text);
+    setCustomText('');
   };
 
   const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {

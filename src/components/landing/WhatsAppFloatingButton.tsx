@@ -11,7 +11,7 @@ export function WhatsAppFloatingButton() {
   const cleanWa = commercialConfig.contactChannels.whatsapp.replace(/\D/g, '');
 
   const defaultMessage = encodeURIComponent(
-    `¡Hola! Me interesa conocer más sobre las viviendas en ${commercialConfig.agencyName} (${commercialConfig.coverageZone}). ¿Me podrían brindar información o agendar una visita?`
+    '¡Hola! Me interesa conocer más sobre las viviendas en la Zona Norte de Nuevo León, Por favor Me podrían brindar información.'
   );
   const waUrl = `https://wa.me/${cleanWa}?text=${defaultMessage}`;
 
@@ -43,7 +43,7 @@ export function WhatsAppFloatingButton() {
           </div>
 
           <div className="py-3 text-xs text-[var(--color-text-secondary)] leading-relaxed">
-            ¿Tienes dudas sobre el <strong>Modelo Águila Premier</strong> o deseas agendar tu visita a la casa muestra? Escríbenos directamente por WhatsApp.
+            ¿Tienes dudas sobre nuestras viviendas disponibles o deseas agendar tu visita a la casa muestra? Escríbenos directamente por WhatsApp.
           </div>
 
           <a

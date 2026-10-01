@@ -54,8 +54,8 @@ El asistente leerá este archivo automáticamente y tendrá el 100% del contexto
 
 ### 2. Formulario de Precalificación Optimizado a 3 Pasos (`PrequalificationForm`)
 - Proceso ultra optimizado sin fricción:
-  - **Paso 1: Modelo y Forma de Compra:** Selección directa de la vivienda en inventario y esquema de crédito (Infonavit, ISSSTE, Bancario, Contado). Se eliminaron campos innecesarios (ubicación fija en Valle de los Encinos, rango de presupuesto y plazo de compra).
-  - **Paso 2: Datos de Contacto y Validación Crediticia:** Nombre completo y WhatsApp con atributos semánticos de autocompletado nativo del navegador (`autoComplete="name"`, `autoComplete="tel"`). Validación adaptativa: solicita **NSS (11 dígitos)** para Infonavit o **CURP (18 car.)** para derechohabientes del ISSSTE con alternativa de orientación previa.
+  - **Paso 1: Modelo y Forma de Compra:** Selección directa de la vivienda en inventario y esquema de crédito (Infonavit, FOVISSSTE, Bancario, Contado). Se eliminaron campos innecesarios (ubicación fija en Valle de los Encinos, rango de presupuesto y plazo de compra).
+  - **Paso 2: Datos de Contacto y Validación Crediticia:** Nombre completo y WhatsApp con atributos semánticos de autocompletado nativo del navegador (`autoComplete="name"`, `autoComplete="tel"`). Validación adaptativa: solicita **NSS (11 dígitos)** para Infonavit o **CURP (18 car.)** para derechohabientes de FOVISSSTE con alternativa de orientación previa.
   - **Paso 3: Cita para Visitar la Casa Muestra:** Selección directa de fecha (sin atajos innecesarios) y **hora exacta de visita** (10:00 AM a 6:00 PM) con atención simultánea sin límites de cupo.
 - **Encuadre visual inteligente:** Se configuró el punto focal de fotografías arquitectónicas en `object-[center_20%]` para que fotos tomadas en vertical desde el celular muestren la fachada completa, segundo piso y techo sin cortes.
 - Compatibilidad total con modo oscuro y modo claro.

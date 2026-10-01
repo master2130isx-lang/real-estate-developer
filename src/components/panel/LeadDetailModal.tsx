@@ -95,14 +95,14 @@ export function LeadDetailModal({ lead, onClose }: LeadDetailModalProps) {
   const handleCopyConstructorSheet = () => {
     const advisor = commercialConfig?.advisorName || 'Ismael Zapata';
     const isFovissste = lead.financingType === 'fovissste' || Boolean(lead.curpValue);
-    const idKey = isFovissste ? 'CURP (ISSSTE)' : 'NSS (Infonavit)';
+    const idKey = isFovissste ? 'CURP (FOVISSSTE)' : 'NSS (Infonavit)';
     const idVal = isFovissste
       ? (lead.curpValue || (lead.curpLastFour ? `**************${lead.curpLastFour}` : 'No proporcionada'))
       : (revealedNss || lead.nssValueEncryptedMock || (lead.nssLastFour ? `*******${lead.nssLastFour}` : 'No proporcionado'));
 
     const sheetText = `📋 REGISTRO DE ATRIBUCIÓN COMERCIAL (15 DÍAS)
-Desarrollo: ${commercialConfig?.agencyName || 'Valle de los Encinos'}
-Modelo: ${lead.selectedPropertyTitle || 'Modelo Águila Premier ($1,180,000 MXN)'}
+Desarrollo: ${commercialConfig?.agencyName || 'Desarrollo Residencial'}
+Modelo: ${lead.selectedPropertyTitle || 'Vivienda Residencial'}
 Cliente: ${lead.fullName}
 Teléfono: ${lead.phone}
 ${idKey}: ${idVal}
@@ -300,7 +300,7 @@ Folio Web: ${lead.folio || 'N/A'}`;
                   <Lock className="w-4 h-4 text-amber-400" />
                   <span className="font-bold text-xs uppercase tracking-wider text-slate-200">
                     {lead.financingType === 'fovissste' || lead.curpValue
-                      ? 'CURP (ISSSTE) • Expediente Protegido'
+                      ? 'CURP (FOVISSSTE) • Expediente Protegido'
                       : 'NSS Recibido en Web (Expediente Protegido)'}
                   </span>
                 </div>

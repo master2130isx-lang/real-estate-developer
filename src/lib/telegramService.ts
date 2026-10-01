@@ -56,9 +56,11 @@ export function buildClientWhatsAppConfirmUrl(lead: Lead): string {
   const cleanPhone = lead.phone.replace(/\D/g, '');
   const date = lead.appointmentRequest?.confirmedDate || lead.appointmentRequest?.preferredDate || 'los próximos días';
   const time = lead.appointmentRequest?.confirmedTime || lead.appointmentRequest?.timeSlot || 'en horario por convenir';
-  const propertyTitle = lead.selectedPropertyTitle || 'Modelo Águila Premier';
+  const propertyTitle = lead.selectedPropertyTitle || 'la vivienda';
+  const zone = lead.interestedZone || COMMERCIAL_CONFIG.coverageZone;
+  const meetingPoint = COMMERCIAL_CONFIG.contactChannels.officeAddressNote || 'Caseta principal con acceso controlado 24/7';
 
-  const message = `¡Hola ${firstName}! Te escribe ${COMMERCIAL_CONFIG.advisorName}, tu asesor comercial de ${COMMERCIAL_CONFIG.agencyName}.\n\nTu visita para conocer el *${propertyTitle}* en *Valle de los Encinos (Salinas Victoria, N.L.)* ha quedado confirmada:\n\n• Día: ${date}\n• Horario: ${time}\n• Punto de reunión: Caseta principal con acceso controlado 24/7 en Calzada del Sol\n\n¿Me confirmas que recibiste estos datos para enviarte la ubicación exacta por GPS?`;
+  const message = `¡Hola ${firstName}! Te escribe ${COMMERCIAL_CONFIG.advisorName}, tu asesor comercial de ${COMMERCIAL_CONFIG.agencyName}.\n\nTu visita para conocer el *${propertyTitle}* en *${zone}* ha quedado confirmada:\n\n• Día: ${date}\n• Horario: ${time}\n• Punto de reunión: ${meetingPoint}\n\n¿Me confirmas que recibiste estos datos para enviarte la ubicación exacta por GPS?`;
 
   return `https://wa.me/52${cleanPhone}?text=${encodeURIComponent(message)}`;
 }
@@ -69,9 +71,9 @@ export function buildClientWhatsAppConfirmUrl(lead: Lead): string {
 export function buildClientWhatsAppCancelUrl(lead: Lead): string {
   const firstName = lead.fullName.split(' ')[0];
   const cleanPhone = lead.phone.replace(/\D/g, '');
-  const propertyTitle = lead.selectedPropertyTitle || 'Modelo Águila Premier';
+  const propertyTitle = lead.selectedPropertyTitle || 'la vivienda';
 
-  const message = `¡Hola ${firstName}! Te escribe ${COMMERCIAL_CONFIG.advisorName} de Valle de los Encinos.\n\nTe confirmo la cancelación de tu visita para conocer el *${propertyTitle}*. Si más adelante deseas retomar tu asesoría o agendar un nuevo recorrido en las casas muestra, con mucho gusto estoy a tus órdenes por este medio. ¡Excelente día!`;
+  const message = `¡Hola ${firstName}! Te escribe ${COMMERCIAL_CONFIG.advisorName} de ${COMMERCIAL_CONFIG.agencyName}.\n\nTe confirmo la cancelación de tu visita para conocer el *${propertyTitle}*. Si más adelante deseas retomar tu asesoría o agendar un nuevo recorrido en las casas muestra, con mucho gusto estoy a tus órdenes por este medio. ¡Excelente día!`;
 
   return `https://wa.me/52${cleanPhone}?text=${encodeURIComponent(message)}`;
 }
@@ -162,8 +164,8 @@ export async function notifyNewAppointmentTelegram(
   let identifierSection = '';
   if (lead.financingType === 'fovissste' || lead.curpValue) {
     identifierSection = curpRaw
-      ? `🏛️ *CURP (ISSSTE):* ${curpDisplay}\n⚡ _(Listo para precalificar y activar exclusividad)_\n`
-      : `⚠️ *CURP (ISSSTE):* Pendiente de solicitar al cliente\n`;
+      ? `🏛️ *CURP (FOVISSSTE):* ${curpDisplay}\n⚡ _(Listo para precalificar y activar exclusividad)_\n`
+      : `⚠️ *CURP (FOVISSSTE):* Pendiente de solicitar al cliente\n`;
   } else if (nssRaw) {
     identifierSection = `🔢 *NSS (Infonavit):* ${nssDisplay}\n⚡ _(Listo para registrar en constructora y activar 15 días de comisión)_\n`;
   } else if (lead.financingType === 'infonavit') {
@@ -186,8 +188,8 @@ export async function notifyNewAppointmentTelegram(
 👤 *Cliente:* ${lead.fullName}
 📱 *Teléfono:* \`${lead.phone}\`
 ${visitSection}💳 *Forma de compra:* ${financingLabel}
-${identifierSection}🏠 *Vivienda:* ${lead.selectedPropertyTitle || 'Modelo Águila Premier ($1,180,000 MXN)'}
-📍 *Ubicación:* Valle de los Encinos, Salinas Victoria
+${identifierSection}🏠 *Vivienda:* ${lead.selectedPropertyTitle || 'Vivienda seleccionada'}
+📍 *Ubicación:* ${lead.interestedZone || COMMERCIAL_CONFIG.coverageZone || COMMERCIAL_CONFIG.agencyName}
 ${lead.appointmentRequest?.notes ? `📝 *Comentarios:* _${lead.appointmentRequest.notes}_\n` : ''}━━━━━━━━━━━━━━━━━━━━
 ${footerPrompt}`;
 
@@ -293,8 +295,8 @@ export async function handleTelegramCallbackQuery(callbackQuery: any): Promise<{
 👤 *Cliente:* ${updatedLead.fullName}
 📱 *Teléfono:* \`${updatedLead.phone}\`
 ${nssLine}📅 *Cita confirmada:* ${date} a las ${time}
-📍 *Punto de reunión:* Caseta principal Valle de los Encinos
-🏠 *Vivienda:* ${updatedLead.selectedPropertyTitle || 'Modelo Águila Premier ($1.18M)'}
+📍 *Punto de reunión:* ${COMMERCIAL_CONFIG.contactChannels.officeAddressNote || 'Caseta principal con acceso controlado'}
+🏠 *Vivienda:* ${updatedLead.selectedPropertyTitle || 'Vivienda seleccionada'}
 ━━━━━━━━━━━━━━━━━━━━
 ✅ *Estado:* Confirmada en CRM y Base de Datos.
 💬 Toca el botón inferior para abrir WhatsApp con el mensaje pre-armado:`;

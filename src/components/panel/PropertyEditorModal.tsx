@@ -44,7 +44,7 @@ const COMMON_AMENITIES = [
 
 const COMMON_FINANCING: { id: FinancingType; label: string }[] = [
   { id: 'infonavit', label: 'Crédito Infonavit (Total, Tradicional, Conyugal)' },
-  { id: 'fovissste', label: 'Crédito ISSSTE' },
+  { id: 'fovissste', label: 'Crédito FOVISSSTE' },
   { id: 'bancario', label: 'Crédito Hipotecario Bancario' },
   { id: 'contado', label: 'Pago de Contado' },
   { id: 'otro', label: 'Cofinavit / Otros esquemas' },
@@ -524,7 +524,7 @@ export function PropertyEditorModal({
                       type="number"
                       required
                       min={100000}
-                      step={10000}
+                      step="any"
                       value={price}
                       onChange={(e) => setPrice(Number(e.target.value))}
                       className="w-full pl-7 pr-3.5 py-2.5 rounded-xl bg-[#102033] border border-[#1E354D] text-white font-bold text-xs focus:ring-2 focus:ring-[#C09B53] focus:outline-none"

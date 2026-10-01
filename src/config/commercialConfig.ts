@@ -111,7 +111,7 @@ export function shouldRequestNss(financingType: string): boolean {
 }
 
 /**
- * Función centralizada que determina si un prospecto requiere CURP (ISSSTE)
+ * Función centralizada que determina si un prospecto requiere CURP (FOVISSSTE)
  */
 export function shouldRequestCurp(financingType: string): boolean {
   return financingType === 'fovissste' || financingType === 'issste';
