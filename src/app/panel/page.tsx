@@ -108,7 +108,7 @@ export default function AgentPanelPage() {
     no_aplica: { label: 'No aplica', bg: 'bg-slate-100 dark:bg-slate-800', text: 'text-slate-600 dark:text-slate-400' },
     pendiente_nss: { label: 'Pendiente NSS (Orientación)', bg: 'bg-amber-50 dark:bg-amber-950/40', text: 'text-amber-800 dark:text-amber-300' },
     pendiente_inmobiliaria: { label: 'Pendiente en Inmobiliaria', bg: 'bg-amber-50 dark:bg-amber-950/40', text: 'text-amber-900 dark:text-amber-300' },
-    confirmado: { label: 'Confirmado (15 días)', bg: 'bg-emerald-50 dark:bg-emerald-950/40', text: 'text-emerald-800 dark:text-emerald-300' },
+    confirmado: { label: 'Confirmado', bg: 'bg-emerald-50 dark:bg-emerald-950/40', text: 'text-emerald-800 dark:text-emerald-300' },
     conflicto_rechazo: { label: 'Conflicto / Rechazo', bg: 'bg-rose-50 dark:bg-rose-950/40', text: 'text-rose-800 dark:text-rose-300' },
     vencido: { label: 'Vencido', bg: 'bg-slate-100 dark:bg-slate-800', text: 'text-slate-600 dark:text-slate-400' },
   };
@@ -132,14 +132,9 @@ export default function AgentPanelPage() {
                 <Building2 className="w-4 h-4 text-[#C09B53]" aria-hidden="true" />
               </div>
               <div>
-                <div className="flex items-center gap-2">
-                  <h1 className="font-sans font-bold text-sm sm:text-base tracking-normal text-white m-0">
-                    Panel Comercial
-                  </h1>
-                  <span className="bg-[#C09B53]/20 text-[#D4AF37] text-xs px-2.5 py-0.5 rounded-full font-semibold border border-[#C09B53]/30 tracking-wider">
-                    Valle de los Encinos
-                  </span>
-                </div>
+                <h1 className="font-sans font-bold text-sm sm:text-base tracking-normal text-white m-0">
+                  Panel Comercial
+                </h1>
               </div>
             </div>
           </div>
@@ -188,20 +183,6 @@ export default function AgentPanelPage() {
         </div>
       </header>
 
-      {/* Regla Fundamental y Alerta de Exclusividad */}
-      <div className="bg-[#FDFBF7] dark:bg-[#0E1F30] border-b border-[#EAE3D6] dark:border-[#1A344D] px-4 py-2.5 text-xs text-slate-800 dark:text-slate-200">
-        <div className="max-w-7xl mx-auto flex items-center justify-between gap-2">
-          <div className="flex items-center gap-2">
-            <ShieldCheck className="w-4 h-4 text-[#C09B53] flex-shrink-0" />
-            <span>
-              <strong className="font-semibold text-slate-900 dark:text-white">Protección de Comisión (15 Días):</strong> El registro oportuno de NSS en el portal de la constructora garantiza tu exclusividad de honorarios comerciales sobre cada prospecto calificado.
-            </span>
-          </div>
-          <span className="text-[11px] text-slate-500 dark:text-slate-400 font-mono hidden sm:inline">
-            Protocolo Comercial
-          </span>
-        </div>
-      </div>
 
       <main className="max-w-7xl mx-auto p-4 sm:p-6 w-full flex-1 space-y-6">
         {/* Tira Ejecutiva de Métricas de Ventas */}
@@ -294,7 +275,7 @@ export default function AgentPanelPage() {
               className="bg-white dark:bg-[#102033] p-4 rounded-2xl border border-slate-200/80 dark:border-[#1E354D] shadow-xs hover:shadow-md hover:border-emerald-300 dark:hover:border-emerald-900/80 transition cursor-pointer flex flex-col justify-between"
             >
               <div className="flex items-center justify-between text-slate-500 dark:text-slate-400 text-xs font-medium mb-2">
-                <h3 className="text-xs font-semibold text-slate-500 dark:text-slate-400 m-0">15 Días Activos</h3>
+                <h3 className="text-xs font-semibold text-slate-500 dark:text-slate-400 m-0">Atribución Activa</h3>
                 <div className="w-7 h-7 rounded-lg bg-emerald-50 dark:bg-emerald-950/50 flex items-center justify-center text-emerald-700 dark:text-emerald-400">
                   <ShieldCheck className="w-3.5 h-3.5" aria-hidden="true" />
                 </div>
@@ -362,7 +343,7 @@ export default function AgentPanelPage() {
               }`}
             >
               <Users className="w-3.5 h-3.5 text-[#C09B53]" aria-hidden="true" />
-              <span>Cartera de Prospectos y 15 Días</span>
+              <span>Cartera de Prospectos</span>
               <span className="bg-slate-200/80 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs px-2 py-0.5 rounded-full font-mono font-semibold leading-none">
                 {totalLeads}
               </span>
@@ -385,7 +366,7 @@ export default function AgentPanelPage() {
           </div>
 
           <span className="text-xs text-slate-500 dark:text-slate-400 hidden md:inline">
-            Fraccionamiento Valle de los Encinos • Salinas Victoria, N.L.
+            {commercialConfig.agencyName}
           </span>
         </nav>
 
@@ -427,14 +408,14 @@ export default function AgentPanelPage() {
                 </div>
                 <select
                   id="attribution-filter-select"
-                  aria-label="Filtrar por estatus de atribución de 15 días"
+                  aria-label="Filtrar por estatus de atribución"
                   value={attributionFilter}
                   onChange={(e) => setAttributionFilter(e.target.value)}
                   className="px-3 py-1.5 rounded-xl border border-slate-300 dark:border-[#1E354D] text-xs bg-white dark:bg-[#0B1522] text-slate-900 dark:text-slate-100"
                 >
                   <option value="todos">Todos los registros</option>
                   <option value="pendiente_inmobiliaria">🔥 Pendiente en Inmobiliaria</option>
-                  <option value="confirmado">Confirmado (15 días)</option>
+                  <option value="confirmado">Confirmado</option>
                   <option value="pendiente_nss">Pendiente NSS (Orientación)</option>
                   <option value="conflicto_rechazo">Conflicto / Rechazo</option>
                   <option value="vencido">Vencido</option>
@@ -481,7 +462,7 @@ export default function AgentPanelPage() {
                       <th className="p-3.5">Prospecto</th>
                       <th className="p-3.5">Vivienda</th>
                       <th className="p-3.5">Forma Compra</th>
-                      <th className="p-3.5">Atribución Constructora (15 Días)</th>
+                      <th className="p-3.5">Atribución Constructora</th>
                       <th className="p-3.5">Visita Agendada</th>
                       <th className="p-3.5">Próxima Acción</th>
                       <th className="p-3.5 text-center">Acciones</th>
@@ -520,10 +501,10 @@ export default function AgentPanelPage() {
                             {/* Zona y modelo */}
                             <td className="p-3.5 max-w-[160px]">
                               <span className="text-slate-800 dark:text-slate-200 font-medium block truncate">
-                                Modelo Águila Premier
+                                {lead.selectedPropertyTitle || properties[0]?.name || 'Vivienda'}
                               </span>
                               <span className="text-[11px] text-slate-400 block truncate">
-                                Valle de los Encinos
+                                {lead.interestedZone || commercialConfig.coverageZone || commercialConfig.agencyName}
                               </span>
                             </td>
 
