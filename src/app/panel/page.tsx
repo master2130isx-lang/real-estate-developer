@@ -11,14 +11,12 @@ import {
   Filter,
   Eye,
   RefreshCw,
-  Clock,
   MessageSquare,
   AlertTriangle,
   Flame,
   Calendar,
   Plus,
   ShieldCheck,
-  Sparkles,
   Settings,
 } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
@@ -191,7 +189,8 @@ export default function AgentPanelPage() {
                   try {
                     await fetch('/api/auth/logout', { method: 'POST' });
                   } catch {}
-                  window.location.href = '/login';
+                  // Recarga completa: descarta de la memoria los prospectos (NSS, teléfonos) y evita volver con "atrás"
+                  window.location.replace(new URL('/login', window.location.origin).href);
                 }}
                 className="bg-rose-950/40 hover:bg-rose-900/60 text-rose-200 border border-rose-800/40 px-2.5 py-1.5 rounded-xl transition flex items-center gap-1 cursor-pointer text-[11px] font-medium"
                 title="Cerrar sesión segura del panel"

@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { Building2, Shield, UserCheck, Phone, Mail, MapPin } from 'lucide-react';
+import { Building2, Shield, UserCheck, Mail, MapPin } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
 import { buildWhatsAppLink } from '@/lib/phone';
 import { FacebookIcon, InstagramIcon, TikTokIcon, YouTubeIcon } from '@/components/common/SocialIcons';

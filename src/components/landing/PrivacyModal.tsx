@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { X, Shield, AlertTriangle } from 'lucide-react';
+import { X, Shield } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
 
 interface PrivacyModalProps {

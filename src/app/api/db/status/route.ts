@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { isSupabaseConfigured, getSupabase } from '@/lib/supabaseClient';
 import { getServerLeads } from '@/lib/leadsServerStore';
+import { getErrorMessage } from '@/lib/errors';
 
 export async function GET() {
   const configured = isSupabaseConfigured();
@@ -91,13 +92,13 @@ export async function GET() {
       },
       message: '¡Conexión exitosa a Supabase PostgreSQL! Persistencia permanente activa.',
     });
-  } catch (err: any) {
+  } catch (err) {
     return NextResponse.json({
       ok: false,
       provider: 'supabase',
       status: 'connection_error',
       isConfigured: true,
-      error: err.message || 'Error de conexión con Supabase',
+      error: getErrorMessage(err, 'Error de conexión con Supabase'),
     });
   }
 }

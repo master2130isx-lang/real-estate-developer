@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, Suspense } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import {
   Building2,
@@ -17,7 +17,6 @@ import {
 import { useApp } from '@/context/AppContext';
 
 function LoginForm() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const rawRedirect = searchParams.get('redirect') || '/panel';
   // Sanitizar redirección: solo permitir rutas relativas internas para prevenir Open Redirect

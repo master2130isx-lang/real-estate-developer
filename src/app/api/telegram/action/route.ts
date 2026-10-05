@@ -9,6 +9,7 @@ import {
 import { getServerCommercialConfig } from '@/lib/commercialConfigStore';
 import { CommercialConfig } from '@/config/commercialConfig';
 import { verifyActionToken } from '@/lib/auth';
+import type { Lead } from '@/types';
 
 /**
  * Escapa caracteres HTML para prevenir XSS en contenido interpolado
@@ -120,7 +121,7 @@ El estado ha sido actualizado en la base de datos comercial.`,
 function renderHtmlPage(
   type: 'success' | 'cancelled' | 'error',
   errorMsg: string,
-  lead: any,
+  lead: Lead | null,
   waUrl: string,
   config?: CommercialConfig
 ): string {

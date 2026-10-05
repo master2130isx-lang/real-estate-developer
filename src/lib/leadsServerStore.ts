@@ -3,6 +3,7 @@ import path from 'path';
 import { Lead } from '@/types';
 import { INITIAL_LEADS } from '@/data/mockData';
 import { getSupabase } from './supabaseClient';
+import type { LeadRow } from './dbRows';
 import { applyLeadAction, type LeadAction, type LeadActionContext } from './leadActions';
 
 // Ruta del archivo local para persistencia de respaldo (fallback) en servidor
@@ -16,7 +17,7 @@ let inMemoryLeads: Lead[] = [...INITIAL_LEADS];
 // MAPEOS ENTRE DB (SNAKE_CASE) Y TYPESCRIPT (CAMELCASE)
 // ==============================================================================
 
-function leadToDbRow(lead: Lead): Record<string, any> {
+function leadToDbRow(lead: Lead): LeadRow {
   return {
     id: lead.id,
     folio: lead.folio,
@@ -61,7 +62,7 @@ function leadToDbRow(lead: Lead): Record<string, any> {
   };
 }
 
-function dbRowToLead(row: any): Lead {
+function dbRowToLead(row: LeadRow): Lead {
   return {
     id: row.id,
     folio: row.folio,
@@ -258,7 +259,7 @@ export async function getServerLeadById(id: string): Promise<Lead | null> {
 
 // Columnas agregadas en la migración 2026-10-05. Si aún no se ejecuta en Supabase,
 // se reintenta el guardado sin ellas para no perder el prospecto.
-const OPTIONAL_LEAD_COLUMNS = ['curp_value', 'curp_last_four', 'lead_source'];
+const OPTIONAL_LEAD_COLUMNS = ['curp_value', 'curp_last_four', 'lead_source'] as const;
 
 let warnedMissingColumns = false;
 
@@ -271,7 +272,7 @@ function isUniqueFolioError(error: { code?: string; message?: string } | null): 
   return !!error && error.code === '23505' && /folio/i.test(error.message || '');
 }
 
-async function upsertLeadRow(row: Record<string, unknown>): Promise<{ code?: string; message?: string } | null> {
+async function upsertLeadRow(row: LeadRow): Promise<{ code?: string; message?: string } | null> {
   const supabase = getSupabase();
   if (!supabase) return null;
 
@@ -284,7 +285,7 @@ async function upsertLeadRow(row: Record<string, unknown>): Promise<{ code?: str
       );
       warnedMissingColumns = true;
     }
-    const legacyRow = { ...row };
+    const legacyRow: Partial<LeadRow> = { ...row };
     for (const col of OPTIONAL_LEAD_COLUMNS) delete legacyRow[col];
     ({ error } = await supabase.from('leads').upsert(legacyRow, { onConflict: 'id' }));
   }

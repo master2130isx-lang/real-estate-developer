@@ -13,12 +13,9 @@ import {
   CreditCard,
   Plus,
   ShieldCheck,
-  CalendarCheck2,
   CalendarX2,
-  X,
   Archive,
   ArchiveRestore,
-  MessageSquare,
 } from 'lucide-react';
 import { Lead } from '@/types';
 import { useApp } from '@/context/AppContext';

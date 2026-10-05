@@ -4,6 +4,7 @@ import { getServerLeadById, updateServerLead } from './leadsServerStore';
 import { generateActionToken } from './auth';
 import { getServerCommercialConfig } from './commercialConfigStore';
 import { buildWhatsAppLink } from './phone';
+import { getErrorMessage } from '@/lib/errors';
 
 const TELEGRAM_API_BASE = 'https://api.telegram.org';
 
@@ -119,7 +120,7 @@ export function buildClientWhatsAppCancelUrl(lead: Lead, config: CommercialConfi
  * Si existe TELEGRAM_WEBHOOK_SECRET, se registra como secret_token para que el webhook
  * solo acepte peticiones de Telegram.
  */
-export async function ensureTelegramWebhook(origin: string): Promise<{ ok: boolean; info?: any }> {
+export async function ensureTelegramWebhook(origin: string): Promise<{ ok: boolean; info?: unknown }> {
   if (!origin || !origin.startsWith('https://')) return { ok: false };
   try {
     const token = getBotToken();
@@ -154,8 +155,8 @@ export async function ensureTelegramWebhook(origin: string): Promise<{ ok: boole
     const setData = await setRes.json();
     if (setData.ok && secret) webhookSecretRegistered = true;
     return { ok: setData.ok, info: setData };
-  } catch (err: any) {
-    console.warn('Advertencia al registrar webhook automático en Telegram:', err.message);
+  } catch (err) {
+    console.warn('Advertencia al registrar webhook automático en Telegram:', getErrorMessage(err));
     return { ok: false };
   }
 }
@@ -270,7 +271,14 @@ ${footerPrompt}`;
 /**
  * Procesa la acción del asesor cuando pulsa un botón interactivo (Inline Keyboard) en Telegram
  */
-export async function handleTelegramCallbackQuery(callbackQuery: any): Promise<{ ok: boolean }> {
+/** Campos que se usan de un callback_query de Telegram (botones inline). */
+export interface TelegramCallbackQuery {
+  id: string;
+  data?: string;
+  message?: { message_id?: number; chat?: { id?: number | string } };
+}
+
+export async function handleTelegramCallbackQuery(callbackQuery: TelegramCallbackQuery): Promise<{ ok: boolean }> {
   const token = getBotToken();
   if (!token) return { ok: false };
 

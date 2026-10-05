@@ -14,9 +14,7 @@ import {
   Car,
   MapPin,
   Camera,
-  CheckCircle2,
   AlertCircle,
-  Sparkles,
   Star,
 } from 'lucide-react';
 import { Property } from '@/types';

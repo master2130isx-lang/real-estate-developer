@@ -59,12 +59,12 @@ export function PrequalificationForm({
   const [fullName, setFullName] = useState<string>('');
   const [phone, setPhone] = useState<string>('');
   const [email, setEmail] = useState<string>('');
-  const [preferredChannel, setPreferredChannel] = useState<ContactChannel>('whatsapp');
+  const preferredChannel: ContactChannel = 'whatsapp';
   const [nssInput, setNssInput] = useState<string>('');
   const [curpInput, setCurpInput] = useState<string>('');
   const [skipIdentifierForOrientation, setSkipIdentifierForOrientation] = useState<boolean>(false);
   const [privacyConsentAccepted, setPrivacyConsentAccepted] = useState<boolean>(true);
-  const [marketingConsentAccepted, setMarketingConsentAccepted] = useState<boolean>(false);
+  const marketingConsentAccepted = false;
 
   // Paso 3: Agenda de Visita (Fecha directa y Hora exacta)
   const timezone = commercialConfig.schedule.timezone;

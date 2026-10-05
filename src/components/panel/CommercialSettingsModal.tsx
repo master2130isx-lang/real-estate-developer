@@ -15,11 +15,7 @@ import {
   AlertCircle,
   MapPin,
   Database,
-  Copy,
-  ExternalLink,
   RefreshCw,
-  ShieldCheck,
-  ShieldAlert,
   Info,
   Star,
   Smartphone,
@@ -33,6 +29,7 @@ import { useApp } from '@/context/AppContext';
 import { WhatsAppIcon } from '@/components/common/WhatsAppIcon';
 import { DeveloperPurgeModal } from './DeveloperPurgeModal';
 import { COMMERCIAL_CONFIG, DEFAULT_VISIT_HOURS, LandingContent, TelegramRecipient } from '@/config/commercialConfig';
+import { getErrorMessage } from '@/lib/errors';
 
 interface CommercialSettingsModalProps {
   isOpen: boolean;
@@ -88,10 +85,7 @@ export function CommercialSettingsModal({ isOpen, onClose }: CommercialSettingsM
   const [heroPropertyId, setHeroPropertyId] = useState(commercialConfig.heroPropertyId || properties[0]?.id || '');
 
   // Telegram
-  const [botToken, setBotToken] = useState(commercialConfig.telegramConfig?.botToken || '');
   const [advisorChatId, setAdvisorChatId] = useState(commercialConfig.telegramConfig?.advisorChatId || '');
-  const [testStatus, setTestStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
-  const [testError, setTestError] = useState('');
 
   // Directorio de Destinatarios de Telegram con Alias
   const [recipients, setRecipients] = useState<TelegramRecipient[]>(() => {
@@ -215,20 +209,24 @@ export function CommercialSettingsModal({ isOpen, onClose }: CommercialSettingsM
       if (data.ok) {
         setTestRecipientStatus((prev) => ({ ...prev, [rec.id]: 'success' }));
         setTimeout(() => {
-          setTestRecipientStatus((prev) => ({ ...prev, [rec.id]: undefined as any }));
+          setTestRecipientStatus((prev) => {
+            const next = { ...prev };
+            delete next[rec.id];
+            return next;
+          });
         }, 3500);
       } else {
         setTestRecipientStatus((prev) => ({ ...prev, [rec.id]: 'error' }));
         setTestRecipientError((prev) => ({ ...prev, [rec.id]: data.error || 'Fallo de envío' }));
       }
-    } catch (err: any) {
+    } catch (err) {
       setTestRecipientStatus((prev) => ({ ...prev, [rec.id]: 'error' }));
-      setTestRecipientError((prev) => ({ ...prev, [rec.id]: err.message || 'Error de red' }));
+      setTestRecipientError((prev) => ({ ...prev, [rec.id]: getErrorMessage(err, 'Error de red') }));
     }
   };
 
   // Diagnóstico de Base de Datos (Supabase)
-  const [dbStatusData, setDbStatusData] = useState<any>(null);
+  const [dbStatusData, setDbStatusData] = useState<DbStatus | null>(null);
   const [dbLoading, setDbLoading] = useState(false);
   const [isDeveloperPurgeOpen, setIsDeveloperPurgeOpen] = useState(false);
 
@@ -240,18 +238,18 @@ export function CommercialSettingsModal({ isOpen, onClose }: CommercialSettingsM
       const res = await fetch('/api/db/status');
       const data = await res.json();
       setDbStatusData(data);
-    } catch (e: any) {
-      setDbStatusData({ ok: false, error: e.message });
+    } catch (e) {
+      setDbStatusData({ ok: false, error: getErrorMessage(e) });
     } finally {
       setDbLoading(false);
     }
   };
 
+  // Consultar el diagnóstico la primera vez que se abre la pestaña Base de Datos
+  const shouldLoadDbStatus = activeTab === 'database' && !dbStatusData && !dbLoading;
   useEffect(() => {
-    if (activeTab === 'database' && !dbStatusData && !dbLoading) {
-      checkDbStatus();
-    }
-  }, [activeTab]);
+    if (shouldLoadDbStatus) checkDbStatus();
+  }, [shouldLoadDbStatus]);
 
   if (!isOpen) return null;
 
@@ -298,7 +296,6 @@ export function CommercialSettingsModal({ isOpen, onClose }: CommercialSettingsM
         youtube: youtube.trim(),
       },
       telegramConfig: {
-        botToken: botToken.trim(),
         advisorChatId: recipients.find((r) => r.isActive)?.chatId || advisorChatId.trim(),
         activeChatId: recipients.find((r) => r.isActive)?.chatId || advisorChatId.trim(),
         recipients,
@@ -318,30 +315,6 @@ export function CommercialSettingsModal({ isOpen, onClose }: CommercialSettingsM
       setSavedSuccess(false);
       onClose();
     }, 1200);
-  };
-
-  const handleTestTelegram = async () => {
-    setTestStatus('loading');
-    setTestError('');
-
-    try {
-      const res = await fetch('/api/telegram/test', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token: botToken.trim(), chatId: advisorChatId.trim() }),
-      });
-
-      const data = await res.json();
-      if (data.ok) {
-        setTestStatus('success');
-      } else {
-        setTestStatus('error');
-        setTestError(data.error || 'Error al conectar con Telegram');
-      }
-    } catch (err: any) {
-      setTestStatus('error');
-      setTestError(err.message || 'Error de red');
-    }
   };
 
   return (
@@ -1308,6 +1281,18 @@ export function CommercialSettingsModal({ isOpen, onClose }: CommercialSettingsM
       />
     </div>
   );
+}
+
+interface DbStatus {
+  ok: boolean;
+  provider?: 'supabase' | 'local_fallback';
+  status?: string;
+  latencyMs?: number;
+  leadsCount?: number;
+  message?: string;
+  error?: string;
+  pendingMigration?: boolean;
+  pendingMigrationFile?: string;
 }
 
 /** Convierte "14:30" a "02:30 PM" (formato usado en los horarios de visita). */

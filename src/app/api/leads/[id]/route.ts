@@ -3,6 +3,7 @@ import { updateServerLead, getServerLeadById, LeadPersistenceError } from '@/lib
 import { getServerCommercialConfig } from '@/lib/commercialConfigStore';
 import { parseLeadAction } from '@/lib/leadActions';
 import { requireAuth } from '@/lib/auth';
+import { getErrorMessage } from '@/lib/errors';
 
 export async function GET(
   req: NextRequest,
@@ -18,8 +19,8 @@ export async function GET(
       return NextResponse.json({ ok: false, error: 'Prospecto no encontrado' }, { status: 404 });
     }
     return NextResponse.json({ ok: true, lead });
-  } catch (error: any) {
-    return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
+  } catch (error) {
+    return NextResponse.json({ ok: false, error: getErrorMessage(error) }, { status: 500 });
   }
 }
 
@@ -54,8 +55,8 @@ export async function PATCH(
     }
 
     return NextResponse.json({ ok: true, lead: updatedLead });
-  } catch (error: any) {
+  } catch (error) {
     const status = error instanceof LeadPersistenceError ? 503 : 500;
-    return NextResponse.json({ ok: false, error: error.message }, { status });
+    return NextResponse.json({ ok: false, error: getErrorMessage(error) }, { status });
   }
 }

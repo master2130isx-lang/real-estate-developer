@@ -107,7 +107,7 @@ export async function POST(req: NextRequest) {
       },
       { status: 401 }
     );
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error en login:', error);
     return NextResponse.json(
       { ok: false, error: 'Ocurrió un error inesperado al procesar la autenticación.' },

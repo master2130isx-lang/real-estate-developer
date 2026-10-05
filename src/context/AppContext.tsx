@@ -6,6 +6,7 @@ import { PROPERTIES_DATA } from '../data/mockData';
 import { COMMERCIAL_CONFIG, CommercialConfig, mergeCommercialConfig } from '../config/commercialConfig';
 import { applyLeadAction, type LeadAction } from '@/lib/leadActions';
 import type { LeadInput } from '@/lib/leadFactory';
+import { getErrorMessage } from '@/lib/errors';
 
 export type NewLeadInput = Omit<LeadInput, 'leadSource'> & { channel?: LeadSource['channel'] };
 
@@ -75,10 +76,11 @@ const STORAGE_KEY_SOURCE = 'red_lead_source_v1';
 const LEGACY_STORAGE_KEYS = ['red_mvp_leads_v1.1', 'red_mvp_config_v1.1'];
 
 // Helper defensivo para garantizar que cualquier objeto Lead tenga todas sus propiedades
-function normalizeLead(lead: any): Lead {
+function normalizeLead(lead: Partial<Lead> & { id: string }): Lead {
   return {
     ...lead,
     folio: lead.folio || 'SIN-FOLIO',
+    createdAt: lead.createdAt || '',
     fullName: lead.fullName || 'Interesado',
     phone: lead.phone || '',
     preferredChannel: lead.preferredChannel || 'whatsapp',
@@ -522,8 +524,8 @@ export function AppProvider({
         localStorage.removeItem(STORAGE_KEY_LEADS);
       } catch {}
       return { ok: true, message: data.message || 'Citas eliminadas con éxito.' };
-    } catch (err: any) {
-      return { ok: false, message: err.message || 'Error de red al purgar citas', error: err.message };
+    } catch (err) {
+      return { ok: false, message: getErrorMessage(err, 'Error de red al purgar citas'), error: getErrorMessage(err) };
     }
   };
 
@@ -542,8 +544,8 @@ export function AppProvider({
         setLeads(data.leads.map(normalizeLead));
       }
       return { ok: true, message: data.message || 'Citas restablecidas a datos de prueba.' };
-    } catch (err: any) {
-      return { ok: false, message: err.message || 'Error de red', error: err.message };
+    } catch (err) {
+      return { ok: false, message: getErrorMessage(err, 'Error de red'), error: getErrorMessage(err) };
     }
   };
 

@@ -12,7 +12,6 @@ import {
   AlertCircle,
   Building2,
   MapPin,
-  DollarSign,
   Maximize2,
   Sparkles,
   Camera,
@@ -25,6 +24,7 @@ import { compressImageInBrowser } from '@/lib/imageCompressor';
 import { useApp } from '@/context/AppContext';
 import { resolveHeroProperty } from '@/lib/heroProperty';
 import { DEFAULT_CLOSING_COSTS } from '@/lib/propertyDefaults';
+import { getErrorMessage } from '@/lib/errors';
 
 interface PropertyEditorModalProps {
   property: Property | null; // null si es creación nueva
@@ -77,12 +77,10 @@ export function PropertyEditorModal({
 
   // Campos
   const [model, setModel] = useState(property?.model || '');
-  const [name, setName] = useState(property?.name || template?.name || '');
   const [development, setDevelopment] = useState(property?.development || template?.development || '');
   const [code, setCode] = useState(property?.code || '');
   const [address, setAddress] = useState(property?.address || template?.address || '');
   const [zone, setZone] = useState(property?.zone || template?.zone || '');
-  const [city, setCity] = useState(property?.city || template?.city || '');
   const [price, setPrice] = useState<number>(property?.price || 0);
   const [availabilityStatus, setAvailabilityStatus] = useState<Property['availabilityStatus']>(
     property?.availabilityStatus || 'disponible'
@@ -161,8 +159,8 @@ export function PropertyEditorModal({
 
       const uploadedUrls = await Promise.all(uploadPromises);
       setImages((prev) => [...prev, ...uploadedUrls]);
-    } catch (err: any) {
-      setErrorMessage(`Error durante la carga: ${err.message}`);
+    } catch (err) {
+      setErrorMessage(`Error durante la carga: ${getErrorMessage(err)}`);
     } finally {
       setUploadingPhotos(false);
       if (fileInputRef.current) fileInputRef.current.value = '';
@@ -304,7 +302,8 @@ export function PropertyEditorModal({
     try {
       const payload: Partial<Property> = {
         model: model.trim(),
-        name: name.trim() || development.trim(),
+        // El editor no tiene campos propios de nombre y ciudad: se derivan del desarrollo y la zona
+        name: property?.name || development.trim(),
         development: development.trim(),
         code:
           code.trim() ||
@@ -314,7 +313,7 @@ export function PropertyEditorModal({
             .toUpperCase()}-${Date.now().toString().slice(-4)}`,
         address: address.trim(),
         zone: zone.trim(),
-        city: city.trim(),
+        city: property && zone.trim() === (property.zone || '') ? property.city : zone.trim(),
         price: Number(price),
         priceFormatted: `$${Number(price).toLocaleString('es-MX')} MXN`,
         availabilityStatus,
@@ -332,7 +331,7 @@ export function PropertyEditorModal({
         description: description.trim(),
         amenities,
         keyFeatures,
-        tags: [development.trim(), 'Casas en Venta', city.trim()].filter(Boolean),
+        tags: [development.trim(), 'Casas en Venta', zone.trim()].filter(Boolean),
       };
 
       const endpoint = isEditing ? `/api/properties/${property.id}` : '/api/properties';
@@ -358,8 +357,8 @@ export function PropertyEditorModal({
         onSave(data.property);
         onClose();
       }, 500);
-    } catch (err: any) {
-      setErrorMessage(err.message || 'Error al guardar');
+    } catch (err) {
+      setErrorMessage(getErrorMessage(err, 'Error al guardar'));
     } finally {
       setIsSubmitting(false);
     }
@@ -534,7 +533,7 @@ export function PropertyEditorModal({
                   </label>
                   <select
                     value={availabilityStatus}
-                    onChange={(e) => setAvailabilityStatus(e.target.value as any)}
+                    onChange={(e) => setAvailabilityStatus(e.target.value as Property['availabilityStatus'])}
                     className="w-full px-3.5 py-2.5 rounded-xl bg-[#102033] border border-[#1E354D] text-white text-xs focus:ring-2 focus:ring-[#C09B53] focus:outline-none"
                   >
                     <option value="disponible">✓ Disponible (Venta Activa)</option>

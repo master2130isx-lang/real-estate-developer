@@ -4,14 +4,15 @@ import { Property } from '@/types';
 import { requireAuth } from '@/lib/auth';
 import { revalidatePath } from 'next/cache';
 import { DEFAULT_CLOSING_COSTS, PLACEHOLDER_PROPERTY_IMAGE } from '@/lib/propertyDefaults';
+import { getErrorMessage } from '@/lib/errors';
 
 export async function GET() {
   try {
     const properties = await getServerProperties();
     return NextResponse.json({ ok: true, properties });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error al obtener propiedades:', error);
-    return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
+    return NextResponse.json({ ok: false, error: getErrorMessage(error) }, { status: 500 });
   }
 }
 
@@ -71,8 +72,8 @@ export async function POST(req: NextRequest) {
     const saved = await saveServerProperty(newProperty);
     revalidatePath('/', 'layout');
     return NextResponse.json({ ok: true, property: saved }, { status: 201 });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error al crear propiedad:', error);
-    return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
+    return NextResponse.json({ ok: false, error: getErrorMessage(error) }, { status: 500 });
   }
 }

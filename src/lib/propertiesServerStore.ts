@@ -3,7 +3,9 @@ import path from 'path';
 import { Property } from '@/types';
 import { PROPERTIES_DATA } from '@/data/mockData';
 import { getSupabase } from './supabaseClient';
+import type { PropertyRow } from './dbRows';
 import { DEFAULT_CLOSING_COSTS, PLACEHOLDER_PROPERTY_IMAGE } from './propertyDefaults';
+import { getErrorMessage } from '@/lib/errors';
 
 const PROPERTIES_FILE_PATH = path.join(process.cwd(), 'src', 'data', 'propertiesStore.json');
 const TMP_PROPERTIES_FILE_PATH = path.join('/tmp', 'propertiesStore.json');
@@ -15,7 +17,7 @@ let inMemoryProperties: Property[] = [...PROPERTIES_DATA];
 // MAPEOS ENTRE DB (SNAKE_CASE) Y TYPESCRIPT (CAMELCASE)
 // ==============================================================================
 
-function propertyToDbRow(prop: Property): Record<string, any> {
+function propertyToDbRow(prop: Property): PropertyRow {
   return {
     id: prop.id,
     code: prop.code,
@@ -50,7 +52,7 @@ function propertyToDbRow(prop: Property): Record<string, any> {
   };
 }
 
-function dbRowToProperty(row: any): Property {
+function dbRowToProperty(row: PropertyRow): Property {
   return {
     id: row.id,
     code: row.code,
@@ -203,7 +205,8 @@ export async function saveServerProperty(property: Property): Promise<Property> 
       if (error) {
         // Fallback resiliente si la columna is_hero aún no ha sido agregada en Supabase
         if (error.message && error.message.includes('is_hero')) {
-          const { is_hero, ...rowWithoutHero } = row;
+          const rowWithoutHero: Partial<PropertyRow> = { ...row };
+          delete rowWithoutHero.is_hero;
           const { error: retryErr } = await supabase
             .from('properties')
             .upsert(rowWithoutHero, { onConflict: 'id' });
@@ -244,8 +247,8 @@ export async function deleteServerProperty(id: string): Promise<boolean> {
       if (error) {
         console.warn('Aviso al eliminar propiedad en Supabase (usando local):', error.message);
       }
-    } catch (err: any) {
-      console.warn('Fallo al eliminar propiedad de Supabase:', err.message);
+    } catch (err) {
+      console.warn('Fallo al eliminar propiedad de Supabase:', getErrorMessage(err));
     }
   }
 

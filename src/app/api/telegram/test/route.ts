@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerCommercialConfig } from '@/lib/commercialConfigStore';
 import { checkRateLimit, getClientIp, TELEGRAM_TEST_RATE_LIMIT } from '@/lib/rateLimit';
 import { requireAuth } from '@/lib/auth';
+import { getErrorMessage } from '@/lib/errors';
 
 /** Devuelve el @usuario del bot configurado (para mostrarlo en el panel). */
 export async function GET(req: NextRequest) {
@@ -15,8 +16,8 @@ export async function GET(req: NextRequest) {
     const data = await res.json();
     if (!data.ok) return NextResponse.json({ ok: false, error: data.description });
     return NextResponse.json({ ok: true, username: data.result?.username || '' });
-  } catch (error: any) {
-    return NextResponse.json({ ok: false, error: error.message });
+  } catch (error) {
+    return NextResponse.json({ ok: false, error: getErrorMessage(error) });
   }
 }
 
@@ -82,7 +83,7 @@ A partir de ahora, cuando un cliente solicite una cita en la web, recibirás aqu
     }
 
     return NextResponse.json({ ok: true, message: 'Mensaje enviado a Telegram con éxito' });
-  } catch (error: any) {
-    return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
+  } catch (error) {
+    return NextResponse.json({ ok: false, error: getErrorMessage(error) }, { status: 500 });
   }
 }

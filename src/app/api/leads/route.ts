@@ -12,6 +12,7 @@ import { getServerProperties } from '@/lib/propertiesServerStore';
 import { buildLead, generateFolio, parseLeadInput } from '@/lib/leadFactory';
 import { getSessionFromRequest, isDeveloperSession, requireAuth } from '@/lib/auth';
 import { checkRateLimit, getClientIp, LEAD_CREATION_RATE_LIMIT } from '@/lib/rateLimit';
+import { getErrorMessage } from '@/lib/errors';
 
 export async function GET(req: NextRequest) {
   try {
@@ -20,8 +21,8 @@ export async function GET(req: NextRequest) {
 
     const leads = await getServerLeads();
     return NextResponse.json({ ok: true, leads });
-  } catch (error: any) {
-    return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
+  } catch (error) {
+    return NextResponse.json({ ok: false, error: getErrorMessage(error) }, { status: 500 });
   }
 }
 
@@ -77,8 +78,8 @@ export async function POST(req: NextRequest) {
       { ok: true, lead: savedLead, ...(persistenceWarning ? { warning: persistenceWarning } : {}) },
       { status: 201 }
     );
-  } catch (error: any) {
-    return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
+  } catch (error) {
+    return NextResponse.json({ ok: false, error: getErrorMessage(error) }, { status: 500 });
   }
 }
 
@@ -140,8 +141,8 @@ export async function DELETE(req: NextRequest) {
       message: `Base de datos de citas limpiada con éxito. Se eliminaron ${deletedCount} registros tanto de Supabase como del servidor local.`,
       leads: [],
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error durante la purga de citas:', error);
-    return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
+    return NextResponse.json({ ok: false, error: getErrorMessage(error) }, { status: 500 });
   }
 }

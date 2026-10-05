@@ -2,12 +2,14 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { ArrowLeft, Building2 } from 'lucide-react';
 import { PrequalificationForm } from '@/components/prequalification/PrequalificationForm';
 import { PrivacyModal } from '@/components/landing/PrivacyModal';
 import { useApp } from '@/context/AppContext';
 
 export default function SolicitarVisitaPage() {
+  const router = useRouter();
   const { commercialConfig } = useApp();
   const [isPrivacyOpen, setIsPrivacyOpen] = useState(false);
 
@@ -38,7 +40,7 @@ export default function SolicitarVisitaPage() {
           sourceChannel="solicitar_visita"
           isOpen={true}
           onClose={() => {
-            if (typeof window !== 'undefined') window.location.href = '/';
+            router.push('/');
           }}
           onOpenPrivacyNotice={() => setIsPrivacyOpen(true)}
         />

@@ -13,6 +13,7 @@ import {
   RotateCcw,
 } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
+import { getErrorMessage } from '@/lib/errors';
 
 interface DeveloperPurgeModalProps {
   isOpen: boolean;
@@ -104,8 +105,8 @@ export function DeveloperPurgeModal({
           }, 1500);
         }
       }
-    } catch (err: any) {
-      setErrorMessage(err.message || 'Ocurrió un error inesperado al validar credenciales.');
+    } catch (err) {
+      setErrorMessage(getErrorMessage(err, 'Ocurrió un error inesperado al validar credenciales.'));
     } finally {
       setIsSubmitting(false);
     }
