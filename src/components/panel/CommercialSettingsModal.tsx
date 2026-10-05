@@ -15,22 +15,21 @@ import {
   AlertCircle,
   MapPin,
   Database,
-  Copy,
-  ExternalLink,
   RefreshCw,
-  ShieldCheck,
-  ShieldAlert,
   Info,
   Star,
   Smartphone,
   Plus,
   Trash2,
   Lock,
+  LayoutTemplate,
+  CalendarClock,
 } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
 import { WhatsAppIcon } from '@/components/common/WhatsAppIcon';
 import { DeveloperPurgeModal } from './DeveloperPurgeModal';
-import { TelegramRecipient } from '@/config/commercialConfig';
+import { COMMERCIAL_CONFIG, DEFAULT_VISIT_HOURS, LandingContent, TelegramRecipient } from '@/config/commercialConfig';
+import { getErrorMessage } from '@/lib/errors';
 
 interface CommercialSettingsModalProps {
   isOpen: boolean;
@@ -38,9 +37,32 @@ interface CommercialSettingsModalProps {
 }
 
 export function CommercialSettingsModal({ isOpen, onClose }: CommercialSettingsModalProps) {
-  const { commercialConfig, updateCommercialConfig, resetToDemoDefaults, properties } = useApp();
+  const { commercialConfig, updateCommercialConfig, properties } = useApp();
 
-  const [activeTab, setActiveTab] = useState<'advisor' | 'social' | 'development' | 'telegram' | 'database'>('advisor');
+  const [activeTab, setActiveTab] = useState<
+    'advisor' | 'social' | 'development' | 'landing' | 'agenda' | 'telegram' | 'database'
+  >('advisor');
+
+  // Landing (textos editables por fraccionamiento / campaña)
+  const [landing, setLanding] = useState<LandingContent>(() => ({ ...commercialConfig.landing }));
+  const setLandingField = <K extends keyof LandingContent>(key: K, value: LandingContent[K]) =>
+    setLanding((prev) => ({ ...prev, [key]: value }));
+
+  // Agenda y reglas de atribución
+  const [visitHours, setVisitHours] = useState<string[]>(() => [...commercialConfig.schedule.visitHours]);
+  const [newVisitHour, setNewVisitHour] = useState('');
+  const [durationDays, setDurationDays] = useState<number>(commercialConfig.attributionRules.durationDays);
+  const [saveError, setSaveError] = useState('');
+
+  // Usuario del bot (se consulta a Telegram)
+  const [botUsername, setBotUsername] = useState('');
+  useEffect(() => {
+    fetch('/api/telegram/test')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => setBotUsername(data?.ok ? data.username : ''))
+      .catch(() => {});
+  }, []);
+  const botHandle = botUsername ? `@${botUsername}` : 'tu bot de alertas';
 
   // Estados locales para edición
   const [advisorName, setAdvisorName] = useState(commercialConfig.advisorName);
@@ -63,21 +85,19 @@ export function CommercialSettingsModal({ isOpen, onClose }: CommercialSettingsM
   const [heroPropertyId, setHeroPropertyId] = useState(commercialConfig.heroPropertyId || properties[0]?.id || '');
 
   // Telegram
-  const [botToken, setBotToken] = useState(commercialConfig.telegramConfig?.botToken || '');
-  const [advisorChatId, setAdvisorChatId] = useState(commercialConfig.telegramConfig?.advisorChatId || '948786976');
-  const [testStatus, setTestStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
-  const [testError, setTestError] = useState('');
+  const [advisorChatId, setAdvisorChatId] = useState(commercialConfig.telegramConfig?.advisorChatId || '');
 
   // Directorio de Destinatarios de Telegram con Alias
   const [recipients, setRecipients] = useState<TelegramRecipient[]>(() => {
     if (commercialConfig.telegramConfig?.recipients && commercialConfig.telegramConfig.recipients.length > 0) {
       return commercialConfig.telegramConfig.recipients;
     }
-    const legacyChatId = commercialConfig.telegramConfig?.advisorChatId || '948786976';
+    const legacyChatId = commercialConfig.telegramConfig?.advisorChatId || '';
+    if (!legacyChatId) return [];
     return [
       {
         id: 'rec-dev',
-        alias: 'Mi Celular (Developer)',
+        alias: 'Asesor principal',
         chatId: legacyChatId,
         isActive: true,
         createdAt: '2026-09-26',
@@ -189,20 +209,24 @@ export function CommercialSettingsModal({ isOpen, onClose }: CommercialSettingsM
       if (data.ok) {
         setTestRecipientStatus((prev) => ({ ...prev, [rec.id]: 'success' }));
         setTimeout(() => {
-          setTestRecipientStatus((prev) => ({ ...prev, [rec.id]: undefined as any }));
+          setTestRecipientStatus((prev) => {
+            const next = { ...prev };
+            delete next[rec.id];
+            return next;
+          });
         }, 3500);
       } else {
         setTestRecipientStatus((prev) => ({ ...prev, [rec.id]: 'error' }));
         setTestRecipientError((prev) => ({ ...prev, [rec.id]: data.error || 'Fallo de envío' }));
       }
-    } catch (err: any) {
+    } catch (err) {
       setTestRecipientStatus((prev) => ({ ...prev, [rec.id]: 'error' }));
-      setTestRecipientError((prev) => ({ ...prev, [rec.id]: err.message || 'Error de red' }));
+      setTestRecipientError((prev) => ({ ...prev, [rec.id]: getErrorMessage(err, 'Error de red') }));
     }
   };
 
   // Diagnóstico de Base de Datos (Supabase)
-  const [dbStatusData, setDbStatusData] = useState<any>(null);
+  const [dbStatusData, setDbStatusData] = useState<DbStatus | null>(null);
   const [dbLoading, setDbLoading] = useState(false);
   const [isDeveloperPurgeOpen, setIsDeveloperPurgeOpen] = useState(false);
 
@@ -214,28 +238,46 @@ export function CommercialSettingsModal({ isOpen, onClose }: CommercialSettingsM
       const res = await fetch('/api/db/status');
       const data = await res.json();
       setDbStatusData(data);
-    } catch (e: any) {
-      setDbStatusData({ ok: false, error: e.message });
+    } catch (e) {
+      setDbStatusData({ ok: false, error: getErrorMessage(e) });
     } finally {
       setDbLoading(false);
     }
   };
 
+  // Consultar el diagnóstico la primera vez que se abre la pestaña Base de Datos
+  const shouldLoadDbStatus = activeTab === 'database' && !dbStatusData && !dbLoading;
   useEffect(() => {
-    if (activeTab === 'database' && !dbStatusData && !dbLoading) {
-      checkDbStatus();
-    }
-  }, [activeTab]);
+    if (shouldLoadDbStatus) checkDbStatus();
+  }, [shouldLoadDbStatus]);
 
   if (!isOpen) return null;
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    setSaveError('');
+    if (!Number.isFinite(durationDays) || durationDays < 1 || durationDays > 365) {
+      setActiveTab('agenda');
+      setSaveError('Los días de atribución deben estar entre 1 y 365.');
+      return;
+    }
+    if (visitHours.length === 0) {
+      setActiveTab('agenda');
+      setSaveError('Agrega al menos un horario de visita.');
+      return;
+    }
+
     // Limpiar número de whatsapp (quitar signos +, espacios o guiones para formato internacional)
     const cleanWa = whatsapp.replace(/\D/g, '');
 
-    await updateCommercialConfig({
+    const saved = await updateCommercialConfig({
+      landing: {
+        ...landing,
+        connectivity: landing.connectivity.filter((c) => c.title.trim() || c.description.trim()),
+      },
+      schedule: { ...commercialConfig.schedule, visitHours },
+      attributionRules: { ...commercialConfig.attributionRules, durationDays: Math.round(durationDays) },
       advisorName: advisorName.trim(),
       advisorRole: advisorRole.trim(),
       heroPropertyId: heroPropertyId || undefined,
@@ -254,7 +296,6 @@ export function CommercialSettingsModal({ isOpen, onClose }: CommercialSettingsM
         youtube: youtube.trim(),
       },
       telegramConfig: {
-        botToken: botToken.trim(),
         advisorChatId: recipients.find((r) => r.isActive)?.chatId || advisorChatId.trim(),
         activeChatId: recipients.find((r) => r.isActive)?.chatId || advisorChatId.trim(),
         recipients,
@@ -265,35 +306,15 @@ export function CommercialSettingsModal({ isOpen, onClose }: CommercialSettingsM
       },
     });
 
+    if (!saved) {
+      setSaveError('No se pudo guardar en el servidor. Revisa tu conexión e inténtalo de nuevo.');
+      return;
+    }
     setSavedSuccess(true);
     setTimeout(() => {
       setSavedSuccess(false);
       onClose();
     }, 1200);
-  };
-
-  const handleTestTelegram = async () => {
-    setTestStatus('loading');
-    setTestError('');
-
-    try {
-      const res = await fetch('/api/telegram/test', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token: botToken.trim(), chatId: advisorChatId.trim() }),
-      });
-
-      const data = await res.json();
-      if (data.ok) {
-        setTestStatus('success');
-      } else {
-        setTestStatus('error');
-        setTestError(data.error || 'Error al conectar con Telegram');
-      }
-    } catch (err: any) {
-      setTestStatus('error');
-      setTestError(err.message || 'Error de red');
-    }
   };
 
   return (
@@ -371,6 +392,32 @@ export function CommercialSettingsModal({ isOpen, onClose }: CommercialSettingsM
             >
               <Building2 className="w-3.5 h-3.5" />
               <span>Inmobiliaria</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setActiveTab('landing')}
+              className={`pb-2 px-2.5 border-b-2 transition flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
+                activeTab === 'landing'
+                  ? 'border-[#0d233a] text-[#0d233a] font-bold'
+                  : 'border-transparent text-slate-500 hover:text-slate-800'
+              }`}
+            >
+              <LayoutTemplate className="w-3.5 h-3.5" />
+              <span>Landing</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setActiveTab('agenda')}
+              className={`pb-2 px-2.5 border-b-2 transition flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
+                activeTab === 'agenda'
+                  ? 'border-[#0d233a] text-[#0d233a] font-bold'
+                  : 'border-transparent text-slate-500 hover:text-slate-800'
+              }`}
+            >
+              <CalendarClock className="w-3.5 h-3.5" />
+              <span>Agenda</span>
             </button>
 
             <button
@@ -479,7 +526,7 @@ export function CommercialSettingsModal({ isOpen, onClose }: CommercialSettingsM
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="asesoria@valledelosencinos.com"
+                  placeholder="asesoria@tuinmobiliaria.com"
                   className="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-[#0d233a] focus:outline-none"
                 />
               </div>
@@ -591,15 +638,37 @@ export function CommercialSettingsModal({ isOpen, onClose }: CommercialSettingsM
                 />
               </div>
 
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <SettingsInput
+                  label="Dirección para Google Maps / Waze"
+                  value={landing.mapQuery}
+                  onChange={(v) => setLandingField('mapQuery', v)}
+                  placeholder="Calle, colonia, municipio, estado"
+                  hint="Vacío = se usa la dirección del punto de reunión."
+                />
+                <SettingsInput
+                  label="Punto de reunión (nombre corto)"
+                  value={landing.meetingPoint}
+                  onChange={(v) => setLandingField('meetingPoint', v)}
+                  placeholder="Ej. Caseta de acceso, Oficina de ventas"
+                />
+              </div>
+              <SettingsInput
+                label="Distintivo sobre el mapa"
+                value={landing.accessBadge}
+                onChange={(v) => setLandingField('accessBadge', v)}
+                placeholder="Ej. Caseta 24/7 (vacío = no se muestra)"
+              />
+
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  Precio Base Promocional
+                  Precio de Referencia (para mensajes de WhatsApp sin modelo asignado)
                 </label>
                 <input
                   type="text"
                   value={amountFormatted}
                   onChange={(e) => setAmountFormatted(e.target.value)}
-                  placeholder="$1,180,000 MXN"
+                  placeholder="$0,000,000 MXN"
                   className="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-[#0d233a] focus:outline-none font-bold"
                 />
               </div>
@@ -622,6 +691,177 @@ export function CommercialSettingsModal({ isOpen, onClose }: CommercialSettingsM
                 </select>
                 <p className="text-[10px] text-slate-500 mt-1">
                   La fotografía de fachada, el nombre de este modelo y su precio se mostrarán en la portada principal de la web.
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* TAB: CONTENIDO DE LA LANDING */}
+          {activeTab === 'landing' && (
+            <div className="space-y-4">
+              <p className="text-[11px] text-slate-500 bg-slate-50 border border-slate-200 rounded-xl p-3">
+                Estos textos aparecen en la página pública. Cámbialos cada vez que promuevas un nuevo fraccionamiento o campaña.
+                Los cambios se publican al guardar.
+              </p>
+
+              <fieldset className="space-y-3">
+                <legend className="text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Portada</legend>
+                <SettingsInput
+                  label="Cintillo superior"
+                  value={landing.topBarText}
+                  onChange={(v) => setLandingField('topBarText', v)}
+                  placeholder={`Vacío = "Visitas privadas · ${coverageZone}"`}
+                />
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <SettingsInput label="Etiqueta superior" value={landing.heroEyebrow} onChange={(v) => setLandingField('heroEyebrow', v)} />
+                  <SettingsInput label="Texto del botón principal" value={landing.heroCtaLabel} onChange={(v) => setLandingField('heroCtaLabel', v)} />
+                  <SettingsInput label="Título (parte normal)" value={landing.heroTitle} onChange={(v) => setLandingField('heroTitle', v)} />
+                  <SettingsInput label="Título (parte destacada en cursiva)" value={landing.heroTitleHighlight} onChange={(v) => setLandingField('heroTitleHighlight', v)} />
+                </div>
+                <SettingsTextarea label="Descripción de portada" value={landing.heroDescription} onChange={(v) => setLandingField('heroDescription', v)} />
+                <SettingsInput label="Placa sobre la foto" value={landing.heroBadge} onChange={(v) => setLandingField('heroBadge', v)} placeholder="Ej. Casa Muestra en Exhibición" />
+              </fieldset>
+
+              <fieldset className="space-y-3">
+                <legend className="text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Modelos y contacto</legend>
+                <SettingsTextarea label="Introducción de la sección de modelos" value={landing.propertiesIntro} onChange={(v) => setLandingField('propertiesIntro', v)} />
+                <SettingsTextarea
+                  label="Mensaje predeterminado de WhatsApp"
+                  value={landing.whatsappDefaultMessage}
+                  onChange={(v) => setLandingField('whatsappDefaultMessage', v)}
+                  hint="Es el texto que se precarga cuando un visitante toca cualquier botón de WhatsApp."
+                />
+              </fieldset>
+
+              <fieldset className="space-y-2">
+                <legend className="text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Conectividad y servicios cercanos</legend>
+                {landing.connectivity.map((item, index) => (
+                  <div key={index} className="grid grid-cols-1 sm:grid-cols-[1fr_2fr_auto] gap-2 items-start">
+                    <input
+                      type="text"
+                      value={item.title}
+                      aria-label={`Título ${index + 1}`}
+                      onChange={(e) =>
+                        setLandingField(
+                          'connectivity',
+                          landing.connectivity.map((c, i) => (i === index ? { ...c, title: e.target.value } : c))
+                        )
+                      }
+                      placeholder="Ej. Vialidades principales"
+                      className="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs font-semibold focus:ring-2 focus:ring-[#0d233a] focus:outline-none"
+                    />
+                    <input
+                      type="text"
+                      value={item.description}
+                      aria-label={`Descripción ${index + 1}`}
+                      onChange={(e) =>
+                        setLandingField(
+                          'connectivity',
+                          landing.connectivity.map((c, i) => (i === index ? { ...c, description: e.target.value } : c))
+                        )
+                      }
+                      placeholder="Ej. A 5 minutos de la carretera principal"
+                      className="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-[#0d233a] focus:outline-none"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setLandingField('connectivity', landing.connectivity.filter((_, i) => i !== index))}
+                      className="w-9 h-9 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 flex items-center justify-center cursor-pointer"
+                      title="Eliminar"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                ))}
+                <button
+                  type="button"
+                  onClick={() => setLandingField('connectivity', [...landing.connectivity, { title: '', description: '' }])}
+                  className="text-xs font-semibold text-[#0d233a] flex items-center gap-1 cursor-pointer hover:underline"
+                >
+                  <Plus className="w-3.5 h-3.5" /> Agregar punto de conectividad
+                </button>
+              </fieldset>
+
+              <fieldset className="space-y-3">
+                <legend className="text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Pie de página y buscadores (SEO)</legend>
+                <SettingsTextarea label="Descripción en el pie de página" value={landing.footerDescription} onChange={(v) => setLandingField('footerDescription', v)} />
+                <SettingsTextarea label="Aviso legal / descargo" value={landing.footerDisclaimer} onChange={(v) => setLandingField('footerDisclaimer', v)} />
+                <SettingsInput label="Título en Google y pestaña del navegador" value={landing.seoTitle} onChange={(v) => setLandingField('seoTitle', v)} />
+                <SettingsTextarea label="Descripción en Google" value={landing.seoDescription} onChange={(v) => setLandingField('seoDescription', v)} />
+              </fieldset>
+
+              <button
+                type="button"
+                onClick={() => setLanding({ ...COMMERCIAL_CONFIG.landing })}
+                className="text-[11px] text-slate-500 hover:text-slate-800 underline cursor-pointer"
+              >
+                Restaurar textos predeterminados
+              </button>
+            </div>
+          )}
+
+          {/* TAB: AGENDA Y REGLAS */}
+          {activeTab === 'agenda' && (
+            <div className="space-y-4">
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">Horarios disponibles para visitas</label>
+                <div className="flex flex-wrap gap-1.5">
+                  {visitHours.map((hour) => (
+                    <span key={hour} className="inline-flex items-center gap-1 bg-slate-100 border border-slate-200 rounded-full pl-3 pr-1 py-1 text-xs font-semibold">
+                      {hour}
+                      <button
+                        type="button"
+                        onClick={() => setVisitHours(visitHours.filter((h) => h !== hour))}
+                        className="w-5 h-5 rounded-full hover:bg-slate-200 flex items-center justify-center cursor-pointer"
+                        aria-label={`Quitar ${hour}`}
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    </span>
+                  ))}
+                </div>
+                <div className="flex gap-2 mt-2">
+                  <input
+                    type="time"
+                    value={newVisitHour}
+                    onChange={(e) => setNewVisitHour(e.target.value)}
+                    className="px-3 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-[#0d233a] focus:outline-none"
+                  />
+                  <button
+                    type="button"
+                    disabled={!newVisitHour}
+                    onClick={() => {
+                      const formatted = formatHour12(newVisitHour);
+                      if (!visitHours.includes(formatted)) setVisitHours(sortHours([...visitHours, formatted]));
+                      setNewVisitHour('');
+                    }}
+                    className="px-3 py-2 rounded-xl bg-[#0d233a] text-white text-xs font-semibold disabled:opacity-40 cursor-pointer flex items-center gap-1"
+                  >
+                    <Plus className="w-3.5 h-3.5" /> Agregar horario
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setVisitHours([...DEFAULT_VISIT_HOURS])}
+                    className="px-3 py-2 rounded-xl border border-slate-300 text-xs text-slate-600 cursor-pointer"
+                  >
+                    Restaurar
+                  </button>
+                </div>
+                <p className="text-[10px] text-slate-500 mt-1">Se usan en el formulario de la landing, en /registro y al agendar desde el panel.</p>
+              </div>
+
+              <div className="max-w-xs">
+                <label className="block text-xs font-semibold text-slate-700 mb-1">Días de atribución con la inmobiliaria</label>
+                <input
+                  type="number"
+                  min={1}
+                  max={365}
+                  value={durationDays || ''}
+                  onChange={(e) => setDurationDays(Number(e.target.value))}
+                  className="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs font-bold focus:ring-2 focus:ring-[#0d233a] focus:outline-none"
+                />
+                <p className="text-[10px] text-slate-500 mt-1">
+                  Vigencia que inicia al confirmar el registro en la inmobiliaria. Aplica a las confirmaciones nuevas.
                 </p>
               </div>
             </div>
@@ -850,10 +1090,10 @@ export function CommercialSettingsModal({ isOpen, onClose }: CommercialSettingsM
                 </div>
                 <ol className="list-decimal pl-4 space-y-1 text-[11px] text-slate-700 leading-relaxed">
                   <li>
-                    Pide al asesor que en su celular abra Telegram, busque el bot <strong>@userinfobot</strong> y pulse Iniciar. Le responderá su número de <strong>Id</strong> (ej. <code>948786976</code>).
+                    Pide al asesor que en su celular abra Telegram, busque el bot <strong>@userinfobot</strong> y pulse Iniciar. Le responderá su número de <strong>Id</strong> (ej. <code>123456789</code>).
                   </li>
                   <li>
-                    Pídele que también abra tu bot oficial <strong>@RED192142_bot</strong> y presione <strong>Iniciar / Start</strong> (requisito para que Telegram permita enviarle mensajes).
+                    Pídele que también abra <strong>{botHandle}</strong> y presione <strong>Iniciar / Start</strong> (requisito para que Telegram permita enviarle mensajes).
                   </li>
                   <li>
                     Escribe su nombre y su ID arriba y pulsa <strong>Guardar en Lista</strong>. ¡Podrás alternar a su número cuando desees!
@@ -866,7 +1106,7 @@ export function CommercialSettingsModal({ isOpen, onClose }: CommercialSettingsM
                 <div>
                   <div className="flex items-center gap-1.5 font-bold text-slate-800">
                     <span>Bot Oficial de Alertas:</span>
-                    <span className="font-mono text-emerald-800 font-bold">@RED192142_bot</span>
+                    <span className="font-mono text-emerald-800 font-bold">{botHandle}</span>
                   </div>
                   <span className="text-[11px] text-slate-500">
                     Botones interactivos de aprobación y cancelación activos 24/7 en la nube.
@@ -947,6 +1187,14 @@ export function CommercialSettingsModal({ isOpen, onClose }: CommercialSettingsM
                         {dbStatusData.message || dbStatusData.error}
                       </p>
 
+                      {dbStatusData.pendingMigration && (
+                        <p className="text-[11px] font-semibold text-amber-900 bg-amber-50 border border-amber-200 rounded-xl p-2.5">
+                          ⚠️ Falta ejecutar la migración <code>{dbStatusData.pendingMigrationFile}</code> en el SQL Editor de
+                          Supabase. Sin ella no se guardan los textos de la landing, los horarios, la portada elegida, la CURP ni
+                          el origen de los prospectos.
+                        </p>
+                      )}
+
                       {dbStatusData.leadsCount !== undefined && (
                         <p className="text-[11px] font-semibold text-slate-700">
                           📊 Prospectos registrados en almacén:{' '}
@@ -987,7 +1235,12 @@ export function CommercialSettingsModal({ isOpen, onClose }: CommercialSettingsM
 
           {/* Pie de Página Fijo (Pinned Footer) */}
           <div className="px-5 sm:px-6 py-3.5 border-t border-slate-100 bg-slate-50/80 shrink-0 flex items-center justify-between">
-            {savedSuccess ? (
+            {saveError ? (
+              <span role="alert" className="text-xs text-rose-700 font-bold flex items-center gap-1.5">
+                <AlertCircle className="w-4 h-4 text-rose-600" />
+                <span>{saveError}</span>
+              </span>
+            ) : savedSuccess ? (
               <span className="text-xs text-emerald-700 font-bold flex items-center gap-1.5 animate-in fade-in">
                 <CheckCircle2 className="w-4 h-4 text-emerald-600" />
                 <span>¡Cambios guardados en toda la plataforma!</span>
@@ -1027,5 +1280,90 @@ export function CommercialSettingsModal({ isOpen, onClose }: CommercialSettingsM
         onClose={() => setIsDeveloperPurgeOpen(false)}
       />
     </div>
+  );
+}
+
+interface DbStatus {
+  ok: boolean;
+  provider?: 'supabase' | 'local_fallback';
+  status?: string;
+  latencyMs?: number;
+  leadsCount?: number;
+  message?: string;
+  error?: string;
+  pendingMigration?: boolean;
+  pendingMigrationFile?: string;
+}
+
+/** Convierte "14:30" a "02:30 PM" (formato usado en los horarios de visita). */
+function formatHour12(value: string): string {
+  const [h, m] = value.split(':').map(Number);
+  const suffix = h >= 12 ? 'PM' : 'AM';
+  const hour12 = h % 12 === 0 ? 12 : h % 12;
+  return `${String(hour12).padStart(2, '0')}:${String(m || 0).padStart(2, '0')} ${suffix}`;
+}
+
+function hourToMinutes(value: string): number {
+  const match = value.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
+  if (!match) return Number.MAX_SAFE_INTEGER;
+  let h = Number(match[1]) % 12;
+  if (match[3].toUpperCase() === 'PM') h += 12;
+  return h * 60 + Number(match[2]);
+}
+
+function sortHours(hours: string[]): string[] {
+  return [...hours].sort((a, b) => hourToMinutes(a) - hourToMinutes(b));
+}
+
+function SettingsInput({
+  label,
+  value,
+  onChange,
+  placeholder,
+  hint,
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  placeholder?: string;
+  hint?: string;
+}) {
+  return (
+    <label className="block">
+      <span className="block text-xs font-semibold text-slate-700 mb-1">{label}</span>
+      <input
+        type="text"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        className="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-[#0d233a] focus:outline-none"
+      />
+      {hint && <span className="block text-[10px] text-slate-500 mt-1">{hint}</span>}
+    </label>
+  );
+}
+
+function SettingsTextarea({
+  label,
+  value,
+  onChange,
+  hint,
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  hint?: string;
+}) {
+  return (
+    <label className="block">
+      <span className="block text-xs font-semibold text-slate-700 mb-1">{label}</span>
+      <textarea
+        rows={2}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-[#0d233a] focus:outline-none"
+      />
+      {hint && <span className="block text-[10px] text-slate-500 mt-1">{hint}</span>}
+    </label>
   );
 }

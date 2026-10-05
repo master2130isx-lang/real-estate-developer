@@ -2,14 +2,17 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerProperties, saveServerProperty } from '@/lib/propertiesServerStore';
 import { Property } from '@/types';
 import { requireAuth } from '@/lib/auth';
+import { revalidatePath } from 'next/cache';
+import { DEFAULT_CLOSING_COSTS, PLACEHOLDER_PROPERTY_IMAGE } from '@/lib/propertyDefaults';
+import { getErrorMessage } from '@/lib/errors';
 
 export async function GET() {
   try {
     const properties = await getServerProperties();
     return NextResponse.json({ ok: true, properties });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error al obtener propiedades:', error);
-    return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
+    return NextResponse.json({ ok: false, error: getErrorMessage(error) }, { status: 500 });
   }
 }
 
@@ -37,10 +40,10 @@ export async function POST(req: NextRequest) {
       code,
       name: prop.name,
       model: prop.model,
-      development: prop.development || 'Valle de los Encinos',
-      address: prop.address || 'Calzada del Sol, Salinas Victoria, N.L.',
-      zone: prop.zone || 'Salinas Victoria, N.L. (Valle de los Encinos)',
-      city: prop.city || 'Salinas Victoria, N.L.',
+      development: prop.development || prop.name,
+      address: prop.address || '',
+      zone: prop.zone || prop.city || '',
+      city: prop.city || '',
       price: Number(prop.price),
       priceFormatted: prop.priceFormatted || `$${Number(prop.price).toLocaleString('es-MX')} MXN`,
       bedrooms: Number(prop.bedrooms) || 2,
@@ -54,10 +57,10 @@ export async function POST(req: NextRequest) {
         : ['infonavit', 'bancario', 'contado'],
       availabilityStatus: prop.availabilityStatus || 'disponible',
       lastUpdated: new Date().toLocaleDateString('es-MX', { month: 'long', year: 'numeric' }),
-      estimatedClosingCosts: prop.estimatedClosingCosts || 'Aprox. 5% a 7% (Escrituración y aranceles notariales en N.L.)',
-      image: prop.image || (prop.images && prop.images[0]) || '/images/properties/aguila-premier/01-facade.jpg',
-      images: Array.isArray(prop.images) && prop.images.length > 0 ? prop.images : [prop.image || '/images/properties/aguila-premier/01-facade.jpg'],
-      tags: prop.tags || [prop.development || 'Valle de los Encinos'],
+      estimatedClosingCosts: prop.estimatedClosingCosts || DEFAULT_CLOSING_COSTS,
+      image: prop.image || (prop.images && prop.images[0]) || PLACEHOLDER_PROPERTY_IMAGE,
+      images: Array.isArray(prop.images) && prop.images.length > 0 ? prop.images : [prop.image || PLACEHOLDER_PROPERTY_IMAGE],
+      tags: prop.tags || [prop.development || prop.name],
       description: prop.description || '',
       keyFeatures: prop.keyFeatures || [],
       amenities: prop.amenities || [],
@@ -67,9 +70,10 @@ export async function POST(req: NextRequest) {
     };
 
     const saved = await saveServerProperty(newProperty);
+    revalidatePath('/', 'layout');
     return NextResponse.json({ ok: true, property: saved }, { status: 201 });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error al crear propiedad:', error);
-    return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
+    return NextResponse.json({ ok: false, error: getErrorMessage(error) }, { status: 500 });
   }
 }

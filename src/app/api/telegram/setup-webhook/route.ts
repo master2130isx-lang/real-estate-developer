@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerCommercialConfig } from '@/lib/commercialConfigStore';
+import { getErrorMessage } from '@/lib/errors';
 
 async function getBotToken(): Promise<string> {
   return process.env.TELEGRAM_BOT_TOKEN || '';
@@ -16,8 +16,8 @@ export async function GET() {
     const data = await res.json();
 
     return NextResponse.json(data);
-  } catch (error: any) {
-    return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
+  } catch (error) {
+    return NextResponse.json({ ok: false, error: getErrorMessage(error) }, { status: 500 });
   }
 }
 
@@ -52,6 +52,7 @@ export async function POST(req: NextRequest) {
         body: JSON.stringify({
           url: fullUrl,
           allowed_updates: ['message', 'callback_query'],
+          ...(process.env.TELEGRAM_WEBHOOK_SECRET ? { secret_token: process.env.TELEGRAM_WEBHOOK_SECRET } : {}),
         }),
       });
       const data = await res.json();
@@ -59,7 +60,7 @@ export async function POST(req: NextRequest) {
     }
 
     return NextResponse.json({ ok: false, error: 'Acción inválida' }, { status: 400 });
-  } catch (error: any) {
-    return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
+  } catch (error) {
+    return NextResponse.json({ ok: false, error: getErrorMessage(error) }, { status: 500 });
   }
 }

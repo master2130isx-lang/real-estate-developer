@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, Suspense } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import {
   Building2,
@@ -14,9 +14,9 @@ import {
   AlertCircle,
   CheckCircle2,
 } from 'lucide-react';
+import { useApp } from '@/context/AppContext';
 
 function LoginForm() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const rawRedirect = searchParams.get('redirect') || '/panel';
   // Sanitizar redirección: solo permitir rutas relativas internas para prevenir Open Redirect
@@ -25,8 +25,8 @@ function LoginForm() {
       ? rawRedirect
       : '/panel';
 
-  // Pre-configurado con el correo del asesor por defecto
-  const [email, setEmail] = useState('master2130.isx@gmail.com');
+  const { commercialConfig } = useApp();
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -85,7 +85,7 @@ function LoginForm() {
               <Building2 className="w-3.5 h-3.5" />
             </div>
             <span className="text-xs font-semibold text-slate-200 tracking-wide">
-              Valle de los Encinos
+              {commercialConfig.agencyName}
             </span>
           </Link>
 
@@ -127,7 +127,7 @@ function LoginForm() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="master2130.isx@gmail.com"
+                placeholder="tu-correo@ejemplo.com"
                 className="w-full px-3.5 py-2.5 rounded-xl bg-[#0B1929] border border-[#1E354D] text-white placeholder-slate-500 text-xs focus:ring-2 focus:ring-[#C09B53] focus:border-[#C09B53] focus:outline-none font-medium transition"
               />
             </div>

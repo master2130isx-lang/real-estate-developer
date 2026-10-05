@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { getServerPropertyById, saveServerProperty, deleteServerProperty } from '@/lib/propertiesServerStore';
 import { Property } from '@/types';
 import { requireAuth } from '@/lib/auth';
+import { getErrorMessage } from '@/lib/errors';
 
 export async function GET(
   req: NextRequest,
@@ -16,8 +18,8 @@ export async function GET(
     }
 
     return NextResponse.json({ ok: true, property });
-  } catch (error: any) {
-    return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
+  } catch (error) {
+    return NextResponse.json({ ok: false, error: getErrorMessage(error) }, { status: 500 });
   }
 }
 
@@ -51,9 +53,10 @@ export async function PUT(
     }
 
     const saved = await saveServerProperty(updatedProperty);
+    revalidatePath('/', 'layout');
     return NextResponse.json({ ok: true, property: saved });
-  } catch (error: any) {
-    return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
+  } catch (error) {
+    return NextResponse.json({ ok: false, error: getErrorMessage(error) }, { status: 500 });
   }
 }
 
@@ -72,8 +75,9 @@ export async function DELETE(
       return NextResponse.json({ ok: false, error: 'No se pudo eliminar la propiedad' }, { status: 500 });
     }
 
+    revalidatePath('/', 'layout');
     return NextResponse.json({ ok: true, message: 'Propiedad eliminada con éxito' });
-  } catch (error: any) {
-    return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
+  } catch (error) {
+    return NextResponse.json({ ok: false, error: getErrorMessage(error) }, { status: 500 });
   }
 }

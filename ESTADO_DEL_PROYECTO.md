@@ -191,6 +191,7 @@ El asistente leerá este archivo automáticamente y tendrá el 100% del contexto
 | `SUPABASE_SERVICE_ROLE_KEY` | Clave secreta service_role de Supabase para backend | Vercel & `.env.local` |
 | `ADMIN_EMAIL` | Correo del administrador (`master2130.isx@gmail.com`) | Vercel & `.env.local` |
 | `ADMIN_PASSWORD` | Contraseña administrativa de respaldo para `/login` | Vercel & `.env.local` |
+| `CRON_SECRET` | Protege la tarea diaria `/api/cron/daily` (vencimientos y resumen por Telegram). Sin ella la tarea queda deshabilitada | Vercel |
 | `HMAC_SESSION_SECRET` | Clave de 32+ chars para firmar cookies (Opcional: se deriva de `SUPABASE_SERVICE_ROLE_KEY` si no se define) | Vercel & `.env.local` |
 
 > [!TIP]
@@ -213,15 +214,18 @@ El asistente leerá este archivo automáticamente y tendrá el 100% del contexto
 
 Cuando decidas continuar el desarrollo, estos son los puntos clave recomendados:
 
-1. **Notificaciones por Correo Electrónico (Email Transaccional):**
+1. **Fraccionamiento como entidad propia con landing por URL** (`/d/[slug]`): agrupar modelos, dirección, conectividad y textos por desarrollo para promover varios a la vez sin perder las campañas anteriores. Hoy la landing es una sola y se edita desde Configuración → Landing.
+2. **NSS fuera del listado del panel:** `GET /api/leads` todavía envía el NSS completo al navegador; revelarlo debería pedirse al servidor (acción `nss_reveal`) en lugar de ocultarlo solo en pantalla.
+3. **Tipar los `any` restantes** para que `npm run lint` pase sin errores (son heredados; ESLint ya vuelve a funcionar).
+4. **Notificaciones por Correo Electrónico (Email Transaccional):**
    - Integrar Resend o Nodemailer para enviar automáticamente un correo formal al cliente con su confirmación de cita y una copia inmediata al correo del asesor (`master2130.isx@gmail.com`).
-2. **Métricas y Píxeles de Conversión:**
+5. **Métricas y Píxeles de Conversión:**
    - Agregar Meta Pixel (Facebook Ads) y Google Tag Manager para trackear eventos de conversión (`Lead`, `ScheduleAppointment`, `NSSCaptured`).
-3. **Calculadora Financiera Dinámica por Modelo:**
+6. **Calculadora Financiera Dinámica por Modelo:**
    - Conectar las mensualidades y enganches estimados automáticamente según el precio del modelo seleccionado en el catálogo.
-4. **Migración de Rate Limiting a Redis (Upstash):**
+7. **Migración de Rate Limiting a Redis (Upstash):**
    - El rate limiter actual opera en memoria (por instancia serverless). Para producción de alto tráfico, migrar a `@upstash/ratelimit` con Redis compartido entre instancias.
-5. **Ejecutar Migración de RLS en Supabase:**
+8. **Ejecutar Migración de RLS en Supabase:**
    - Ejecutar en SQL Editor de Supabase las instrucciones de `supabase/schema.sql` para crear la vista `public_commercial_config` y las nuevas políticas.
 
 ---
@@ -229,6 +233,37 @@ Cuando decidas continuar el desarrollo, estos son los puntos clave recomendados:
 ## 📝 Historial de Cambios (Changelog)
 
 > **Instrucciones para futuros agentes:** Al realizar cambios significativos en el proyecto, agregar una entrada nueva **al inicio** de esta lista con la fecha, un resumen del cambio y los archivos afectados. Mantener las entradas existentes sin modificar.
+
+### 2026-10-05 — Revisión integral: persistencia, landing personalizable y seguridad
+**Rama:** `fix/revision-integral` · **Requiere ejecutar** `supabase/migrations/2026-10-05_curp_origen_configuracion.sql` en Supabase.
+
+**Seguridad**
+- ✅ **Bypass de login corregido:** `proxy.ts` y `getSessionFromRequest` aceptaban cookies "legacy" en JSON sin firmar (`advisor_session={"email":"..."}`), lo que daba acceso total al panel. Ahora solo se aceptan cookies firmadas con HMAC.
+- ✅ `POST /api/leads` ya no guarda el objeto que manda el navegador: valida una lista blanca de campos (`parseLeadInput`) y el servidor genera `id`, folio, estados y bitácora (`src/lib/leadFactory.ts`). Las citas "confirmadas" desde el panel requieren sesión.
+- ✅ El directorio de Telegram (Chat IDs) ya no se incrusta en el HTML público del layout.
+- ✅ Webhook de Telegram: se registra `secret_token` (`TELEGRAM_WEBHOOK_SECRET`) y solo los chats del directorio pueden confirmar/cancelar citas. Datos del cliente escapados en Markdown (un `_` en el nombre hacía que Telegram rechazara la alerta).
+
+**Datos que se perdían**
+- ✅ Notas, cambios de estado, confirmación/conflicto de atribución y auditoría de NSS ahora se guardan en el servidor con `PATCH /api/leads/[id]` (acciones en `src/lib/leadActions.ts`). Antes solo vivían en el navegador y la sincronización de 10 s las borraba.
+- ✅ Desarchivar persiste y restaura el estado previo de la cita (`statusBeforeArchive`).
+- ✅ CURP (FOVISSSTE) y origen del prospecto (canal + UTM) se guardan en Supabase (columnas nuevas, con reintento si la migración no se ha ejecutado).
+- ✅ Folios únicos `LEAD-AAMMDD-XXXX` con reintento ante colisión (antes 3 dígitos al azar con año fijo).
+- ✅ `/registro` enviaba el prospecto dos veces (doble alerta de Telegram).
+- ✅ "Hoy" se calcula en hora de Monterrey (`src/lib/dateUtils.ts`); antes, después de las 6 pm mostraba las visitas de mañana.
+- ✅ Los modales del panel muestran siempre la versión vigente del prospecto y ya no arrastran el NSS revelado de un prospecto a otro.
+
+**Personalización (sin tocar código)**
+- ✅ Configuración completa guardada como JSON (`commercial_config.settings`): portada elegida, textos de la landing, horarios de visita, días de atribución y zona horaria.
+- ✅ Nuevas pestañas en Configuración: **Landing** (portada, intro de modelos, mensaje de WhatsApp, conectividad, pie de página, SEO) y **Agenda** (horarios, días de atribución). En **Inmobiliaria**: dirección para mapas, punto de reunión y distintivo de acceso.
+- ✅ Se eliminaron ~100 referencias fijas a Valle de los Encinos / Águila Premier / 15 días. La tarjeta de cada modelo muestra su disponibilidad y créditos reales; el formulario solo ofrece los créditos que acepta el modelo.
+- ✅ Landing con ISR (`revalidate = 300`) + `revalidatePath` al guardar configuración o modelos; los modelos llegan desde el servidor en el primer render.
+- ✅ Modelos nuevos parten de los datos del fraccionamiento del modelo de portada (no de los del Águila).
+
+**Seguimiento**
+- ✅ Tarea diaria `/api/cron/daily` (Vercel Cron, 8:00 am Monterrey, `vercel.json`): marca atribuciones vencidas y envía por Telegram las visitas del día y las atribuciones por vencer. Requiere `CRON_SECRET`.
+- ✅ Origen del prospecto visible en el expediente y en la alerta de Telegram (`?utm_source=`, `?src=`).
+
+**Herramientas:** ESLint 9 (la versión 10 no era compatible con `eslint-config-next`).
 
 ### 2026-09-27 — Contrauditoría y Hardening Definitivo de Seguridad
 **Revisión y Refuerzo Posterior a la Auditoría de Ciberseguridad**

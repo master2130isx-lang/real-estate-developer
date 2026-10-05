@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { handleTelegramCallbackQuery } from '@/lib/telegramService';
-import { getServerCommercialConfig } from '@/lib/commercialConfigStore';
+import { getErrorMessage } from '@/lib/errors';
 
 const TELEGRAM_API_BASE = 'https://api.telegram.org';
 
@@ -53,7 +53,7 @@ export async function GET() {
       processedCallbacks: processedCount,
       updatesFound: updatesData.result?.length || 0,
     });
-  } catch (error: any) {
-    return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
+  } catch (error) {
+    return NextResponse.json({ ok: false, error: getErrorMessage(error) }, { status: 500 });
   }
 }

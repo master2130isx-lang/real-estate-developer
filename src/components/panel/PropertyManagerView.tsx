@@ -14,18 +14,19 @@ import {
   Car,
   MapPin,
   Camera,
-  CheckCircle2,
   AlertCircle,
-  Sparkles,
   Star,
 } from 'lucide-react';
 import { Property } from '@/types';
 import { useApp } from '@/context/AppContext';
+import { resolveHeroProperty } from '@/lib/heroProperty';
+import { PLACEHOLDER_PROPERTY_IMAGE } from '@/lib/propertyDefaults';
 import { PropertyEditorModal } from './PropertyEditorModal';
 import { PropertyDetailModal } from '../landing/PropertyDetailModal';
 
 export function PropertyManagerView() {
   const { properties, deleteProperty, reloadProperties, commercialConfig, setHeroProperty } = useApp();
+  const heroProperty = resolveHeroProperty(properties, commercialConfig);
   const [selectedPropertyForEdit, setSelectedPropertyForEdit] = useState<Property | null>(null);
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   const [previewProperty, setPreviewProperty] = useState<Property | null>(null);
@@ -112,10 +113,10 @@ export function PropertyManagerView() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {properties.map((prop) => {
             const galleryCount = prop.images?.length || (prop.image ? 1 : 0);
-            const coverImage = prop.images?.[0] || prop.image || '/images/properties/aguila-premier/01-facade.jpg';
+            const coverImage = prop.images?.[0] || prop.image || PLACEHOLDER_PROPERTY_IMAGE;
             const statusConfig = statusBadge[prop.availabilityStatus] || statusBadge.disponible;
 
-            const isHero = commercialConfig?.heroPropertyId === prop.id || (Boolean(prop.isHero) && !commercialConfig?.heroPropertyId);
+            const isHero = heroProperty?.id === prop.id;
 
             return (
               <div
@@ -172,7 +173,7 @@ export function PropertyManagerView() {
                   <div>
                     <div className="flex items-center justify-between gap-2 mb-1">
                       <span className="text-[11px] font-bold tracking-wider text-[#C09B53] uppercase">
-                        {prop.development || 'Valle de los Encinos'}
+                        {prop.development || prop.name}
                       </span>
                       {prop.code && (
                         <span className="text-[11px] font-mono text-slate-500">

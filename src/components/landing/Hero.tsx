@@ -5,6 +5,8 @@ import Image from 'next/image';
 import { ArrowRight, ChevronDown } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
 import { Property } from '@/types';
+import { PLACEHOLDER_PROPERTY_IMAGE } from '@/lib/propertyDefaults';
+import { resolveHeroProperty } from '@/lib/heroProperty';
 
 interface HeroProps {
   onOpenPrequalification: (property?: Property) => void;
@@ -17,20 +19,12 @@ export function Hero({ onOpenPrequalification }: HeroProps) {
   // 1. Por ID en commercialConfig.heroPropertyId
   // 2. Por propiedad marcada con isHero === true
   // 3. Fallback a la primera propiedad del catálogo
-  const heroProperty =
-    (commercialConfig?.heroPropertyId
-      ? properties.find((p) => p.id === commercialConfig.heroPropertyId)
-      : null) ||
-    properties.find((p) => p.isHero) ||
-    properties[0];
+  const heroProperty = resolveHeroProperty(properties, commercialConfig);
 
-  const heroImage =
-    heroProperty?.image ||
-    heroProperty?.images?.[0] ||
-    '/images/properties/aguila-premier/01-facade.jpg';
-
-  const heroModelName = heroProperty?.model || heroProperty?.name || 'Modelo Águila Premier';
-  const heroPrice = heroProperty?.priceFormatted || '$1,180,000 MXN';
+  const heroImage = heroProperty?.image || heroProperty?.images?.[0] || PLACEHOLDER_PROPERTY_IMAGE;
+  const heroModelName = heroProperty?.model || heroProperty?.name || '';
+  const heroPrice = heroProperty?.priceFormatted || '';
+  const landing = commercialConfig.landing;
 
   return (
     <section className="relative bg-[var(--color-bg)] pt-12 pb-16 sm:pt-16 sm:pb-24 px-4 sm:px-6 overflow-hidden">
@@ -41,19 +35,19 @@ export function Hero({ onOpenPrequalification }: HeroProps) {
           <div className="space-y-6 text-left order-2 lg:order-1">
             {/* Etiqueta superior */}
             <span className="label-caps text-[var(--color-accent-text)] tracking-[0.18em]">
-              COLECCIÓN RESIDENCIAL 2026
+              {landing.heroEyebrow}
             </span>
 
             {/* Título editorial con cursiva selectiva */}
             <h1 className="font-serif text-4xl sm:text-5xl md:text-[3.5rem] lg:text-[3.75rem] font-bold leading-[1.1] tracking-tight text-[var(--color-navy)]">
-              Una casa que{' '}
+              {landing.heroTitle}{' '}
               <br className="hidden sm:block" />
-              <em className="font-serif italic text-[var(--color-accent-text)]">se siente tuya.</em>
+              <em className="font-serif italic text-[var(--color-accent-text)]">{landing.heroTitleHighlight}</em>
             </h1>
 
             {/* Descripción */}
             <p className="text-[var(--color-text-secondary)] text-base sm:text-lg leading-relaxed max-w-lg">
-              Diseñamos una forma de empezar: casas luminosas, un entorno tranquilo y el acompañamiento que necesitas para dar el siguiente paso.
+              {landing.heroDescription}
             </p>
 
             {/* CTAs */}
@@ -63,7 +57,7 @@ export function Hero({ onOpenPrequalification }: HeroProps) {
                 onClick={() => onOpenPrequalification(heroProperty)}
                 className="bg-[var(--color-accent)] hover:bg-[var(--color-accent-hover)] text-[var(--color-navy)] dark:text-[#0B1929] font-semibold py-3.5 px-7 rounded text-base transition flex items-center justify-center gap-2 cursor-pointer shadow-sm"
               >
-                <span>Conocer la casa muestra</span>
+                <span>{landing.heroCtaLabel}</span>
                 <ArrowRight className="w-4 h-4" />
               </button>
 
@@ -83,7 +77,7 @@ export function Hero({ onOpenPrequalification }: HeroProps) {
             <div className="relative rounded-2xl overflow-hidden aspect-[4/3] sm:aspect-[16/11] lg:aspect-[4/3] bg-[var(--color-surface-alt)] shadow-lg border border-[var(--color-border)] group">
               <Image
                 src={heroImage}
-                alt={`Casa Muestra ${heroModelName} en Valle de los Encinos, Salinas Victoria`}
+                alt={`${landing.heroBadge} ${heroModelName} en ${heroProperty?.development || commercialConfig.agencyName}`}
                 fill
                 priority
                 fetchPriority="high"
@@ -95,7 +89,7 @@ export function Hero({ onOpenPrequalification }: HeroProps) {
               <div className="absolute bottom-3 left-3 sm:bottom-4 sm:left-4 bg-[#0F2C40]/90 dark:bg-[#071526]/95 backdrop-blur-md text-white px-4 py-2.5 rounded-xl border border-white/15 shadow-lg flex items-center gap-3">
                 <div>
                   <span className="text-[#D4AD62] font-bold text-xs sm:text-[13px] tracking-wider uppercase block leading-snug">
-                    Casa Muestra en Exhibición
+                    {landing.heroBadge}
                   </span>
                   <span className="font-serif font-bold text-sm sm:text-base text-white">
                     {heroModelName}

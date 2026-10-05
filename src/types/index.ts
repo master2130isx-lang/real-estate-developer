@@ -37,7 +37,8 @@ export type NssStatus =
   | 'eliminado_conservacion';
 
 /**
- * Estados del seguimiento de atribución comercial en el sistema interno de la inmobiliaria (15 días).
+ * Estados del seguimiento de atribución comercial en el sistema interno de la inmobiliaria
+ * (vigencia configurable en attributionRules.durationDays).
  * IMPORTANTE: Un envío web NUNCA crea automáticamente un registro confirmado.
  * El paso web solo puede avanzar hasta 'pendiente_inmobiliaria'.
  */
@@ -45,9 +46,9 @@ export type AttributionStatus =
   | 'no_aplica'                 // Para esquemas que no aplican registro por NSS
   | 'pendiente_nss'             // El usuario solicitó orientación previa sin ingresar NSS
   | 'pendiente_inmobiliaria'    // NSS recibido en web; pendiente que el asesor registre en inmobiliaria
-  | 'confirmado'                // Bloqueo / asignación confirmado en la inmobiliaria (15 días activos)
+  | 'confirmado'                // Bloqueo / asignación confirmado en la inmobiliaria (vigencia activa)
   | 'conflicto_rechazo'         // Duplicado, ya asignado a otro asesor o rechazado por la inmobiliaria
-  | 'vencido';                  // Concluyeron los 15 días sin cierre ni renovación
+  | 'vencido';                  // Concluyó la vigencia sin cierre ni renovación
 
 export type CompatibilityLevel = 'alta' | 'media' | 'baja' | 'requiere_orientacion';
 
@@ -87,12 +88,15 @@ export interface Property {
   isHero?: boolean; // Destacado en la portada principal (Hero)
 }
 
+export type AppointmentStatus = 'solicitada' | 'confirmada' | 'reprogramada' | 'cancelada' | 'archivada';
+
 export interface AppointmentRequest {
   modality: 'presencial' | 'virtual';
   preferredDate: string;
-  timeSlot: '10:00 - 13:00' | '14:00 - 17:00' | '17:00 - 19:00' | 'sabado_manana' | string;
+  timeSlot: string;
   notes?: string;
-  status: 'solicitada' | 'confirmada' | 'reprogramada' | 'cancelada' | 'archivada';
+  status: AppointmentStatus;
+  statusBeforeArchive?: AppointmentStatus; // Para restaurar la cita al desarchivar
   confirmedDate?: string;
   confirmedTime?: string;
   cancelledAt?: string;
@@ -113,6 +117,16 @@ export interface AuditEvent {
   action: string;
   reason?: string;
   ipMasked?: string;
+}
+
+/** Origen del prospecto: canal de captura y parámetros UTM de la campaña. */
+export interface LeadSource {
+  channel: 'landing' | 'registro' | 'solicitar_visita' | 'panel';
+  utmSource?: string;
+  utmMedium?: string;
+  utmCampaign?: string;
+  utmContent?: string;
+  referrer?: string;
 }
 
 export interface Lead {
@@ -142,7 +156,7 @@ export interface Lead {
   curpValue?: string; // Para derechohabientes FOVISSSTE
   curpLastFour?: string;
   
-  // Seguimiento de atribución comercial interna (15 días)
+  // Seguimiento de atribución comercial interna
   attributionStatus: AttributionStatus;
   attributionAdvisor?: string;
   attributionConfirmedAt?: string;
@@ -158,6 +172,7 @@ export interface Lead {
   assignedAdvisor: string;
   
   appointmentRequest?: AppointmentRequest;
+  leadSource?: LeadSource;
   isArchived?: boolean;
   internalNotes: LeadNote[];
   auditHistory: AuditEvent[];

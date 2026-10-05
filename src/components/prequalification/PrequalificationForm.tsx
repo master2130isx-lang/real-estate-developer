@@ -16,30 +16,24 @@ import { Property, FinancingType, ContactChannel, Lead } from '@/types';
 import { PROPERTIES_DATA } from '@/data/mockData';
 import { useApp } from '@/context/AppContext';
 import { WhatsAppIcon } from '@/components/common/WhatsAppIcon';
-
-export const getTomorrowDateStr = () => {
-  const d = new Date();
-  d.setDate(d.getDate() + 1);
-  return d.toISOString().split('T')[0];
-};
+import { addDaysLocalISO, todayLocalISO } from '@/lib/dateUtils';
+import { buildWhatsAppLink } from '@/lib/phone';
+import { CURP_REGEX } from '@/lib/leadFactory';
 
 interface PrequalificationFormProps {
   isOpen: boolean;
   onClose: () => void;
   preselectedProperty?: Property | null;
   onOpenPrivacyNotice: () => void;
+  /** Canal de captura para medir de dónde llegan los prospectos. */
+  sourceChannel?: 'landing' | 'solicitar_visita';
 }
 
-const AVAILABLE_HOURS = [
-  '10:00 AM',
-  '11:00 AM',
-  '12:00 PM',
-  '01:00 PM',
-  '02:00 PM',
-  '03:00 PM',
-  '04:00 PM',
-  '05:00 PM',
-  '06:00 PM',
+const FINANCING_OPTIONS: Array<{ id: FinancingType; label: string; desc: string }> = [
+  { id: 'infonavit', label: 'Crédito Infonavit', desc: 'Tradicional, Total o Segundo Crédito' },
+  { id: 'fovissste', label: 'Crédito FOVISSSTE', desc: 'Para trabajadores del Estado' },
+  { id: 'bancario', label: 'Crédito Bancario', desc: 'Con cualquier banco o Cofinavit' },
+  { id: 'contado', label: 'Recursos Propios / Contado', desc: 'Liquidación directa sin financiamiento' },
 ];
 
 export function PrequalificationForm({
@@ -47,6 +41,7 @@ export function PrequalificationForm({
   onClose,
   preselectedProperty,
   onOpenPrivacyNotice,
+  sourceChannel = 'landing',
 }: PrequalificationFormProps) {
   const { properties: appProperties, commercialConfig, createLeadFromPrequalification, logFunnelEvent } = useApp();
   const availableProperties = appProperties && appProperties.length > 0 ? appProperties : PROPERTIES_DATA;
@@ -57,29 +52,39 @@ export function PrequalificationForm({
   const [createdLead, setCreatedLead] = useState<Lead | null>(null);
 
   // Paso 1: Modelo y Crédito
-  const [propertyId, setPropertyId] = useState<string>(() => preselectedProperty?.id || availableProperties[0]?.id || 'prop-aguila-premier');
+  const [propertyId, setPropertyId] = useState<string>(() => preselectedProperty?.id || availableProperties[0]?.id || '');
   const [financingType, setFinancingType] = useState<FinancingType>('infonavit');
 
   // Paso 2: Datos de Contacto y Validación Crediticia (NSS o CURP)
   const [fullName, setFullName] = useState<string>('');
   const [phone, setPhone] = useState<string>('');
   const [email, setEmail] = useState<string>('');
-  const [preferredChannel, setPreferredChannel] = useState<ContactChannel>('whatsapp');
+  const preferredChannel: ContactChannel = 'whatsapp';
   const [nssInput, setNssInput] = useState<string>('');
   const [curpInput, setCurpInput] = useState<string>('');
   const [skipIdentifierForOrientation, setSkipIdentifierForOrientation] = useState<boolean>(false);
   const [privacyConsentAccepted, setPrivacyConsentAccepted] = useState<boolean>(true);
-  const [marketingConsentAccepted, setMarketingConsentAccepted] = useState<boolean>(false);
+  const marketingConsentAccepted = false;
 
   // Paso 3: Agenda de Visita (Fecha directa y Hora exacta)
-  const [preferredDate, setPreferredDate] = useState<string>(getTomorrowDateStr());
-  const [exactTime, setExactTime] = useState<string>('11:00 AM');
+  const timezone = commercialConfig.schedule.timezone;
+  const visitHours = commercialConfig.schedule.visitHours;
+  const [preferredDate, setPreferredDate] = useState<string>(() => addDaysLocalISO(1, timezone));
+  const [exactTime, setExactTime] = useState<string>(() => visitHours[1] || visitHours[0] || '');
+  const [isSending, setIsSending] = useState<boolean>(false);
+  const [submitError, setSubmitError] = useState<string>('');
   const [appointmentNotes, setAppointmentNotes] = useState<string>('');
 
   // Errores de validación
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   if (!isOpen) return null;
+
+  const selectedProperty = availableProperties.find((p) => p.id === propertyId) || availableProperties[0];
+  const financingOptions = FINANCING_OPTIONS.filter(
+    (f) => !selectedProperty?.admittedFinancing?.length || selectedProperty.admittedFinancing.includes(f.id)
+  );
+  const attributionDays = commercialConfig.attributionRules.durationDays;
 
   const requiresNss = financingType === 'infonavit';
   const requiresCurp = financingType === 'fovissste';
@@ -114,8 +119,8 @@ export function PrequalificationForm({
     // Validación de CURP si eligió FOVISSSTE y no pidió orientación previa
     if (requiresCurp && !skipIdentifierForOrientation) {
       const cleanCurp = curpInput.trim().toUpperCase();
-      if (cleanCurp.length !== 18) {
-        errs.curp = 'La CURP consta de 18 caracteres alfanuméricos';
+      if (!CURP_REGEX.test(cleanCurp)) {
+        errs.curp = 'Revisa tu CURP: son 18 caracteres (4 letras, 6 números de tu fecha de nacimiento, etc.)';
       }
     }
 
@@ -164,44 +169,38 @@ export function PrequalificationForm({
     }
   };
 
-  const handleSubmitForm = () => {
-    const selectedProp = availableProperties.find((p) => p.id === propertyId) || availableProperties[0];
-
+  const handleSubmitForm = async () => {
+    if (isSending) return;
     const isProvidingNss = requiresNss && !skipIdentifierForOrientation && nssInput.replace(/\D/g, '').length === 11;
-    const isProvidingCurp = requiresCurp && !skipIdentifierForOrientation && curpInput.trim().length === 18;
+    const isProvidingCurp = requiresCurp && !skipIdentifierForOrientation && CURP_REGEX.test(curpInput.trim().toUpperCase());
 
-    const leadPayload: Partial<Lead> = {
+    setIsSending(true);
+    setSubmitError('');
+    const result = await createLeadFromPrequalification({
+      channel: sourceChannel,
       fullName: fullName.trim(),
       phone: phone.trim(),
       email: email.trim() || undefined,
       preferredChannel,
-      preferredContactTime: 'tarde',
-      interestedZone: commercialConfig.coverageZone || 'Salinas Victoria, N.L. (Valle de los Encinos)',
-      selectedPropertyId: selectedProp?.id,
-      selectedPropertyTitle: selectedProp ? `${selectedProp.model} (${selectedProp.priceFormatted})` : undefined,
-      budgetRange: '1.2m_a_1.6m',
-      purchaseTimeline: 'corto',
+      selectedPropertyId: selectedProperty?.id,
       financingType,
-      curpValue: isProvidingCurp ? curpInput.trim().toUpperCase() : undefined,
       needsOrientation: skipIdentifierForOrientation,
-      privacyConsentAccepted: true,
       marketingConsentAccepted,
-      appointmentRequest: {
-        modality: 'presencial',
-        preferredDate: preferredDate || getTomorrowDateStr(),
+      rawNss: isProvidingNss ? nssInput.replace(/\D/g, '') : undefined,
+      rawCurp: isProvidingCurp ? curpInput.trim().toUpperCase() : undefined,
+      appointment: {
+        preferredDate: preferredDate || addDaysLocalISO(1, timezone),
         timeSlot: exactTime,
         notes: appointmentNotes.trim() || undefined,
-        status: 'solicitada',
       },
-    };
+    });
+    setIsSending(false);
 
-    const newLead = createLeadFromPrequalification(
-      leadPayload,
-      isProvidingNss ? nssInput.replace(/\D/g, '') : undefined,
-      isProvidingCurp ? curpInput.trim().toUpperCase() : undefined
-    );
-
-    setCreatedLead(newLead);
+    if (!result.ok) {
+      setSubmitError(result.error);
+      return;
+    }
+    setCreatedLead(result.lead);
     setIsSubmitted(true);
   };
 
@@ -291,16 +290,14 @@ export function PrequalificationForm({
 
             {/* Botón de WhatsApp directo */}
             {(() => {
-              const cleanWa = commercialConfig.contactChannels.whatsapp.replace(/\D/g, '');
-              const waMessage = encodeURIComponent(
+              const directWaUrl = buildWhatsAppLink(
+                commercialConfig.contactChannels.whatsapp,
                 `¡Hola! Acabo de registrar mi solicitud de cita para conocer las casas muestra en ${commercialConfig.agencyName}.\n\n` +
-                `• *Folio:* ${createdLead.folio}\n` +
-                `• *Nombre:* ${createdLead.fullName}\n` +
-                `• *Fecha y hora de visita:* ${createdLead.appointmentRequest?.preferredDate} a las ${createdLead.appointmentRequest?.timeSlot}\n\n` +
-                `¿Me podrían compartir la ubicación exacta por GPS para llegar a la caseta? ¡Muchas gracias!`
+                  `• *Folio:* ${createdLead.folio}\n` +
+                  `• *Nombre:* ${createdLead.fullName}\n` +
+                  `• *Fecha y hora de visita:* ${createdLead.appointmentRequest?.preferredDate} a las ${createdLead.appointmentRequest?.timeSlot}\n\n` +
+                  `¿Me podrían compartir la ubicación exacta por GPS para llegar? ¡Muchas gracias!`
               );
-
-              const directWaUrl = `https://wa.me/${cleanWa}?text=${waMessage}`;
 
               return (
                 <div className="space-y-3 pt-2">
@@ -367,7 +364,16 @@ export function PrequalificationForm({
                   </label>
                   <select
                     value={propertyId}
-                    onChange={(e) => setPropertyId(e.target.value)}
+                    onChange={(e) => {
+                      setPropertyId(e.target.value);
+                      // Si el nuevo modelo no admite la forma de compra elegida, usar la primera disponible
+                      const nextProperty = availableProperties.find((p) => p.id === e.target.value);
+                      const admitted = nextProperty?.admittedFinancing;
+                      if (admitted?.length && !admitted.includes(financingType)) {
+                        const firstOption = FINANCING_OPTIONS.find((f) => admitted.includes(f.id));
+                        if (firstOption) setFinancingType(firstOption.id);
+                      }
+                    }}
                     className="w-full px-4 py-3 rounded-xl border border-slate-300 dark:border-slate-600 text-sm bg-white dark:bg-[#0B1E30] text-slate-900 dark:text-white font-medium focus:border-[var(--color-accent)] focus:ring-2 focus:ring-[var(--color-accent)]/20 focus:outline-none"
                   >
                     {availableProperties.map((p) => (
@@ -384,12 +390,7 @@ export function PrequalificationForm({
                     Forma de adquisición o tipo de crédito <span className="text-red-500">*</span>
                   </label>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                    {[
-                      { id: 'infonavit', label: 'Crédito Infonavit', desc: 'Tradicional, Total o Segundo Crédito' },
-                      { id: 'fovissste', label: 'Crédito FOVISSSTE', desc: 'Para trabajadores del Estado' },
-                      { id: 'bancario', label: 'Crédito Bancario', desc: 'Con cualquier banco o Cofinavit' },
-                      { id: 'contado', label: 'Recursos Propios / Contado', desc: 'Liquidación directa sin financiamiento' },
-                    ].map((f) => (
+                    {financingOptions.map((f) => (
                       <button
                         key={f.id}
                         type="button"
@@ -525,7 +526,7 @@ export function PrequalificationForm({
                         {errors.nss && <p className="text-xs font-semibold text-red-600 dark:text-red-400">{errors.nss}</p>}
 
                         <p className="text-[11px] text-slate-600 dark:text-slate-400 leading-relaxed">
-                          🛡️ Tu NSS no inicia ningún trámite sin tu consentimiento ni te compromete a comprar. Garantiza la atención personalizada de tu asesor durante 15 días.
+                          🛡️ Tu NSS no inicia ningún trámite sin tu consentimiento ni te compromete a comprar. Garantiza la atención personalizada de tu asesor durante {attributionDays} días.
                         </p>
 
                         <button
@@ -664,7 +665,7 @@ export function PrequalificationForm({
                   <input
                     type="date"
                     value={preferredDate}
-                    min={new Date().toISOString().split('T')[0]}
+                    min={todayLocalISO(timezone)}
                     onChange={(e) => setPreferredDate(e.target.value)}
                     className={`w-full max-w-full block min-w-0 box-border appearance-none px-4 py-3.5 rounded-xl border text-sm sm:text-base font-semibold bg-white dark:bg-[#0B1E30] text-slate-900 dark:text-white focus:border-[var(--color-accent)] focus:ring-2 focus:ring-[var(--color-accent)]/20 focus:outline-none shadow-xs ${
                       errors.preferredDate ? 'border-red-500 bg-red-50/10' : 'border-slate-300 dark:border-slate-600'
@@ -682,7 +683,7 @@ export function PrequalificationForm({
                     <span>Hora Exacta de la Cita</span> <span className="text-red-500">*</span>
                   </label>
                   <div className="grid grid-cols-3 gap-2">
-                    {AVAILABLE_HOURS.map((hour) => (
+                    {visitHours.map((hour) => (
                       <button
                         key={hour}
                         type="button"
@@ -717,9 +718,16 @@ export function PrequalificationForm({
                 </div>
 
                 <div className="bg-slate-100 dark:bg-[#0E2236] rounded-xl p-3.5 text-xs text-slate-700 dark:text-slate-300 leading-relaxed border border-slate-200 dark:border-slate-700">
-                  <strong className="text-slate-900 dark:text-white font-bold">Punto de encuentro:</strong> Caseta principal de {commercialConfig.agencyName} ({commercialConfig.contactChannels.officeAddressNote || 'Calzada del Sol'}). Tu asesor te recibirá personalmente.
+                  <strong className="text-slate-900 dark:text-white font-bold">Punto de encuentro:</strong> {commercialConfig.landing.meetingPoint || 'Acceso principal'} de {commercialConfig.agencyName}
+                  {commercialConfig.contactChannels.officeAddressNote ? ` (${commercialConfig.contactChannels.officeAddressNote})` : ''}. Tu asesor te recibirá personalmente.
                 </div>
               </div>
+            )}
+
+            {submitError && (
+              <p role="alert" className="text-xs font-semibold text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900/50 rounded-xl p-3">
+                {submitError}
+              </p>
             )}
 
             {/* BOTONES DE NAVEGACIÓN */}
@@ -740,9 +748,10 @@ export function PrequalificationForm({
               <button
                 type="button"
                 onClick={handleNext}
-                className="bg-[var(--color-accent)] hover:bg-[var(--color-accent-hover)] text-[var(--color-navy)] dark:text-[#0B1929] font-bold py-3.5 px-8 rounded-xl text-sm sm:text-base transition flex items-center gap-2 cursor-pointer shadow"
+                disabled={isSending}
+                className="disabled:opacity-60 disabled:cursor-wait bg-[var(--color-accent)] hover:bg-[var(--color-accent-hover)] text-[var(--color-navy)] dark:text-[#0B1929] font-bold py-3.5 px-8 rounded-xl text-sm sm:text-base transition flex items-center gap-2 cursor-pointer shadow"
               >
-                <span>{step === 3 ? 'Confirmar Cita y Enviar' : 'Continuar'}</span>
+                <span>{step === 3 ? (isSending ? 'Enviando…' : 'Confirmar Cita y Enviar') : 'Continuar'}</span>
                 <ArrowRight className="w-4 h-4" />
               </button>
             </div>

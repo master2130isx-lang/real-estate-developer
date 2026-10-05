@@ -1,30 +1,25 @@
 import fs from 'fs';
 import path from 'path';
-import { COMMERCIAL_CONFIG, CommercialConfig } from '@/config/commercialConfig';
+import { COMMERCIAL_CONFIG, CommercialConfig, mergeCommercialConfig } from '@/config/commercialConfig';
 import { getSupabase } from './supabaseClient';
 
 const CONFIG_FILE_PATH = path.join(process.cwd(), 'src', 'data', 'commercialConfigStore.json');
 const TMP_CONFIG_FILE_PATH = path.join('/tmp', 'commercialConfigStore.json');
 
 let inMemoryConfig: CommercialConfig = { ...COMMERCIAL_CONFIG };
+let warnedMissingSettingsColumn = false;
 
 function readConfigFromLocalStorage(): CommercialConfig {
+  // Rutas fijas (no en un bucle) para que el bundler no rastree todo el proyecto
   try {
-    if (fs.existsSync(TMP_CONFIG_FILE_PATH)) {
-      const tmpData = fs.readFileSync(TMP_CONFIG_FILE_PATH, 'utf-8');
-      const parsed = JSON.parse(tmpData);
-      if (parsed && parsed.advisorName) {
-        inMemoryConfig = { ...COMMERCIAL_CONFIG, ...parsed };
-        return inMemoryConfig;
-      }
-    }
-    if (fs.existsSync(CONFIG_FILE_PATH)) {
-      const fileData = fs.readFileSync(CONFIG_FILE_PATH, 'utf-8');
-      const parsed = JSON.parse(fileData);
-      if (parsed && parsed.advisorName) {
-        inMemoryConfig = { ...COMMERCIAL_CONFIG, ...parsed };
-        return inMemoryConfig;
-      }
+    const raw = fs.existsSync(TMP_CONFIG_FILE_PATH)
+      ? fs.readFileSync(TMP_CONFIG_FILE_PATH, 'utf-8')
+      : fs.existsSync(CONFIG_FILE_PATH)
+      ? fs.readFileSync(CONFIG_FILE_PATH, 'utf-8')
+      : null;
+    const parsed = raw ? JSON.parse(raw) : null;
+    if (parsed && parsed.advisorName) {
+      inMemoryConfig = mergeCommercialConfig(COMMERCIAL_CONFIG, parsed);
     }
   } catch (error) {
     console.warn('Advertencia al leer commercialConfigStore.json local:', error);
@@ -49,10 +44,80 @@ function writeConfigToLocalStorage(config: CommercialConfig): void {
   }
 }
 
-function sanitizeTelegramConfig(tgConfig?: any) {
+function sanitizeTelegramConfig(tgConfig?: CommercialConfig['telegramConfig']) {
   if (!tgConfig) return undefined;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { botToken, ...safe } = tgConfig;
   return safe;
+}
+
+function withoutSecrets(config: CommercialConfig): CommercialConfig {
+  return { ...config, telegramConfig: sanitizeTelegramConfig(config.telegramConfig) };
+}
+
+function isMissingColumnError(error: { code?: string; message?: string } | null): boolean {
+  if (!error) return false;
+  return error.code === 'PGRST204' || error.code === '42703' || /column/i.test(error.message || '');
+}
+
+/** Convierte una fila de commercial_config en configuración completa. */
+function rowToConfig(data: Record<string, unknown>): CommercialConfig {
+  // Formato nuevo: toda la configuración vive en la columna JSON `settings`
+  if (data.settings && typeof data.settings === 'object') {
+    return mergeCommercialConfig(COMMERCIAL_CONFIG, data.settings);
+  }
+  // Formato anterior: columnas individuales
+  return mergeCommercialConfig(COMMERCIAL_CONFIG, {
+    advisorName: data.advisor_name || undefined,
+    advisorRole: data.advisor_role || undefined,
+    agencyName: data.agency_name || undefined,
+    coverageZone: data.coverage_zone || undefined,
+    contactChannels: data.contact_channels || undefined,
+    socialLinks: data.social_links || undefined,
+    telegramConfig: data.telegram_config || undefined,
+    featuredPrice: data.featured_price || undefined,
+  });
+}
+
+function configToRow(config: CommercialConfig): Record<string, unknown> {
+  const safe = withoutSecrets(config);
+  return {
+    id: 'primary_config',
+    advisor_name: safe.advisorName,
+    advisor_role: safe.advisorRole,
+    agency_name: safe.agencyName,
+    coverage_zone: safe.coverageZone,
+    contact_channels: safe.contactChannels,
+    social_links: safe.socialLinks,
+    telegram_config: safe.telegramConfig,
+    featured_price: safe.featuredPrice,
+    settings: safe,
+    updated_at: new Date().toISOString(),
+  };
+}
+
+async function upsertConfigRow(config: CommercialConfig): Promise<void> {
+  const supabase = getSupabase();
+  if (!supabase) return;
+  const row = configToRow(config);
+  let { error } = await supabase.from('commercial_config').upsert(row);
+  if (isMissingColumnError(error)) {
+    if (!warnedMissingSettingsColumn) {
+      console.warn(
+        'Supabase: falta la columna "settings" en commercial_config. Ejecuta ' +
+          'supabase/migrations/2026-10-05_curp_origen_configuracion.sql para guardar textos de la landing, ' +
+          'horarios y portada. Guardando solo los campos básicos.'
+      );
+      warnedMissingSettingsColumn = true;
+    }
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { settings, ...legacyRow } = row;
+    ({ error } = await supabase.from('commercial_config').upsert(legacyRow));
+  }
+  if (error) {
+    console.error('Error al guardar configuración en Supabase:', error.message);
+    throw new Error(error.message);
+  }
 }
 
 export async function getServerCommercialConfig(): Promise<CommercialConfig> {
@@ -67,96 +132,37 @@ export async function getServerCommercialConfig(): Promise<CommercialConfig> {
         .maybeSingle();
 
       if (!error && data) {
-        const loadedConfig: CommercialConfig = {
-          ...COMMERCIAL_CONFIG,
-          advisorName: data.advisor_name || COMMERCIAL_CONFIG.advisorName,
-          advisorRole: data.advisor_role || COMMERCIAL_CONFIG.advisorRole,
-          agencyName: data.agency_name || COMMERCIAL_CONFIG.agencyName,
-          coverageZone: data.coverage_zone || COMMERCIAL_CONFIG.coverageZone,
-          contactChannels: data.contact_channels || COMMERCIAL_CONFIG.contactChannels,
-          socialLinks: data.social_links || COMMERCIAL_CONFIG.socialLinks,
-          telegramConfig: sanitizeTelegramConfig(data.telegram_config) || COMMERCIAL_CONFIG.telegramConfig,
-          featuredPrice: data.featured_price || COMMERCIAL_CONFIG.featuredPrice,
-        };
-        inMemoryConfig = loadedConfig;
-        return loadedConfig;
+        inMemoryConfig = withoutSecrets(rowToConfig(data));
+        return inMemoryConfig;
       }
 
       if (!error && !data) {
         // Inicializar registro en Supabase con la configuración por defecto
-        await supabase.from('commercial_config').insert({
-          id: 'primary_config',
-          advisor_name: COMMERCIAL_CONFIG.advisorName,
-          advisor_role: COMMERCIAL_CONFIG.advisorRole,
-          agency_name: COMMERCIAL_CONFIG.agencyName,
-          coverage_zone: COMMERCIAL_CONFIG.coverageZone,
-          contact_channels: COMMERCIAL_CONFIG.contactChannels,
-          social_links: COMMERCIAL_CONFIG.socialLinks,
-          telegram_config: sanitizeTelegramConfig(COMMERCIAL_CONFIG.telegramConfig),
-          featured_price: COMMERCIAL_CONFIG.featuredPrice,
-        });
-        return COMMERCIAL_CONFIG;
+        await upsertConfigRow(COMMERCIAL_CONFIG).catch(() => {});
+        return withoutSecrets(COMMERCIAL_CONFIG);
       }
     } catch (err) {
       console.warn('Error al leer configuración comercial de Supabase, usando local:', err);
     }
   }
 
-  const local = readConfigFromLocalStorage();
-  if (local.telegramConfig) {
-    local.telegramConfig = sanitizeTelegramConfig(local.telegramConfig);
-  }
-  return local;
+  return withoutSecrets(readConfigFromLocalStorage());
 }
 
-export async function saveServerCommercialConfig(
-  configUpdate: Partial<CommercialConfig>
-): Promise<CommercialConfig> {
+export async function saveServerCommercialConfig(configUpdate: Partial<CommercialConfig>): Promise<CommercialConfig> {
   const current = await getServerCommercialConfig();
-  const updated: CommercialConfig = {
-    ...current,
-    ...configUpdate,
-    contactChannels: {
-      ...current.contactChannels,
-      ...(configUpdate.contactChannels || {}),
-    },
-    socialLinks: {
-      ...current.socialLinks,
-      ...(configUpdate.socialLinks || {}),
-    },
-    telegramConfig: sanitizeTelegramConfig({
-      ...current.telegramConfig,
-      ...(configUpdate.telegramConfig || {}),
-    }),
-    featuredPrice: {
-      ...current.featuredPrice,
-      ...(configUpdate.featuredPrice || {}),
-    },
-  };
+  const updated = withoutSecrets(mergeCommercialConfig(current, configUpdate));
 
-  // Guardar en local/tmp
   writeConfigToLocalStorage(updated);
-
-  // Guardar en Supabase PostgreSQL
-  const supabase = getSupabase();
-  if (supabase) {
-    try {
-      await supabase.from('commercial_config').upsert({
-        id: 'primary_config',
-        advisor_name: updated.advisorName,
-        advisor_role: updated.advisorRole,
-        agency_name: updated.agencyName,
-        coverage_zone: updated.coverageZone,
-        contact_channels: updated.contactChannels,
-        social_links: updated.socialLinks,
-        telegram_config: updated.telegramConfig,
-        featured_price: updated.featuredPrice,
-        updated_at: new Date().toISOString(),
-      });
-    } catch (err) {
-      console.error('Error al guardar configuración en Supabase:', err);
-    }
-  }
+  await upsertConfigRow(updated);
 
   return updated;
+}
+
+/** Indica si la columna `settings` ya existe (para el diagnóstico de la pestaña Base de Datos). */
+export async function hasSettingsColumn(): Promise<boolean | null> {
+  const supabase = getSupabase();
+  if (!supabase) return null;
+  const { error } = await supabase.from('commercial_config').select('settings').limit(1);
+  return !isMissingColumnError(error);
 }

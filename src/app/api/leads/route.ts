@@ -1,9 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerLeads, saveServerLead, purgeAllServerLeads, resetServerLeadsToDemo } from '@/lib/leadsServerStore';
+import {
+  getServerLeads,
+  saveServerLead,
+  purgeAllServerLeads,
+  resetServerLeadsToDemo,
+  LeadPersistenceError,
+} from '@/lib/leadsServerStore';
 import { notifyNewAppointmentTelegram } from '@/lib/telegramService';
-import { Lead } from '@/types';
-import { isDeveloperSession, requireAuth } from '@/lib/auth';
+import { getServerCommercialConfig } from '@/lib/commercialConfigStore';
+import { getServerProperties } from '@/lib/propertiesServerStore';
+import { buildLead, generateFolio, parseLeadInput } from '@/lib/leadFactory';
+import { getSessionFromRequest, isDeveloperSession, requireAuth } from '@/lib/auth';
 import { checkRateLimit, getClientIp, LEAD_CREATION_RATE_LIMIT } from '@/lib/rateLimit';
+import { getErrorMessage } from '@/lib/errors';
 
 export async function GET(req: NextRequest) {
   try {
@@ -12,8 +21,8 @@ export async function GET(req: NextRequest) {
 
     const leads = await getServerLeads();
     return NextResponse.json({ ok: true, leads });
-  } catch (error: any) {
-    return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
+  } catch (error) {
+    return NextResponse.json({ ok: false, error: getErrorMessage(error) }, { status: 500 });
   }
 }
 
@@ -29,14 +38,28 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const body = await req.json();
-    const lead = body as Lead;
-
-    if (!lead || !lead.id || !lead.fullName || !lead.phone) {
-      return NextResponse.json({ ok: false, error: 'Datos de prospecto incompletos' }, { status: 400 });
+    const body = await req.json().catch(() => null);
+    const { input, error } = parseLeadInput(body);
+    if (!input) {
+      return NextResponse.json({ ok: false, error }, { status: 400 });
     }
 
-    const savedLead = await saveServerLead(lead);
+    // Solo un asesor con sesión puede registrar citas ya confirmadas desde el panel
+    const isPanel = body?.origin === 'panel' && !!getSessionFromRequest(req);
+    const [config, properties] = await Promise.all([getServerCommercialConfig(), getServerProperties()]);
+    const lead = buildLead(input, { config, properties, origin: isPanel ? 'panel' : 'web' });
+
+    let savedLead = lead;
+    let persistenceWarning: string | undefined;
+    try {
+      savedLead = await saveServerLead(lead, () =>
+        generateFolio(isPanel ? 'AGEND' : 'LEAD', config.schedule?.timezone)
+      );
+    } catch (err) {
+      if (!(err instanceof LeadPersistenceError)) throw err;
+      // No perder el prospecto: el aviso de Telegram lleva todos sus datos al asesor
+      persistenceWarning = 'El registro no se pudo guardar en la base de datos; se notificó al asesor.';
+    }
 
     // Determinar origen del servidor para enlaces de acción y auto-registro de webhook
     const proto = req.headers.get('x-forwarded-proto') || 'https';
@@ -51,16 +74,19 @@ export async function POST(req: NextRequest) {
       console.error('Error al notificar por Telegram:', err);
     }
 
-    return NextResponse.json({ ok: true, lead: savedLead }, { status: 201 });
-  } catch (error: any) {
-    return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
+    return NextResponse.json(
+      { ok: true, lead: savedLead, ...(persistenceWarning ? { warning: persistenceWarning } : {}) },
+      { status: 201 }
+    );
+  } catch (error) {
+    return NextResponse.json({ ok: false, error: getErrorMessage(error) }, { status: 500 });
   }
 }
 
 /**
  * PURGA DE BASE DE DATOS DE CITAS (ZONA DE SEGURIDAD DEVELOPER)
  * Requiere:
- * 1. Sesión activa de desarrollador (correo coincide con master2130.isx@gmail.com o ADMIN_EMAIL)
+ * 1. Sesión activa de desarrollador (correo coincide con ADMIN_EMAIL)
  * 2. Frase de confirmación obligatoria: "BORRAR-CITAS-TEST"
  */
 export async function DELETE(req: NextRequest) {
@@ -115,8 +141,8 @@ export async function DELETE(req: NextRequest) {
       message: `Base de datos de citas limpiada con éxito. Se eliminaron ${deletedCount} registros tanto de Supabase como del servidor local.`,
       leads: [],
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error durante la purga de citas:', error);
-    return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
+    return NextResponse.json({ ok: false, error: getErrorMessage(error) }, { status: 500 });
   }
 }

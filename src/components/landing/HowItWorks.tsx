@@ -2,19 +2,22 @@
 
 import React from 'react';
 import { Search, SlidersHorizontal, CalendarCheck2, ArrowRight } from 'lucide-react';
+import { useApp } from '@/context/AppContext';
 
 interface HowItWorksProps {
   onOpenPrequalification: () => void;
 }
 
 export function HowItWorks({ onOpenPrequalification }: HowItWorksProps) {
+  const { commercialConfig } = useApp();
+  const attributionDays = commercialConfig.attributionRules.durationDays;
   const steps = [
     {
       number: '01',
       icon: Search,
       title: 'Cuéntanos qué estás buscando',
       description:
-        'Indica en nuestro formulario tu presupuesto aproximado, zona de interés, plazo de compra y tu forma de pago prevista (Infonavit, banco o recursos propios).',
+        'Indica en nuestro formulario tu presupuesto aproximado, zona de interés, plazo de compra y tu forma de pago prevista (Infonavit, FOVISSSTE, banco o recursos propios).',
       detail: 'Puedes solicitar orientación si aún no defines tu esquema.',
     },
     {
@@ -22,7 +25,7 @@ export function HowItWorks({ onOpenPrequalification }: HowItWorksProps) {
       icon: SlidersHorizontal,
       title: 'Revisamos qué opciones encajan contigo',
       description:
-        'Revisamos el inventario disponible según tus criterios. Si vas por Infonavit, se contempla el NSS para el registro interno de atención de 15 días con tu asesor.',
+        `Revisamos el inventario disponible según tus criterios. Si vas por Infonavit o FOVISSSTE, se contempla tu NSS o CURP para el registro interno de atención de ${attributionDays} días con tu asesor.`,
       detail: 'No autoriza consultas crediticias ni te obliga a comprar.',
     },
     {

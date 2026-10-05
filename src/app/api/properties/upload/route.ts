@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabase } from '@/lib/supabaseClient';
+import type { SupabaseClient } from '@supabase/supabase-js';
 import { requireAuth } from '@/lib/auth';
 import fs from 'fs';
 import path from 'path';
+import { getErrorMessage } from '@/lib/errors';
 
 const BUCKET_NAME = 'property-images';
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB límite de seguridad
@@ -11,11 +13,11 @@ const ALLOWED_MIME_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg'
 /**
  * Asegura que el bucket de Supabase exista y sea público
  */
-async function ensureSupabaseBucket(supabase: any) {
+async function ensureSupabaseBucket(supabase: SupabaseClient) {
   try {
     const { data: buckets, error } = await supabase.storage.listBuckets();
     if (!error && buckets) {
-      const exists = buckets.some((b: any) => b.name === BUCKET_NAME);
+      const exists = buckets.some((b) => b.name === BUCKET_NAME);
       if (!exists) {
         await supabase.storage.createBucket(BUCKET_NAME, {
           public: true,
@@ -93,8 +95,8 @@ export async function POST(req: NextRequest) {
           });
         }
         console.warn('Fallo al subir a Supabase Storage, aplicando fallback local:', error?.message);
-      } catch (err: any) {
-        console.warn('Excepción en Supabase Storage:', err.message);
+      } catch (err) {
+        console.warn('Excepción en Supabase Storage:', getErrorMessage(err));
       }
     }
 
@@ -114,7 +116,7 @@ export async function POST(req: NextRequest) {
         storageType: 'local',
         fileName: cleanFileName,
       });
-    } catch (localErr: any) {
+    } catch {
       // 5. Si el sistema de archivos es de solo lectura (Vercel Serverless sin Supabase), retornar como Data URL WebP
       const base64Data = buffer.toString('base64');
       const dataUrl = `data:${file.type};base64,${base64Data}`;
@@ -125,9 +127,9 @@ export async function POST(req: NextRequest) {
         fileName: cleanFileName,
       });
     }
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error al procesar subida de foto:', error);
-    return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
+    return NextResponse.json({ ok: false, error: getErrorMessage(error) }, { status: 500 });
   }
 }
 
@@ -155,7 +157,7 @@ export async function DELETE(req: NextRequest) {
     }
 
     return NextResponse.json({ ok: true, message: 'Archivo eliminado' });
-  } catch (error: any) {
-    return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
+  } catch (error) {
+    return NextResponse.json({ ok: false, error: getErrorMessage(error) }, { status: 500 });
   }
 }

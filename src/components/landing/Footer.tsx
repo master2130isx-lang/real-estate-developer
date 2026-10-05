@@ -2,8 +2,9 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { Building2, Shield, UserCheck, Phone, Mail, MapPin } from 'lucide-react';
+import { Building2, Shield, UserCheck, Mail, MapPin } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
+import { buildWhatsAppLink } from '@/lib/phone';
 import { FacebookIcon, InstagramIcon, TikTokIcon, YouTubeIcon } from '@/components/common/SocialIcons';
 import { WhatsAppIcon } from '@/components/common/WhatsAppIcon';
 
@@ -15,7 +16,6 @@ export function Footer({ onOpenPrivacy }: FooterProps) {
   const { commercialConfig } = useApp();
   const social = commercialConfig.socialLinks;
   const hasSocial = Boolean(social?.facebook || social?.instagram || social?.tiktok || social?.youtube);
-  const cleanWa = commercialConfig.contactChannels.whatsapp.replace(/\D/g, '');
 
   return (
     <footer className="bg-[var(--color-navy-deep)] text-[#D1D5DB] text-xs py-14 px-4 sm:px-6 border-t border-white/5">
@@ -32,7 +32,7 @@ export function Footer({ onOpenPrivacy }: FooterProps) {
               </span>
             </div>
             <p className="text-[#D1D5DB] text-xs leading-relaxed">
-              Plataforma de asesoría inmobiliaria personalizada, catálogo de vivienda y acompañamiento integral para tu crédito Infonavit o bancario.
+              {commercialConfig.landing.footerDescription}
             </p>
           </div>
 
@@ -129,7 +129,7 @@ export function Footer({ onOpenPrivacy }: FooterProps) {
 
             <div className="space-y-2 pt-1">
               <a
-                href={`https://wa.me/${cleanWa}?text=${encodeURIComponent('¡Hola! Me interesa conocer más sobre las viviendas en la Zona Norte de Nuevo León, Por favor Me podrían brindar información.')}`}
+                href={buildWhatsAppLink(commercialConfig.contactChannels.whatsapp, commercialConfig.landing.whatsappDefaultMessage)}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="py-2.5 min-h-[44px] inline-flex items-center gap-2 text-[#25D366] hover:text-[#4ADE80] transition font-semibold text-xs"
@@ -155,7 +155,7 @@ export function Footer({ onOpenPrivacy }: FooterProps) {
         {/* Descargos */}
         <div className="pt-6 border-t border-white/10 text-xs text-[#9CA3AF] space-y-2">
           <p>
-            * Los precios y especificaciones mostrados son recursos de referencia ilustrativos para la evaluación técnica del prototipo. Los gastos notariales y de escrituración varían según la legislación y el municipio aplicable.
+            {commercialConfig.landing.footerDisclaimer}
           </p>
           <div className="flex flex-col sm:flex-row justify-between items-center gap-3 pt-3 text-xs text-[#D1D5DB]">
             <div className="flex flex-wrap items-center gap-3">

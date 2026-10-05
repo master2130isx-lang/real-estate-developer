@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { X, Shield, AlertTriangle } from 'lucide-react';
+import { X, Shield } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
 
 interface PrivacyModalProps {
@@ -48,7 +48,7 @@ export function PrivacyModal({ isOpen, onClose }: PrivacyModalProps) {
             <p>
               El responsable del tratamiento y resguardo legítimo de sus datos personales es{' '}
               <strong className="text-[var(--color-text)]">{commercialConfig.agencyName}</strong>, con domicilio comercial para efectos de atención ubicado en{' '}
-              <strong className="text-[var(--color-text)]">{commercialConfig.contactChannels.officeAddressNote || 'Calzada del Sol, Salinas Victoria, Nuevo León'}</strong>, y correo electrónico de contacto oficial{' '}
+              <strong className="text-[var(--color-text)]">{commercialConfig.contactChannels.officeAddressNote || commercialConfig.coverageZone}</strong>, y correo electrónico de contacto oficial{' '}
               <strong className="text-[var(--color-text)]">{commercialConfig.contactChannels.email}</strong>.
             </p>
           </section>
@@ -58,7 +58,7 @@ export function PrivacyModal({ isOpen, onClose }: PrivacyModalProps) {
               2. Finalidad Específica del Número de Seguridad Social (NSS)
             </h3>
             <p>
-              El NSS se recaba de manera justificada y condicional <strong>únicamente</strong> para solicitar su registro en el mecanismo interno de la inmobiliaria y asignar al asesor la atribución comercial de su atención durante un periodo de 15 días, conforme a las reglas internas vigentes.
+              El NSS (o la CURP en FOVISSSTE) se recaba de manera justificada y condicional <strong>únicamente</strong> para solicitar su registro en el mecanismo interno de la inmobiliaria y asignar al asesor la atribución comercial de su atención durante un periodo de {commercialConfig.attributionRules.durationDays} días, conforme a las reglas internas vigentes.
             </p>
             <div className="bg-[var(--color-surface-alt)] border border-[var(--color-border)] rounded p-3 text-[11px] text-[var(--color-text-secondary)] mt-2 space-y-1">
               <p className="font-semibold text-[var(--color-text)]">Límites expresos de esta recopilación:</p>
@@ -106,7 +106,7 @@ export function PrivacyModal({ isOpen, onClose }: PrivacyModalProps) {
               5. Política de Conservación y Destrucción
             </h3>
             <p>
-              La política de atribución comercial de 15 días es independiente de la política de conservación de datos personales. Conforme a las directrices de seguridad, el NSS de prospectos no convertidos será eliminado de forma segura una vez agotado el periodo de conservación legal y comercial aprobado por el responsable.
+              La política de atribución comercial de {commercialConfig.attributionRules.durationDays} días es independiente de la política de conservación de datos personales. Conforme a las directrices de seguridad, el NSS de prospectos no convertidos será eliminado de forma segura una vez agotado el periodo de conservación legal y comercial aprobado por el responsable.
             </p>
           </section>
         </div>

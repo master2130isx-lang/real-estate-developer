@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { handleTelegramCallbackQuery } from '@/lib/telegramService';
+import { getErrorMessage } from '@/lib/errors';
 
 /**
  * Webhook de Telegram para recibir interacciones del asesor inmobiliario
@@ -23,10 +24,10 @@ export async function POST(req: NextRequest) {
     }
 
     return NextResponse.json({ ok: true });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error al procesar webhook de Telegram:', error);
     // Responder 200 a Telegram para evitar reintentos continuos en caso de payloads malformados
-    return NextResponse.json({ ok: true, error: error.message });
+    return NextResponse.json({ ok: true, error: getErrorMessage(error) });
   }
 }
 
@@ -39,7 +40,7 @@ export async function GET() {
 
   return NextResponse.json({
     status: 'online',
-    description: 'Webhook de Bot de Telegram para Asesor Comercial (Valle de los Encinos)',
+    description: 'Webhook de Bot de Telegram para Asesor Comercial',
     config: {
       hasBotToken: hasToken,
       hasAdvisorChatId: hasChatId,

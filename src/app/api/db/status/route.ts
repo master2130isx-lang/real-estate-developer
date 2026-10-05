@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { isSupabaseConfigured, getSupabase } from '@/lib/supabaseClient';
 import { getServerLeads } from '@/lib/leadsServerStore';
+import { getErrorMessage } from '@/lib/errors';
 
 export async function GET() {
   const configured = isSupabaseConfigured();
@@ -68,10 +69,20 @@ export async function GET() {
       });
     }
 
+    // 3. Verificar migración 2026-10-05 (columna settings y columnas nuevas de leads)
+    const [{ error: settingsError }, { error: leadColumnsError }] = await Promise.all([
+      supabase.from('commercial_config').select('settings', { head: true }),
+      supabase.from('leads').select('curp_value, curp_last_four, lead_source', { head: true }),
+    ]);
+    const pendingMigration = Boolean(settingsError || leadColumnsError);
+
     return NextResponse.json({
       ok: true,
       provider: 'supabase',
       status: 'connected',
+      usesServiceRole: Boolean(process.env.SUPABASE_SERVICE_ROLE_KEY),
+      pendingMigration,
+      pendingMigrationFile: pendingMigration ? 'supabase/migrations/2026-10-05_curp_origen_configuracion.sql' : undefined,
       isConfigured: true,
       latencyMs,
       leadsCount: leadsCount ?? 0,
@@ -81,13 +92,13 @@ export async function GET() {
       },
       message: '¡Conexión exitosa a Supabase PostgreSQL! Persistencia permanente activa.',
     });
-  } catch (err: any) {
+  } catch (err) {
     return NextResponse.json({
       ok: false,
       provider: 'supabase',
       status: 'connection_error',
       isConfigured: true,
-      error: err.message || 'Error de conexión con Supabase',
+      error: getErrorMessage(err, 'Error de conexión con Supabase'),
     });
   }
 }

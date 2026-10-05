@@ -20,6 +20,10 @@ import { ThemeToggle } from '@/components/common/ThemeToggle';
 import { WhatsAppIcon } from '@/components/common/WhatsAppIcon';
 import { PrivacyModal } from '@/components/landing/PrivacyModal';
 import { FinancingType, Lead } from '@/types';
+import { addDaysLocalISO, todayLocalISO } from '@/lib/dateUtils';
+import { buildWhatsAppLink } from '@/lib/phone';
+import { CURP_REGEX } from '@/lib/leadFactory';
+import { resolveHeroProperty } from '@/lib/heroProperty';
 
 export default function ExpressRegistrationPage() {
   const { commercialConfig, createLeadFromPrequalification, properties, logFunnelEvent } = useApp();
@@ -28,12 +32,10 @@ export default function ExpressRegistrationPage() {
   const [phone, setPhone] = useState('');
   const [financingType, setFinancingType] = useState<FinancingType>('infonavit');
   const [creditIdentifier, setCreditIdentifier] = useState('');
-  const [preferredDate, setPreferredDate] = useState(() => {
-    const d = new Date();
-    d.setDate(d.getDate() + 1);
-    return d.toISOString().split('T')[0];
-  });
-  const [preferredTime, setPreferredTime] = useState('11:00 AM');
+  const timezone = commercialConfig.schedule.timezone;
+  const visitHours = commercialConfig.schedule.visitHours;
+  const [preferredDate, setPreferredDate] = useState(() => addDaysLocalISO(1, timezone));
+  const [preferredTime, setPreferredTime] = useState(() => visitHours[1] || visitHours[0] || '');
   const [privacyAccepted, setPrivacyAccepted] = useState(true);
 
   const [isPrivacyModalOpen, setIsPrivacyModalOpen] = useState(false);
@@ -41,7 +43,7 @@ export default function ExpressRegistrationPage() {
   const [createdLead, setCreatedLead] = useState<Lead | null>(null);
   const [errorMsg, setErrorMsg] = useState('');
 
-  const featuredProperty = properties[0];
+  const featuredProperty = resolveHeroProperty(properties, commercialConfig);
   const requiresNss = financingType === 'infonavit';
   const requiresCurp = financingType === 'fovissste';
 
@@ -65,59 +67,43 @@ export default function ExpressRegistrationPage() {
       return;
     }
 
-    setIsSubmitting(true);
-
-    try {
-      const cleanId = creditIdentifier.trim();
-      const rawNss = requiresNss && cleanId.length === 11 ? cleanId : undefined;
-      const rawCurp = requiresCurp && cleanId.length === 18 ? cleanId.toUpperCase() : undefined;
-
-      const leadPayload: Partial<Lead> = {
-        fullName: fullName.trim(),
-        phone: cleanPhone,
-        preferredChannel: 'whatsapp',
-        preferredContactTime: 'tarde',
-        interestedZone: commercialConfig.coverageZone || 'Salinas Victoria, N.L. (Valle de los Encinos)',
-        selectedPropertyId: featuredProperty?.id,
-        selectedPropertyTitle: featuredProperty ? `${featuredProperty.model} (${featuredProperty.priceFormatted})` : undefined,
-        budgetRange: '1.2m_a_1.6m',
-        purchaseTimeline: 'corto',
-        financingType,
-        curpValue: rawCurp,
-        privacyConsentAccepted: true,
-        marketingConsentAccepted: true,
-        appointmentRequest: {
-          modality: 'presencial',
-          preferredDate,
-          timeSlot: preferredTime,
-          notes: 'Registro rápido desde campaña de redes sociales (Facebook / TikTok)',
-          status: 'solicitada',
-        },
-      };
-
-      const newLead = createLeadFromPrequalification(leadPayload, rawNss, rawCurp);
-
-      // Notificar al servidor y Telegram
-      try {
-        await fetch('/api/leads', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(newLead),
-        });
-      } catch (err) {
-        console.warn('Registro guardado localmente:', err);
-      }
-
-      logFunnelEvent('paso_completado', { paso: 'express', forma_compra: financingType });
-      setCreatedLead(newLead);
-    } catch (err: any) {
-      setErrorMsg('Ocurrió un error al enviar tu registro. Intenta de nuevo.');
-    } finally {
-      setIsSubmitting(false);
+    const cleanId = creditIdentifier.trim().toUpperCase();
+    if (requiresCurp && cleanId && !CURP_REGEX.test(cleanId)) {
+      setErrorMsg('Revisa tu CURP (18 caracteres) o deja el campo vacío para recibir orientación.');
+      return;
     }
-  };
+    if (requiresNss && cleanId && cleanId.length !== 11) {
+      setErrorMsg('El NSS tiene 11 dígitos. Revísalo o deja el campo vacío para recibir orientación.');
+      return;
+    }
 
-  const cleanWa = commercialConfig.contactChannels.whatsapp.replace(/\D/g, '');
+    setIsSubmitting(true);
+    const result = await createLeadFromPrequalification({
+      channel: 'registro',
+      fullName: fullName.trim(),
+      phone: cleanPhone,
+      preferredChannel: 'whatsapp',
+      selectedPropertyId: featuredProperty?.id,
+      financingType,
+      needsOrientation: (requiresNss || requiresCurp) && !cleanId,
+      marketingConsentAccepted: true,
+      rawNss: requiresNss && cleanId.length === 11 ? cleanId : undefined,
+      rawCurp: requiresCurp && cleanId ? cleanId : undefined,
+      appointment: {
+        preferredDate,
+        timeSlot: preferredTime,
+        notes: 'Registro rápido desde campaña de redes sociales',
+      },
+    });
+    setIsSubmitting(false);
+
+    if (!result.ok) {
+      setErrorMsg(result.error);
+      return;
+    }
+    logFunnelEvent('paso_completado', { paso: 'express', forma_compra: financingType });
+    setCreatedLead(result.lead);
+  };
 
   return (
     <div className="min-h-screen bg-[#FDFBF7] dark:bg-[#0A131F] text-slate-900 dark:text-slate-100 flex flex-col justify-between transition-colors duration-200">
@@ -167,7 +153,7 @@ export default function ExpressRegistrationPage() {
                 ¡Registro Recibido con Éxito!
               </h1>
               <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed max-w-md mx-auto">
-                Hola <strong>{createdLead.fullName}</strong>, tu asesor <strong>{commercialConfig.advisorName}</strong> te recibirá en la caseta principal de {commercialConfig.agencyName}.
+                Hola <strong>{createdLead.fullName}</strong>, tu asesor <strong>{commercialConfig.advisorName}</strong> te recibirá en {(commercialConfig.landing.meetingPoint || 'el acceso principal').toLowerCase()} de {commercialConfig.agencyName}.
               </p>
             </div>
 
@@ -188,17 +174,18 @@ export default function ExpressRegistrationPage() {
 
             {/* Botón WhatsApp de Acción Inmediata */}
             {(() => {
-              const waText = encodeURIComponent(
+              const waHref = buildWhatsAppLink(
+                commercialConfig.contactChannels.whatsapp,
                 `¡Hola ${commercialConfig.advisorName}! Me acabo de registrar desde redes sociales para conocer la Casa Muestra en ${commercialConfig.agencyName}.\n\n` +
                 `• Folio: ${createdLead.folio}\n` +
                 `• Nombre: ${createdLead.fullName}\n` +
                 `• Cita tentativa: ${preferredDate} a las ${preferredTime}\n\n` +
-                `¿Me compartes la ubicación por GPS para llegar a la caseta? ¡Gracias!`
+                `¿Me compartes la ubicación por GPS para llegar? ¡Gracias!`
               );
               return (
                 <div className="space-y-3 pt-2">
                   <a
-                    href={`https://wa.me/${cleanWa}?text=${waText}`}
+                    href={waHref}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="w-full bg-[#25D366] hover:bg-[#20bd5a] text-white font-bold py-4 px-6 rounded-2xl text-base transition flex items-center justify-center gap-2.5 shadow-lg cursor-pointer"
@@ -368,7 +355,7 @@ export default function ExpressRegistrationPage() {
                     id="visit_date"
                     name="visit_date"
                     value={preferredDate}
-                    min={new Date().toISOString().split('T')[0]}
+                    min={todayLocalISO(timezone)}
                     onChange={(e) => setPreferredDate(e.target.value)}
                     className="w-full max-w-full block min-w-0 box-border appearance-none px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 text-xs sm:text-sm font-semibold bg-slate-50 dark:bg-[#0A1726] text-slate-900 dark:text-white focus:outline-none focus:border-[#C09B53]"
                   />
@@ -389,7 +376,7 @@ export default function ExpressRegistrationPage() {
                     onChange={(e) => setPreferredTime(e.target.value)}
                     className="w-full max-w-full block min-w-0 box-border px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 text-xs sm:text-sm font-semibold bg-slate-50 dark:bg-[#0A1726] text-slate-900 dark:text-white focus:outline-none focus:border-[#C09B53]"
                   >
-                    {['10:00 AM', '11:00 AM', '12:00 PM', '01:00 PM', '02:00 PM', '03:00 PM', '04:00 PM', '05:00 PM', '06:00 PM'].map((h) => (
+                    {visitHours.map((h) => (
                       <option key={h} value={h}>{h}</option>
                     ))}
                   </select>
@@ -436,11 +423,15 @@ export default function ExpressRegistrationPage() {
                   <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
                   <span>Sin costo ni compromiso</span>
                 </span>
-                <span>•</span>
-                <span className="flex items-center gap-1">
-                  <MapPin className="w-3.5 h-3.5 text-[#C09B53]" />
-                  <span>Caseta con acceso controlado</span>
-                </span>
+                {commercialConfig.landing.meetingPoint && (
+                  <>
+                    <span>•</span>
+                    <span className="flex items-center gap-1">
+                      <MapPin className="w-3.5 h-3.5 text-[#C09B53]" />
+                      <span>{commercialConfig.landing.meetingPoint}</span>
+                    </span>
+                  </>
+                )}
               </div>
             </form>
           </div>

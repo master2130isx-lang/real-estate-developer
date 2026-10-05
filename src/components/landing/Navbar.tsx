@@ -4,9 +4,11 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { Building2, Menu, X, ArrowRight, UserCheck } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
+import { buildWhatsAppLink } from '@/lib/phone';
 import { WhatsAppIcon } from '@/components/common/WhatsAppIcon';
 import { FacebookIcon, InstagramIcon, TikTokIcon, YouTubeIcon } from '@/components/common/SocialIcons';
 import { ThemeToggle } from '@/components/common/ThemeToggle';
+import { getTopBarText } from '@/config/commercialConfig';
 
 interface NavbarProps {
   onOpenPrequalification: () => void;
@@ -18,14 +20,13 @@ export function Navbar({ onOpenPrequalification, onOpenPrivacy }: NavbarProps) {
   const { commercialConfig } = useApp();
   const social = commercialConfig.socialLinks;
   const hasSocial = Boolean(social?.facebook || social?.instagram || social?.tiktok || social?.youtube);
-  const cleanWa = commercialConfig.contactChannels.whatsapp.replace(/\D/g, '');
 
   return (
     <header className="sticky top-0 z-40 transition-colors">
       {/* Top bar — navy en claro, crema con texto oscuro en modo noche */}
       <div className="bg-[var(--color-navy)] text-center py-2.5 px-4 transition-colors">
         <span className="label-caps text-[#C09B53] dark:text-[#071A2C] font-bold tracking-[0.18em] text-[10px] sm:text-[11px]">
-          VISITAS PRIVADAS · {commercialConfig.coverageZone.toUpperCase()}
+          {getTopBarText(commercialConfig).toUpperCase()}
         </span>
       </div>
 
@@ -39,10 +40,10 @@ export function Navbar({ onOpenPrequalification, onOpenPrivacy }: NavbarProps) {
             </div>
             <div>
               <span className="font-serif text-base sm:text-lg font-bold tracking-tight text-[var(--color-navy)] block leading-tight">
-                {commercialConfig.agencyName || 'Valle de los Encinos'}
+                {commercialConfig.agencyName}
               </span>
               <span className="label-caps text-[var(--color-text-muted)] text-[9px]">
-                {commercialConfig.coverageZone ? commercialConfig.coverageZone.toUpperCase() : 'RESIDENCIAL · N.L.'}
+                {commercialConfig.coverageZone.toUpperCase()}
               </span>
             </div>
           </Link>
@@ -166,7 +167,7 @@ export function Navbar({ onOpenPrequalification, onOpenPrivacy }: NavbarProps) {
 
           <div className="pt-2 border-t border-[var(--color-border)] flex flex-col gap-2">
             <a
-              href={`https://wa.me/${cleanWa}?text=${encodeURIComponent('¡Hola! Me interesa conocer más sobre las viviendas en la Zona Norte de Nuevo León, Por favor Me podrían brindar información.')}`}
+              href={buildWhatsAppLink(commercialConfig.contactChannels.whatsapp, commercialConfig.landing.whatsappDefaultMessage)}
               target="_blank"
               rel="noopener noreferrer"
               onClick={() => setMobileMenuOpen(false)}
