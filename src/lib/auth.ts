@@ -132,33 +132,14 @@ export function setSessionCookie(
 
 /**
  * Extrae y valida la sesión del asesor desde la cookie de la request.
- * Soporta el nuevo formato firmado Y el formato legacy (JSON plano) para
- * transición suave sin cerrar sesiones activas.
  */
 export function getSessionFromRequest(req: NextRequest): SessionPayload | null {
   const sessionCookie = req.cookies.get(COOKIE_NAME);
   if (!sessionCookie || !sessionCookie.value) return null;
 
-  const value = sessionCookie.value;
-
-  // 1. Intentar formato firmado nuevo (base64url.hmac)
-  if (value.includes('.') && !value.startsWith('{')) {
-    return verifySession(value);
-  }
-
-  // 2. Formato legacy (JSON plano) — aceptar temporalmente para no romper sesiones activas
-  // pero marcar para renovación
-  try {
-    const parsed = JSON.parse(value);
-    if (parsed.expiresAt && Date.now() > parsed.expiresAt) return null;
-    return {
-      userId: parsed.userId || 'legacy',
-      email: parsed.email || '',
-      expiresAt: parsed.expiresAt || 0,
-    };
-  } catch {
-    return null;
-  }
+  // Solo se aceptan cookies firmadas (base64url.hmac). El formato legacy en JSON plano
+  // se eliminó porque permitía fabricar una sesión válida sin credenciales.
+  return verifySession(sessionCookie.value);
 }
 
 /**

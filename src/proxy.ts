@@ -24,27 +24,13 @@ import { verifySession } from '@/lib/auth';
 
 /**
  * Extrae y valida la sesión del asesor desde la cookie.
- * Soporta formato firmado (nuevo) y JSON plano (legacy para transición).
+ * Solo acepta cookies firmadas con HMAC (base64url.hmac).
  */
 function validateSessionCookie(request: NextRequest): boolean {
   const sessionCookie = request.cookies.get('advisor_session');
   if (!sessionCookie || !sessionCookie.value) return false;
 
-  const value = sessionCookie.value;
-
-  // 1. Formato firmado nuevo (base64url.hmac)
-  if (value.includes('.') && !value.startsWith('{')) {
-    return verifySession(value) !== null;
-  }
-
-  // 2. Formato legacy (JSON plano) — aceptar temporalmente
-  try {
-    const session = JSON.parse(value);
-    if (session.expiresAt && Date.now() > session.expiresAt) return false;
-    return true;
-  } catch {
-    return false;
-  }
+  return verifySession(sessionCookie.value) !== null;
 }
 
 // Rutas de API que requieren autenticación (método específico)
