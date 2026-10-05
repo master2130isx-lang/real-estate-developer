@@ -3,6 +3,7 @@ import path from 'path';
 import { Property } from '@/types';
 import { PROPERTIES_DATA } from '@/data/mockData';
 import { getSupabase } from './supabaseClient';
+import { DEFAULT_CLOSING_COSTS, PLACEHOLDER_PROPERTY_IMAGE } from './propertyDefaults';
 
 const PROPERTIES_FILE_PATH = path.join(process.cwd(), 'src', 'data', 'propertiesStore.json');
 const TMP_PROPERTIES_FILE_PATH = path.join('/tmp', 'propertiesStore.json');
@@ -20,7 +21,7 @@ function propertyToDbRow(prop: Property): Record<string, any> {
     code: prop.code,
     name: prop.name,
     model: prop.model,
-    development: prop.development || 'Valle de los Encinos',
+    development: prop.development || prop.name,
     address: prop.address || '',
     zone: prop.zone,
     city: prop.city,
@@ -35,7 +36,7 @@ function propertyToDbRow(prop: Property): Record<string, any> {
     admitted_financing: prop.admittedFinancing || ['infonavit', 'bancario', 'contado'],
     availability_status: prop.availabilityStatus || 'disponible',
     last_updated: prop.lastUpdated || new Date().toLocaleDateString('es-MX', { month: 'long', year: 'numeric' }),
-    estimated_closing_costs: prop.estimatedClosingCosts || 'Aprox. 5% a 7% (Escrituración y aranceles notariales en N.L.)',
+    estimated_closing_costs: prop.estimatedClosingCosts || DEFAULT_CLOSING_COSTS,
     image: prop.image,
     images: prop.images || (prop.image ? [prop.image] : []),
     tags: prop.tags || [],
@@ -55,10 +56,10 @@ function dbRowToProperty(row: any): Property {
     code: row.code,
     name: row.name,
     model: row.model,
-    development: row.development || 'Valle de los Encinos',
+    development: row.development || row.name,
     address: row.address || '',
-    zone: row.zone || 'Salinas Victoria, N.L.',
-    city: row.city || 'Salinas Victoria, N.L.',
+    zone: row.zone || row.city || '',
+    city: row.city || '',
     price: Number(row.price) || 0,
     priceFormatted: row.price_formatted || `$${Number(row.price).toLocaleString('es-MX')} MXN`,
     bedrooms: Number(row.bedrooms) || 0,
@@ -71,8 +72,8 @@ function dbRowToProperty(row: any): Property {
     availabilityStatus: row.availability_status || 'disponible',
     lastUpdated: row.last_updated || 'Actualizado recientemente',
     estimatedClosingCosts: row.estimated_closing_costs || 'Aprox. 5% a 7%',
-    image: row.image || (row.images && row.images[0]) || '/images/properties/aguila-premier/01-facade.jpg',
-    images: Array.isArray(row.images) && row.images.length > 0 ? row.images : [row.image || '/images/properties/aguila-premier/01-facade.jpg'],
+    image: row.image || (row.images && row.images[0]) || PLACEHOLDER_PROPERTY_IMAGE,
+    images: Array.isArray(row.images) && row.images.length > 0 ? row.images : [row.image || PLACEHOLDER_PROPERTY_IMAGE],
     tags: Array.isArray(row.tags) ? row.tags : [],
     description: row.description || '',
     keyFeatures: Array.isArray(row.key_features) ? row.key_features : [],

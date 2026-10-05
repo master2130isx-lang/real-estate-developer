@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { Lead } from '@/types';
 import { COMMERCIAL_CONFIG } from '@/config/commercialConfig';
+import { buildWhatsAppLink } from '@/lib/phone';
 import { useApp } from '@/context/AppContext';
 import { WhatsAppIcon } from '@/components/common/WhatsAppIcon';
 
@@ -65,23 +66,25 @@ export function WhatsAppDraftModal({ lead, onClose }: WhatsAppDraftModalProps) {
     properties[0];
 
   const firstName = (lead.fullName || 'Cliente').split(' ')[0];
-  const cleanPhone = (lead.phone || '').replace(/\D/g, '');
   const visitDay = lead.appointmentRequest?.confirmedDate || lead.appointmentRequest?.preferredDate || 'los próximos días';
   const visitTime = lead.appointmentRequest?.confirmedTime || lead.appointmentRequest?.timeSlot || 'en horario por convenir';
-  const siteUrl = typeof window !== 'undefined' ? window.location.origin : 'https://valledelosencinos.com';
+  const siteUrl = typeof window !== 'undefined' ? window.location.origin : '';
 
   const propertyTitle = lead.selectedPropertyTitle || matchedProperty?.name || 'la vivienda';
   const propertyPrice = matchedProperty?.price
     ? `$${matchedProperty.price.toLocaleString('es-MX')} MXN`
-    : (cfg.featuredPrice?.amountFormatted || '$1,253,000 MXN');
+    : cfg.featuredPrice?.amountFormatted || 'precio por confirmar';
   const developmentName = matchedProperty?.development || cfg.agencyName || 'el desarrollo';
-  const zoneName = matchedProperty?.zone || lead.interestedZone || cfg.coverageZone || 'la Zona Norte de Nuevo León';
-  const addressNote = matchedProperty?.address || cfg.contactChannels.officeAddressNote || 'caseta principal con acceso controlado';
+  const zoneName = matchedProperty?.zone || lead.interestedZone || cfg.coverageZone;
+  const meetingPointLabel = cfg.landing.meetingPoint || 'Acceso principal';
+  const addressNote = matchedProperty?.address || cfg.contactChannels.officeAddressNote || meetingPointLabel;
   const meetingPoint = matchedProperty?.address
-    ? `Caseta principal en ${matchedProperty.address}`
-    : (cfg.contactChannels.officeAddressNote ? `Caseta principal (${cfg.contactChannels.officeAddressNote})` : 'Caseta principal con acceso controlado 24/7');
+    ? `${meetingPointLabel} en ${matchedProperty.address}`
+    : cfg.contactChannels.officeAddressNote
+    ? `${meetingPointLabel} (${cfg.contactChannels.officeAddressNote})`
+    : meetingPointLabel;
 
-  const gpsQuery = encodeURIComponent(matchedProperty?.address || cfg.contactChannels.officeAddressNote || `${developmentName}, ${zoneName}`);
+  const gpsQuery = encodeURIComponent(matchedProperty?.address || cfg.landing.mapQuery || cfg.contactChannels.officeAddressNote || `${developmentName}, ${zoneName}`);
   const mapsLink = `https://www.google.com/maps/search/?api=1&query=${gpsQuery}`;
   const wazeLink = `https://waze.com/ul?q=${gpsQuery}&navigate=yes`;
 
@@ -98,9 +101,9 @@ export function WhatsAppDraftModal({ lead, onClose }: WhatsAppDraftModalProps) {
       text: `¡Hola ${firstName}! Te escribe ${cfg.advisorName}, tu asesor comercial de ${cfg.agencyName}.\n\nTu visita para conocer el *${propertyTitle}* en *${developmentName} (${zoneName})* ha quedado programada:\n\n• Día: ${visitDay}\n• Horario: ${visitTime}\n• Punto de reunión: ${meetingPoint}\n\n¿Me confirmas que recibiste estos datos para enviarte la ubicación exacta por GPS?`,
     },
     ubicacion: {
-      title: 'Ubicación GPS Caseta',
+      title: 'Ubicación GPS',
       icon: <MapPin className="w-3.5 h-3.5" />,
-      text: `¡Hola ${firstName}! Te comparto las rutas GPS directas para llegar a la caseta de acceso de *${developmentName} (${zoneName})*:\n\n• Google Maps: ${mapsLink}\n• Waze: ${wazeLink}\n\nAl llegar a la caseta (${addressNote}), avisa que tienes cita con ${cfg.advisorName} para que te permitan el acceso a las casas muestra. ¡Buen viaje!`,
+      text: `¡Hola ${firstName}! Te comparto las rutas GPS directas para llegar a *${developmentName} (${zoneName})*:\n\n• Google Maps: ${mapsLink}\n• Waze: ${wazeLink}\n\nAl llegar a ${meetingPointLabel.toLowerCase()} (${addressNote}), avisa que tienes cita con ${cfg.advisorName} para que te permitan el acceso a las casas muestra. ¡Buen viaje!`,
     },
     recordatorio: {
       title: 'Recordatorio Pre-Visita',
@@ -155,8 +158,7 @@ export function WhatsAppDraftModal({ lead, onClose }: WhatsAppDraftModalProps) {
     setCustomText(e.target.value);
   };
 
-  const encodedMessage = encodeURIComponent(activeMessage);
-  const waUrl = `https://wa.me/52${cleanPhone}?text=${encodedMessage}`;
+  const waUrl = buildWhatsAppLink(lead.phone, activeMessage);
 
   const handleCopy = () => {
     navigator.clipboard.writeText(activeMessage);

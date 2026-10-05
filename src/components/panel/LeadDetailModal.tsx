@@ -30,7 +30,8 @@ interface LeadDetailModalProps {
 }
 
 export function LeadDetailModal({ lead, onClose }: LeadDetailModalProps) {
-  const { updateLeadStatus, updateAppointmentStatus, addLeadNote, revealNssWithAudit, commercialConfig } = useApp();
+  const { updateLeadStatus, updateAppointmentStatus, addLeadNote, revealNssWithAudit, commercialConfig, properties } = useApp();
+  const attributionDays = commercialConfig.attributionRules.durationDays;
 
   const [activeTab, setActiveTab] = useState<'info' | 'atribucion' | 'cita' | 'notas' | 'auditoria'>('info');
   const [newNote, setNewNote] = useState('');
@@ -93,15 +94,16 @@ export function LeadDetailModal({ lead, onClose }: LeadDetailModalProps) {
   };
 
   const handleCopyConstructorSheet = () => {
-    const advisor = commercialConfig?.advisorName || 'Ismael Zapata';
+    const advisor = commercialConfig.advisorName;
+    const property = properties.find((p) => p.id === lead.selectedPropertyId);
     const isFovissste = lead.financingType === 'fovissste' || Boolean(lead.curpValue);
     const idKey = isFovissste ? 'CURP (FOVISSSTE)' : 'NSS (Infonavit)';
     const idVal = isFovissste
       ? (lead.curpValue || (lead.curpLastFour ? `**************${lead.curpLastFour}` : 'No proporcionada'))
       : (revealedNss || lead.nssValueEncryptedMock || (lead.nssLastFour ? `*******${lead.nssLastFour}` : 'No proporcionado'));
 
-    const sheetText = `📋 REGISTRO DE ATRIBUCIÓN COMERCIAL (15 DÍAS)
-Desarrollo: ${commercialConfig?.agencyName || 'Desarrollo Residencial'}
+    const sheetText = `📋 REGISTRO DE ATRIBUCIÓN COMERCIAL (${attributionDays} DÍAS)
+Desarrollo: ${property?.development || commercialConfig.agencyName}
 Modelo: ${lead.selectedPropertyTitle || 'Vivienda Residencial'}
 Cliente: ${lead.fullName}
 Teléfono: ${lead.phone}
@@ -131,7 +133,7 @@ Folio Web: ${lead.folio || 'N/A'}`;
     no_aplica: { label: 'No aplica', bg: 'bg-slate-100', text: 'text-slate-600' },
     pendiente_nss: { label: 'Pendiente de NSS (Orientación)', bg: 'bg-amber-100', text: 'text-amber-800' },
     pendiente_inmobiliaria: { label: 'Pendiente de registro en inmobiliaria', bg: 'bg-blue-100', text: 'text-blue-900' },
-    confirmado: { label: 'Registro confirmado (15 días activos)', bg: 'bg-emerald-100', text: 'text-emerald-900' },
+    confirmado: { label: `Registro confirmado (${attributionDays} días activos)`, bg: 'bg-emerald-100', text: 'text-emerald-900' },
     conflicto_rechazo: { label: 'Conflicto o rechazo', bg: 'bg-rose-100', text: 'text-rose-800' },
     vencido: { label: 'Vencido (Plazo concluido)', bg: 'bg-slate-200', text: 'text-slate-700' },
   };
@@ -174,7 +176,7 @@ Folio Web: ${lead.folio || 'N/A'}`;
             <div className="flex flex-wrap items-center gap-2 self-start sm:self-auto">
               <button
                 onClick={handleCopyConstructorSheet}
-                title="Copiar datos formateados para registrar en el sistema de la constructora y activar los 15 días"
+                title="Copiar datos formateados para registrar en el sistema de la constructora y activar la atribución"
                 className="bg-[#0F2C40] hover:bg-[#163E5B] dark:bg-[#1E3E5E] dark:hover:bg-[#254F77] text-white font-medium px-3 py-1.5 rounded-xl text-xs flex items-center gap-1.5 transition shadow-xs cursor-pointer border border-[#0F2C40] dark:border-[#2D5A85]"
               >
                 {copiedSheet ? (
@@ -217,7 +219,7 @@ Folio Web: ${lead.folio || 'N/A'}`;
         <div className="flex border-b border-slate-200 dark:border-slate-800 gap-4 mb-5 text-xs font-bold overflow-x-auto">
           {[
             { id: 'info', label: 'Resumen' },
-            { id: 'atribucion', label: 'Registro Inmobiliaria (15 días)' },
+            { id: 'atribucion', label: `Registro Inmobiliaria (${attributionDays} días)` },
             { id: 'cita', label: 'Visita Solicitada' },
             { id: 'notas', label: `Notas (${(lead.internalNotes || []).length})` },
             { id: 'auditoria', label: `Auditoría (${(lead.auditHistory || []).length})` },
@@ -273,9 +275,23 @@ Folio Web: ${lead.folio || 'N/A'}`;
                 <div className="flex items-center gap-2 text-slate-700 dark:text-slate-300">
                   <MapPin className="w-4 h-4 text-slate-500 dark:text-slate-400" />
                   <span>
-                    <strong>Zona:</strong> {lead.interestedZone || 'Salinas Victoria, N.L. (Valle de los Encinos)'}
+                    <strong>Zona:</strong> {lead.interestedZone || commercialConfig.coverageZone}
                   </span>
                 </div>
+                {lead.leadSource && (
+                  <div>
+                    <strong>Origen:</strong>{' '}
+                    {{ landing: 'Landing', registro: 'Registro rápido (anuncios)', solicitar_visita: 'Enlace directo de visita', panel: 'Panel del asesor' }[
+                      lead.leadSource.channel
+                    ] || lead.leadSource.channel}
+                    {[lead.leadSource.utmSource, lead.leadSource.utmMedium, lead.leadSource.utmCampaign].filter(Boolean).length > 0 && (
+                      <span className="text-slate-500 dark:text-slate-400">
+                        {' '}
+                        · {[lead.leadSource.utmSource, lead.leadSource.utmMedium, lead.leadSource.utmCampaign].filter(Boolean).join(' / ')}
+                      </span>
+                    )}
+                  </div>
+                )}
                 <div>
                   <strong>Forma de compra:</strong> {((lead.financingType || 'infonavit') as string).replace(/_/g, ' ')}
                 </div>
@@ -396,7 +412,7 @@ Folio Web: ${lead.folio || 'N/A'}`;
           </div>
         )}
 
-        {/* PESTAÑA 2: REGISTRO INTERNO · 15 DÍAS */}
+        {/* PESTAÑA 2: REGISTRO INTERNO DE ATRIBUCIÓN */}
         {activeTab === 'atribucion' && (
           <div className="space-y-4">
             <div className="bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-2xl p-5 space-y-4">
@@ -404,7 +420,7 @@ Folio Web: ${lead.folio || 'N/A'}`;
                 <div className="flex items-center gap-2">
                   <Building2 className="w-5 h-5 text-amber-600 dark:text-amber-400" />
                   <span className="font-bold text-sm text-slate-900 dark:text-slate-100">
-                    Mecanismo de Atribución Comercial (15 Días)
+                    Mecanismo de Atribución Comercial ({attributionDays} Días)
                   </span>
                 </div>
                 <span className={`text-xs font-bold px-2.5 py-1 rounded-lg ${currentAttribution.bg} ${currentAttribution.text}`}>
@@ -452,7 +468,7 @@ Folio Web: ${lead.folio || 'N/A'}`;
                     Acción urgente para el asesor:
                   </p>
                   <p className="leading-relaxed">
-                    El prospecto ya proporcionó su NSS en la web. Copia la ficha con el botón superior y regístralo de inmediato en el portal de la constructora para asegurar tu bloqueo de 15 días.
+                    El prospecto ya proporcionó su NSS en la web. Copia la ficha con el botón superior y regístralo de inmediato en el portal de la constructora para asegurar tu bloqueo de {attributionDays} días.
                   </p>
                 </div>
               ) : lead.attributionStatus === 'pendiente_nss' ? (
@@ -597,7 +613,9 @@ Folio Web: ${lead.folio || 'N/A'}`;
 
             <div className="space-y-2.5 pt-2">
               {(lead.internalNotes || []).length > 0 ? (
-                (lead.internalNotes || []).map((note) => (
+                [...(lead.internalNotes || [])]
+                  .sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''))
+                  .map((note) => (
                   <div key={note.id} className="bg-slate-50 dark:bg-slate-800/60 p-3.5 rounded-xl border border-slate-200 dark:border-slate-700 text-xs space-y-1">
                     <div className="flex justify-between text-[11px] text-slate-500 dark:text-slate-400 font-medium">
                       <span className="font-bold text-slate-700 dark:text-slate-300">{note.author}</span>
@@ -621,7 +639,9 @@ Folio Web: ${lead.folio || 'N/A'}`;
             </p>
             <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
               {(lead.auditHistory || []).length > 0 ? (
-                (lead.auditHistory || []).map((event) => (
+                [...(lead.auditHistory || [])]
+                  .sort((a, b) => (b.timestamp || '').localeCompare(a.timestamp || ''))
+                  .map((event) => (
                   <div
                     key={event.id}
                     className="bg-slate-50 dark:bg-slate-800/60 p-3 rounded-xl border border-slate-200 dark:border-slate-700 text-xs flex items-start gap-2.5"

@@ -1,10 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerLeadById, updateServerLeadAppointment } from '@/lib/leadsServerStore';
-import { buildClientWhatsAppConfirmUrl, buildClientWhatsAppCancelUrl } from '@/lib/telegramService';
+import { getServerLeadById, updateServerLead } from '@/lib/leadsServerStore';
+import {
+  buildClientWhatsAppConfirmUrl,
+  buildClientWhatsAppCancelUrl,
+  escapeMd,
+  sendTelegramMessage,
+} from '@/lib/telegramService';
 import { getServerCommercialConfig } from '@/lib/commercialConfigStore';
+import { CommercialConfig } from '@/config/commercialConfig';
 import { verifyActionToken } from '@/lib/auth';
-
-const TELEGRAM_API_BASE = 'https://api.telegram.org';
 
 /**
  * Escapa caracteres HTML para prevenir XSS en contenido interpolado
@@ -21,7 +25,7 @@ function escapeHtml(str: string): string {
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
-  const action = searchParams.get('action') || 'confirm';
+  const action = searchParams.get('action') === 'cancel' ? 'cancel' : 'confirm';
   const leadId = searchParams.get('leadId');
   const token = searchParams.get('token');
 
@@ -57,56 +61,55 @@ export async function GET(req: NextRequest) {
   }
 
   const isConfirm = action === 'confirm';
-  const newStatus = isConfirm ? 'confirmada' : 'cancelada';
+  const config = await getServerCommercialConfig();
 
   // 1. Actualizar el estatus en la base de datos (Supabase / Store local)
-  const updatedLead = await updateServerLeadAppointment(leadId, newStatus);
-  const activeLead = updatedLead || lead;
+  let updatedLead = null;
+  try {
+    updatedLead = await updateServerLead(
+      leadId,
+      { type: 'appointment', status: isConfirm ? 'confirmada' : 'cancelada' },
+      {
+        actor: 'Enlace de Telegram',
+        durationDays: config.attributionRules.durationDays,
+        timezone: config.schedule?.timezone,
+      }
+    );
+  } catch (err) {
+    console.error('Error al actualizar cita desde enlace de Telegram:', err);
+  }
+  if (!updatedLead) {
+    return new NextResponse(
+      renderHtmlPage('error', 'No se pudo guardar el cambio. Intenta de nuevo o hazlo desde el panel.', null, '', config),
+      { headers: { 'Content-Type': 'text/html; charset=utf-8' }, status: 503 }
+    );
+  }
+  const activeLead = updatedLead;
 
   // 2. Construir enlace de WhatsApp
   const waUrl = isConfirm
-    ? buildClientWhatsAppConfirmUrl(activeLead)
-    : buildClientWhatsAppCancelUrl(activeLead);
+    ? buildClientWhatsAppConfirmUrl(activeLead, config)
+    : buildClientWhatsAppCancelUrl(activeLead, config);
 
   // 3. Notificar a Telegram la actualización del estado
-  try {
-    const config = await getServerCommercialConfig();
-    const botToken = process.env.TELEGRAM_BOT_TOKEN;
-    const chatId = config.telegramConfig?.advisorChatId?.trim() || process.env.TELEGRAM_ADVISOR_CHAT_ID;
-
-    if (botToken && chatId) {
-      const statusText = isConfirm ? '✅ *CITA CONFIRMADA DESDE MÓVIL*' : '❌ *CITA CANCELADA DESDE MÓVIL*';
-      const visitDate = activeLead.appointmentRequest?.confirmedDate || activeLead.appointmentRequest?.preferredDate || 'Por acordar';
-      const visitTime = activeLead.appointmentRequest?.confirmedTime || activeLead.appointmentRequest?.timeSlot || 'Por acordar';
-
-      const updateMsg = `${statusText}
+  const statusText = isConfirm ? '✅ *CITA CONFIRMADA DESDE MÓVIL*' : '❌ *CITA CANCELADA DESDE MÓVIL*';
+  const visitDate = activeLead.appointmentRequest?.confirmedDate || activeLead.appointmentRequest?.preferredDate || 'Por acordar';
+  const visitTime = activeLead.appointmentRequest?.confirmedTime || activeLead.appointmentRequest?.timeSlot || 'Por acordar';
+  const meetingPoint = config.landing?.meetingPoint || config.contactChannels.officeAddressNote;
+  await sendTelegramMessage(
+    `${statusText}
 ━━━━━━━━━━━━━━━━━━━━
-👤 *Cliente:* ${activeLead.fullName}
+👤 *Cliente:* ${escapeMd(activeLead.fullName)}
 📱 *Teléfono:* \`${activeLead.phone}\`
-📅 *Visita:* ${visitDate} a las ${visitTime}
-📍 *Lugar:* Caseta principal Valle de los Encinos
+📅 *Visita:* ${escapeMd(visitDate)} a las ${escapeMd(visitTime)}
+📍 *Lugar:* ${escapeMd(meetingPoint)}
 ━━━━━━━━━━━━━━━━━━━━
-El estado ha sido actualizado en la base de datos comercial.`;
-
-      await fetch(`${TELEGRAM_API_BASE}/bot${botToken}/sendMessage`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          chat_id: chatId,
-          text: updateMsg,
-          parse_mode: 'Markdown',
-          reply_markup: {
-            inline_keyboard: [[{ text: '💬 Enviar WhatsApp al Cliente', url: waUrl }]],
-          },
-        }),
-      });
-    }
-  } catch (e) {
-    console.warn('Advertencia al enviar confirmación complementaria a Telegram:', e);
-  }
+El estado ha sido actualizado en la base de datos comercial.`,
+    [[{ text: '💬 Enviar WhatsApp al Cliente', url: waUrl }]]
+  );
 
   // 4. Renderizar pantalla de confirmación ejecutiva con auto-apertura de WhatsApp
-  const html = renderHtmlPage(isConfirm ? 'success' : 'cancelled', '', activeLead, waUrl);
+  const html = renderHtmlPage(isConfirm ? 'success' : 'cancelled', '', activeLead, waUrl, config);
 
   return new NextResponse(html, {
     headers: { 'Content-Type': 'text/html; charset=utf-8' },
@@ -118,8 +121,12 @@ function renderHtmlPage(
   type: 'success' | 'cancelled' | 'error',
   errorMsg: string,
   lead: any,
-  waUrl: string
+  waUrl: string,
+  config?: CommercialConfig
 ): string {
+  const safeAgency = escapeHtml(config?.agencyName || 'Panel Comercial');
+  const safeZone = escapeHtml(config?.coverageZone || '');
+  const safeMeetingPoint = escapeHtml(config?.landing?.meetingPoint || config?.contactChannels.officeAddressNote || 'Punto de reunión por confirmar');
   const isSuccess = type === 'success';
   const isCancelled = type === 'cancelled';
 
@@ -143,7 +150,7 @@ function renderHtmlPage(
   const safePhone = escapeHtml(lead?.phone || '');
   const safeDateStr = escapeHtml(dateStr);
   const safeTimeStr = escapeHtml(timeStr);
-  const safePropertyTitle = escapeHtml(lead?.selectedPropertyTitle || 'Modelo Águila Premier ($1.18M)');
+  const safePropertyTitle = escapeHtml(lead?.selectedPropertyTitle || 'Vivienda seleccionada');
   const safeErrorMsg = escapeHtml(errorMsg);
   const safeWaUrl = escapeHtml(waUrl);
 
@@ -152,7 +159,7 @@ function renderHtmlPage(
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>${escapeHtml(title)} • Valle de los Encinos</title>
+  <title>${escapeHtml(title)} • ${safeAgency}</title>
   <style>
     * { margin:0; padding:0; box-sizing:border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
     body { background: #0B1522; color: #F1F5F9; min-height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; }
@@ -176,7 +183,7 @@ function renderHtmlPage(
 <body>
   <div class="card">
     <div class="logo-badge">
-      🏢 Valle de los Encinos • Salinas Victoria
+      🏢 ${safeAgency}${safeZone ? ` • ${safeZone}` : ''}
     </div>
 
     <div class="status-badge">
@@ -204,7 +211,7 @@ function renderHtmlPage(
       </div>
       <div class="details-row">
         <span class="details-label">Punto de Acceso:</span>
-        <span class="details-val">Caseta Calzada del Sol</span>
+        <span class="details-val">${safeMeetingPoint}</span>
       </div>
       <div class="details-row">
         <span class="details-label">Vivienda:</span>

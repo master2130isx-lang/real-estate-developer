@@ -39,7 +39,7 @@ export async function GET() {
 
   return NextResponse.json({
     status: 'online',
-    description: 'Webhook de Bot de Telegram para Asesor Comercial (Valle de los Encinos)',
+    description: 'Webhook de Bot de Telegram para Asesor Comercial',
     config: {
       hasBotToken: hasToken,
       hasAdvisorChatId: hasChatId,

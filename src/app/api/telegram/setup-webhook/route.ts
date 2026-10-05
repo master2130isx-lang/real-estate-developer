@@ -52,6 +52,7 @@ export async function POST(req: NextRequest) {
         body: JSON.stringify({
           url: fullUrl,
           allowed_updates: ['message', 'callback_query'],
+          ...(process.env.TELEGRAM_WEBHOOK_SECRET ? { secret_token: process.env.TELEGRAM_WEBHOOK_SECRET } : {}),
         }),
       });
       const data = await res.json();

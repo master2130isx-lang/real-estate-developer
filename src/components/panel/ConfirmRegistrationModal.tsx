@@ -5,6 +5,7 @@ import { X, ShieldCheck, AlertCircle, Clock, CheckCircle2 } from 'lucide-react';
 import { Lead } from '@/types';
 import { useApp } from '@/context/AppContext';
 import { COMMERCIAL_CONFIG } from '@/config/commercialConfig';
+import { localTimestamp } from '@/lib/dateUtils';
 
 interface ConfirmRegistrationModalProps {
   lead: Lead | null;
@@ -14,11 +15,12 @@ interface ConfirmRegistrationModalProps {
 export function ConfirmRegistrationModal({ lead, onClose }: ConfirmRegistrationModalProps) {
   const { confirmAttributionInAgency, markAttributionConflict, commercialConfig } = useApp();
   const cfg = commercialConfig || COMMERCIAL_CONFIG;
+  const days = cfg.attributionRules.durationDays;
 
   const [mode, setMode] = useState<'confirmar' | 'conflicto'>('confirmar');
   const [reference, setReference] = useState('');
-  const [confirmedAtDate, setConfirmedAtDate] = useState(() => new Date().toISOString().split('T')[0]);
-  const [confirmedAtTime, setConfirmedAtTime] = useState(() => new Date().toTimeString().substring(0, 5));
+  const [confirmedAtDate, setConfirmedAtDate] = useState(() => localTimestamp(new Date(), cfg.schedule.timezone).slice(0, 10));
+  const [confirmedAtTime, setConfirmedAtTime] = useState(() => localTimestamp(new Date(), cfg.schedule.timezone).slice(11, 16));
   const [advisorName, setAdvisorName] = useState(cfg.advisorName);
   const [operatorUser, setOperatorUser] = useState(cfg.advisorName);
   const [notes, setNotes] = useState('');
@@ -57,7 +59,7 @@ export function ConfirmRegistrationModal({ lead, onClose }: ConfirmRegistrationM
         <div className="flex items-center gap-2 text-[#0d233a] dark:text-amber-400">
           <ShieldCheck className="w-5 h-5 text-amber-500" />
           <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-            Seguimiento de Atribución Comercial (15 Días)
+            Seguimiento de Atribución Comercial ({days} Días)
           </span>
         </div>
 
@@ -74,10 +76,10 @@ export function ConfirmRegistrationModal({ lead, onClose }: ConfirmRegistrationM
         <div className="bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-900/50 rounded-xl p-3 text-xs text-blue-900 dark:text-blue-200 space-y-1">
           <div className="flex items-center gap-1.5 font-bold text-blue-950 dark:text-blue-300">
             <Clock className="w-4 h-4 text-blue-600 dark:text-blue-400 flex-shrink-0" />
-            <span>Regla fundamental de inicio de los 15 días:</span>
+            <span>Regla fundamental de inicio de los {days} días:</span>
           </div>
           <p className="text-[11px] leading-relaxed text-blue-900 dark:text-blue-200">
-            Los 15 días de atribución comercial <strong>NO inician desde que el prospecto envió el formulario web</strong>.
+            Los {days} días de atribución comercial <strong>NO inician desde que el prospecto envió el formulario web</strong>.
             Inician únicamente a partir de la fecha y hora en que la inmobiliaria confirma el registro efectivo en su mecanismo interno.
           </p>
         </div>
@@ -193,7 +195,7 @@ export function ConfirmRegistrationModal({ lead, onClose }: ConfirmRegistrationM
                 className="bg-emerald-700 hover:bg-emerald-800 text-white font-bold px-4 py-2 rounded-xl shadow flex items-center gap-1.5 cursor-pointer"
               >
                 <CheckCircle2 className="w-4 h-4" />
-                <span>Confirmar Bloqueo de 15 Días</span>
+                <span>Confirmar Bloqueo de {days} Días</span>
               </button>
             </div>
           </form>
@@ -205,7 +207,7 @@ export function ConfirmRegistrationModal({ lead, onClose }: ConfirmRegistrationM
                 <span>Registro rechazado o duplicado:</span>
               </div>
               <p className="text-[11px] leading-relaxed">
-                Si la inmobiliaria rechaza el registro (por ejemplo, si el NSS ya estaba asignado a otro asesor o ya existía en su base dentro de los últimos 15 días), el prospecto pasa a revisión sin atribución.
+                Si la inmobiliaria rechaza el registro (por ejemplo, si el NSS ya estaba asignado a otro asesor o ya existía en su base dentro del periodo de exclusividad), el prospecto pasa a revisión sin atribución.
               </p>
             </div>
 
@@ -219,7 +221,7 @@ export function ConfirmRegistrationModal({ lead, onClose }: ConfirmRegistrationM
                 <option value="Prospecto ya registrado por otro asesor previamente.">
                   Prospecto ya registrado por otro asesor (Conflicto de asignación)
                 </option>
-                <option value="NSS ya registrado dentro de los últimos 15 días.">
+                <option value="NSS ya registrado dentro del periodo de exclusividad.">
                   NSS duplicado en periodo de atribución vigente
                 </option>
                 <option value="Rechazado por mesa de control de la inmobiliaria.">

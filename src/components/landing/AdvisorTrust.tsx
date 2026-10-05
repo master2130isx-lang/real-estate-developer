@@ -3,6 +3,7 @@
 import React from 'react';
 import { UserCheck, MapPin, Phone, Mail, Clock, HelpCircle, Info } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
+import { buildWhatsAppLink } from '@/lib/phone';
 import { WhatsAppIcon } from '@/components/common/WhatsAppIcon';
 import { FacebookIcon, InstagramIcon, TikTokIcon, YouTubeIcon } from '@/components/common/SocialIcons';
 
@@ -10,7 +11,6 @@ export function AdvisorTrust() {
   const { commercialConfig } = useApp();
   const social = commercialConfig.socialLinks;
   const hasSocial = Boolean(social?.facebook || social?.instagram || social?.tiktok || social?.youtube);
-  const cleanWa = commercialConfig.contactChannels.whatsapp.replace(/\D/g, '');
 
   const initials = commercialConfig.advisorName
     .split(' ')
@@ -119,7 +119,7 @@ export function AdvisorTrust() {
 
                 <div className="pt-2">
                   <a
-                    href={`https://wa.me/${cleanWa}?text=${encodeURIComponent('¡Hola! Me interesa conocer más sobre las viviendas en la Zona Norte de Nuevo León, Por favor Me podrían brindar información.')}`}
+                    href={buildWhatsAppLink(commercialConfig.contactChannels.whatsapp, commercialConfig.landing.whatsappDefaultMessage)}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="w-full bg-[#15803d] hover:bg-[#166534] text-white font-semibold py-2.5 px-3 rounded text-xs transition flex items-center justify-center gap-2 shadow-xs"

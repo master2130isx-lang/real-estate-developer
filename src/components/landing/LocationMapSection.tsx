@@ -4,6 +4,15 @@ import React, { useState, useEffect, useRef } from 'react';
 import { MapPin, Navigation, Bus, GraduationCap, Building2, ExternalLink, Clock, Map } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
 import { WhatsAppIcon } from '@/components/common/WhatsAppIcon';
+import { getMapQuery } from '@/config/commercialConfig';
+import { buildWhatsAppLink } from '@/lib/phone';
+
+const CONNECTIVITY_ICONS = [
+  { icon: Navigation, color: 'text-blue-600 dark:text-blue-400' },
+  { icon: Bus, color: 'text-[var(--color-success)]' },
+  { icon: GraduationCap, color: 'text-[var(--color-accent-text)]' },
+  { icon: Building2, color: 'text-purple-600 dark:text-purple-400' },
+];
 
 export function LocationMapSection() {
   const { commercialConfig } = useApp();
@@ -29,16 +38,17 @@ export function LocationMapSection() {
     return () => observer.disconnect();
   }, []);
 
-  const addressQuery = commercialConfig.contactChannels.officeAddressNote || 'Calzada del Sol, Salinas Victoria, Nuevo León, México';
+  const landing = commercialConfig.landing;
+  const addressQuery = getMapQuery(commercialConfig);
+  const addressLabel = commercialConfig.contactChannels.officeAddressNote || addressQuery;
   const queryAddress = encodeURIComponent(addressQuery);
   const googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${queryAddress}`;
   const wazeUrl = `https://waze.com/ul?q=${queryAddress}&navigate=yes`;
 
-  const cleanWa = commercialConfig.contactChannels.whatsapp.replace(/\D/g, '');
-  const waLocationMsg = encodeURIComponent(
+  const waLocationUrl = buildWhatsAppLink(
+    commercialConfig.contactChannels.whatsapp,
     `¡Hola! Me gustaría que me compartan la ubicación exacta de la casa muestra en ${commercialConfig.agencyName} (${commercialConfig.coverageZone}) por WhatsApp.`
   );
-  const waLocationUrl = `https://wa.me/${cleanWa}?text=${waLocationMsg}`;
 
   const mapEmbedUrl = `https://maps.google.com/maps?q=${queryAddress}&t=&z=14&ie=UTF8&iwloc=&output=embed`;
 
@@ -55,7 +65,7 @@ export function LocationMapSection() {
               ¿Cómo llegar a {commercialConfig.agencyName}?
             </h2>
             <p className="text-[var(--color-text-secondary)] text-sm sm:text-base leading-relaxed">
-              Fraccionamiento ubicado en <strong>{commercialConfig.contactChannels.officeAddressNote || 'Calzada del Sol, Salinas Victoria, N.L.'}</strong> Conoce las principales vías de acceso y abre la ruta directa en tu aplicación de mapas favorita.
+              Fraccionamiento ubicado en <strong>{addressLabel}</strong> Conoce las principales vías de acceso y abre la ruta directa en tu aplicación de mapas favorita.
             </p>
           </div>
 
@@ -92,17 +102,19 @@ export function LocationMapSection() {
             <div className="bg-[var(--color-navy)] dark:bg-[var(--color-surface-alt)] text-white dark:text-[var(--color-text)] px-4 py-2.5 flex items-center justify-between text-xs font-medium border-b border-white/10">
               <div className="flex items-center gap-2">
                 <MapPin className="w-4 h-4 text-[var(--color-accent)]" />
-                <span>Calzada del Sol, Salinas Victoria, N.L.</span>
+                <span>{addressQuery}</span>
               </div>
-              <span className="label-caps bg-emerald-950/90 text-emerald-300 border border-emerald-600/40 px-2 py-0.5 rounded text-[11px] font-semibold tracking-wide">
-                Caseta 24/7
-              </span>
+              {landing.accessBadge && (
+                <span className="label-caps bg-emerald-950/90 text-emerald-300 border border-emerald-600/40 px-2 py-0.5 rounded text-[11px] font-semibold tracking-wide">
+                  {landing.accessBadge}
+                </span>
+              )}
             </div>
 
             <div className="relative w-full flex-1 flex items-center justify-center bg-[var(--color-surface-alt)]">
               {isMapLoaded ? (
                 <iframe
-                  title="Mapa de ubicación Valle de los Encinos"
+                  title={`Mapa de ubicación ${commercialConfig.agencyName}`}
                   src={mapEmbedUrl}
                   width="100%"
                   height="100%"
@@ -154,7 +166,7 @@ export function LocationMapSection() {
                 <span>Punto de encuentro para visitas</span>
               </div>
               <p className="text-[var(--color-text-secondary)] leading-relaxed">
-                Las citas se coordinan directamente en la <strong>caseta de acceso con control 24/7</strong> de {commercialConfig.agencyName} ({commercialConfig.contactChannels.officeAddressNote || 'sobre Calzada del Sol'}). Tu asesor te recibirá personalmente para darte el recorrido por la casa muestra.
+                Las citas se coordinan directamente en <strong>{(landing.meetingPoint || 'el acceso principal').toLowerCase()}</strong> de {commercialConfig.agencyName} ({addressLabel}). Tu asesor te recibirá personalmente para darte el recorrido por la casa muestra.
               </p>
             </div>
 
@@ -163,22 +175,20 @@ export function LocationMapSection() {
                 Conectividad y servicios cercanos
               </h3>
 
-              {[
-                { icon: Navigation, title: 'Vialidades principales', desc: 'Conexión fluida hacia Carretera a Colombia, Libramiento Noreste y salidas rápidas hacia Escobedo y San Nicolás.', color: 'text-blue-600 dark:text-blue-400' },
-                { icon: Bus, title: 'Transporte público', desc: 'Rutas de transporte colectivo urbano con paradas accesibles sobre Calzada del Sol y avenidas perimetrales.', color: 'text-[var(--color-success)]' },
-                { icon: GraduationCap, title: 'Escuelas y comercios locales', desc: 'Planteles educativos de nivel básico, tiendas de autoservicio, farmacias y comercios a pocos minutos.', color: 'text-[var(--color-accent-text)]' },
-                { icon: Building2, title: 'Centros de trabajo', desc: 'Ubicación estratégica próxima a los principales parques industriales y centros logísticos del norte metropolitano.', color: 'text-purple-600 dark:text-purple-400' },
-              ].map(({ icon: Icon, title, desc, color }, i) => (
-                <div key={i} className="bg-[var(--color-bg)] border border-[var(--color-border)] rounded-lg p-4 flex items-start gap-3">
-                  <div className="w-9 h-9 rounded-lg bg-[var(--color-surface)] border border-[var(--color-border)] flex items-center justify-center flex-shrink-0 mt-0.5">
-                    <Icon className={`w-4 h-4 ${color}`} />
+              {landing.connectivity.map(({ title, description: desc }, i) => {
+                const { icon: Icon, color } = CONNECTIVITY_ICONS[i % CONNECTIVITY_ICONS.length];
+                return (
+                  <div key={i} className="bg-[var(--color-bg)] border border-[var(--color-border)] rounded-lg p-4 flex items-start gap-3">
+                    <div className="w-9 h-9 rounded-lg bg-[var(--color-surface)] border border-[var(--color-border)] flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <Icon className={`w-4 h-4 ${color}`} />
+                    </div>
+                    <div className="space-y-0.5 text-xs">
+                      <h4 className="font-semibold text-[var(--color-navy)]">{title}</h4>
+                      <p className="text-[var(--color-text-secondary)] leading-relaxed">{desc}</p>
+                    </div>
                   </div>
-                  <div className="space-y-0.5 text-xs">
-                    <h4 className="font-semibold text-[var(--color-navy)]">{title}</h4>
-                    <p className="text-[var(--color-text-secondary)] leading-relaxed">{desc}</p>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         </div>

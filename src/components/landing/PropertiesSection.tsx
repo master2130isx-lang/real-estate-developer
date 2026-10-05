@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { Property } from '@/types';
 import { PROPERTIES_DATA } from '@/data/mockData';
+import { AVAILABILITY_LABELS, FINANCING_SHORT_LABELS } from '@/lib/propertyLabels';
 import { useApp } from '@/context/AppContext';
 import { PropertyDetailModal } from './PropertyDetailModal';
 
@@ -25,10 +26,10 @@ interface PropertiesSectionProps {
 }
 
 export function PropertiesSection({ onSelectPropertyForPrequalification }: PropertiesSectionProps) {
-  const { properties: appProperties } = useApp();
+  const { properties: appProperties, commercialConfig } = useApp();
   const properties = appProperties && appProperties.length > 0 ? appProperties : PROPERTIES_DATA;
 
-  const [selectedPropertyId, setSelectedPropertyId] = useState<string>(properties[0]?.id || 'prop-aguila-premier');
+  const [selectedPropertyId, setSelectedPropertyId] = useState<string>(properties[0]?.id || '');
   const [selectedModalProperty, setSelectedModalProperty] = useState<Property | null>(null);
   const [activePhotoIndex, setActivePhotoIndex] = useState<number>(0);
 
@@ -59,7 +60,7 @@ export function PropertiesSection({ onSelectPropertyForPrequalification }: Prope
               {property.model} · {property.development}
             </h2>
             <p className="text-[var(--color-text-secondary)] text-sm sm:text-base leading-relaxed">
-              Vivienda de dos plantas en fraccionamiento privado con acceso controlado en Salinas Victoria, N.L. Conoce las fotografías reales de la casa muestra y agenda tu visita personalizada.
+              {commercialConfig.landing.propertiesIntro}
             </p>
           </div>
           <div className="text-xs text-[var(--color-text-secondary)] bg-[var(--color-bg)] p-3.5 rounded-lg border border-[var(--color-border)] self-start md:self-auto">
@@ -186,7 +187,7 @@ export function PropertiesSection({ onSelectPropertyForPrequalification }: Prope
               {/* Encabezado y Precio */}
               <div>
                 <span className="label-caps text-[var(--color-accent-text)] text-[10px]">
-                  {property.development} · Salinas Victoria, N.L.
+                  {[property.development, property.city].filter(Boolean).join(' · ')}
                 </span>
                 <h3 className="font-serif text-2xl sm:text-3xl font-bold text-[var(--color-navy)] mt-1.5">
                   {property.model}
@@ -195,8 +196,12 @@ export function PropertiesSection({ onSelectPropertyForPrequalification }: Prope
                   <span className="text-2xl sm:text-3xl font-bold text-[var(--color-navy)]">
                     {property.priceFormatted}
                   </span>
-                  <span className="label-caps text-[var(--color-success)] bg-[var(--color-success-bg)] px-2 py-0.5 rounded text-[10px]">
-                    Disponible
+                  <span
+                    className={`label-caps px-2 py-0.5 rounded text-[10px] ${
+                      (AVAILABILITY_LABELS[property.availabilityStatus] || AVAILABILITY_LABELS.disponible).className
+                    }`}
+                  >
+                    {(AVAILABILITY_LABELS[property.availabilityStatus] || AVAILABILITY_LABELS.disponible).label}
                   </span>
                 </div>
               </div>
@@ -298,15 +303,16 @@ export function PropertiesSection({ onSelectPropertyForPrequalification }: Prope
                   Formas de compra admitidas
                 </span>
                 <div className="flex flex-wrap gap-1.5 text-xs">
-                  <span className="bg-[var(--color-bg)] text-[var(--color-text)] font-medium px-2.5 py-1 rounded border border-[var(--color-border)]">
-                    ✓ Infonavit
-                  </span>
-                  <span className="bg-[var(--color-bg)] text-[var(--color-text)] font-medium px-2.5 py-1 rounded border border-[var(--color-border)]">
-                    ✓ Crédito Bancario
-                  </span>
-                  <span className="bg-[var(--color-bg)] text-[var(--color-text)] font-medium px-2.5 py-1 rounded border border-[var(--color-border)]">
-                    ✓ Contado
-                  </span>
+                  {(property.admittedFinancing?.length ? property.admittedFinancing : (['infonavit', 'bancario', 'contado'] as const)).map(
+                    (f) => (
+                      <span
+                        key={f}
+                        className="bg-[var(--color-bg)] text-[var(--color-text)] font-medium px-2.5 py-1 rounded border border-[var(--color-border)]"
+                      >
+                        ✓ {FINANCING_SHORT_LABELS[f] || f}
+                      </span>
+                    )
+                  )}
                 </div>
               </div>
             </div>

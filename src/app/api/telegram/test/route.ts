@@ -1,6 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerCommercialConfig } from '@/lib/commercialConfigStore';
 import { checkRateLimit, getClientIp, TELEGRAM_TEST_RATE_LIMIT } from '@/lib/rateLimit';
+import { requireAuth } from '@/lib/auth';
+
+/** Devuelve el @usuario del bot configurado (para mostrarlo en el panel). */
+export async function GET(req: NextRequest) {
+  const authError = requireAuth(req);
+  if (authError) return authError;
+
+  const token = process.env.TELEGRAM_BOT_TOKEN;
+  if (!token) return NextResponse.json({ ok: false, error: 'TELEGRAM_BOT_TOKEN no configurado' });
+  try {
+    const res = await fetch(`https://api.telegram.org/bot${token}/getMe`);
+    const data = await res.json();
+    if (!data.ok) return NextResponse.json({ ok: false, error: data.description });
+    return NextResponse.json({ ok: true, username: data.result?.username || '' });
+  } catch (error: any) {
+    return NextResponse.json({ ok: false, error: error.message });
+  }
+}
 
 export async function POST(req: NextRequest) {
   try {

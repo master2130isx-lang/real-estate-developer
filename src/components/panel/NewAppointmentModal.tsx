@@ -16,6 +16,10 @@ import { useApp } from '@/context/AppContext';
 import { Lead } from '@/types';
 import { WhatsAppIcon } from '@/components/common/WhatsAppIcon';
 import { COMMERCIAL_CONFIG } from '@/config/commercialConfig';
+import { addDaysLocalISO } from '@/lib/dateUtils';
+import { buildWhatsAppLink } from '@/lib/phone';
+import { CURP_REGEX } from '@/lib/leadFactory';
+import { resolveHeroProperty } from '@/lib/heroProperty';
 
 interface NewAppointmentModalProps {
   isOpen: boolean;
@@ -35,14 +39,13 @@ export function NewAppointmentModal({
   const [fullName, setFullName] = useState('');
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
-  const [preferredDate, setPreferredDate] = useState(() => {
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    return tomorrow.toISOString().split('T')[0];
-  });
-  const [timeSlot, setTimeSlot] = useState('11:00 AM');
+  const visitHours = cfg.schedule.visitHours;
+  const [preferredDate, setPreferredDate] = useState(() => addDaysLocalISO(1, cfg.schedule.timezone));
+  const [timeSlot, setTimeSlot] = useState(() => visitHours[1] || visitHours[0] || '11:00 AM');
   const [financingType, setFinancingType] = useState<Lead['financingType']>('infonavit');
+  const [selectedPropertyId, setSelectedPropertyId] = useState(() => resolveHeroProperty(properties, cfg)?.id || '');
   const [rawNss, setRawNss] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
   const [notes, setNotes] = useState('');
 
   // Estado de éxito posterior al agendamiento
@@ -56,12 +59,14 @@ export function NewAppointmentModal({
     setPhone(numeric);
   };
 
-  const handleNssChange = (val: string) => {
-    const numeric = val.replace(/\D/g, '').slice(0, 11);
-    setRawNss(numeric);
+  const isCurp = financingType === 'fovissste';
+  const attributionDays = cfg.attributionRules.durationDays;
+
+  const handleIdentifierChange = (val: string) => {
+    setRawNss(isCurp ? val.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 18) : val.replace(/\D/g, '').slice(0, 11));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!fullName.trim()) {
       setError('Por favor ingresa el nombre completo del interesado.');
@@ -75,27 +80,37 @@ export function NewAppointmentModal({
       setError('Selecciona la fecha para la visita.');
       return;
     }
-    if (rawNss && rawNss.length !== 11) {
+    if (rawNss && !isCurp && rawNss.length !== 11) {
       setError('El NSS debe contener exactamente 11 dígitos numéricos o déjalo vacío.');
+      return;
+    }
+    if (rawNss && isCurp && !CURP_REGEX.test(rawNss)) {
+      setError('La CURP no tiene un formato válido (18 caracteres) o déjala vacía.');
       return;
     }
 
     setError(null);
-    const newLead = scheduleNewAppointment({
+    setIsSaving(true);
+    const result = await scheduleNewAppointment({
       fullName: fullName.trim(),
       phone,
       email: email.trim() || undefined,
       financingType,
+      selectedPropertyId: selectedPropertyId || undefined,
       preferredDate,
       timeSlot,
       notes: notes.trim(),
-      rawNss: rawNss.trim() || undefined,
+      rawNss: !isCurp ? rawNss.trim() || undefined : undefined,
+      rawCurp: isCurp ? rawNss.trim() || undefined : undefined,
     });
+    setIsSaving(false);
 
-    setCreatedLead(newLead);
-    if (onAppointmentCreated) {
-      onAppointmentCreated(newLead);
+    if (!result.ok) {
+      setError(result.error);
+      return;
     }
+    setCreatedLead(result.lead);
+    onAppointmentCreated?.(result.lead);
   };
 
   const handleResetAndClose = () => {
@@ -112,19 +127,18 @@ export function NewAppointmentModal({
   // Mensaje pre-armado dinámico para enviar confirmación por WhatsApp
   const generateWhatsAppUrl = (lead: Lead) => {
     const firstName = lead.fullName.split(' ')[0];
-    const cleanPhone = lead.phone.replace(/\D/g, '');
     const dateFormatted = lead.appointmentRequest?.confirmedDate || preferredDate;
     const timeFormatted = lead.appointmentRequest?.confirmedTime || timeSlot;
-    const propertyTitle = lead.selectedPropertyTitle || properties[0]?.name || 'la vivienda';
-    const development = cfg.agencyName;
+    const property = properties.find((p) => p.id === lead.selectedPropertyId);
+    const propertyTitle = property?.model || lead.selectedPropertyTitle || 'la vivienda';
     const zone = lead.interestedZone || cfg.coverageZone;
-    const meetingPoint = properties[0]?.address
-      ? `Caseta principal en ${properties[0].address}`
-      : (cfg.contactChannels.officeAddressNote ? `Caseta principal (${cfg.contactChannels.officeAddressNote})` : 'Caseta principal con acceso controlado 24/7');
+    const meetingPoint = property?.address
+      ? `${cfg.landing.meetingPoint || 'Acceso principal'} en ${property.address}`
+      : cfg.landing.meetingPoint || cfg.contactChannels.officeAddressNote || 'Acceso principal';
 
-    const message = `¡Hola ${firstName}! Te escribe ${cfg.advisorName}, tu asesor comercial de ${development}.\n\nTu visita para conocer el *${propertyTitle}* en *${zone}* ha quedado agendada:\n\n• Día: ${dateFormatted}\n• Horario: ${timeFormatted}\n• Punto de reunión: ${meetingPoint}\n\n¿Me confirmas que recibiste estos datos para enviarte la ubicación exacta por GPS?`;
+    const message = `¡Hola ${firstName}! Te escribe ${cfg.advisorName}, tu asesor comercial de ${cfg.agencyName}.\n\nTu visita para conocer el *${propertyTitle}* en *${zone}* ha quedado agendada:\n\n• Día: ${dateFormatted}\n• Horario: ${timeFormatted}\n• Punto de reunión: ${meetingPoint}\n\n¿Me confirmas que recibiste estos datos para enviarte la ubicación exacta por GPS?`;
 
-    return `https://wa.me/52${cleanPhone}?text=${encodeURIComponent(message)}`;
+    return buildWhatsAppLink(lead.phone, message);
   };
 
   return (
@@ -174,11 +188,11 @@ export function NewAppointmentModal({
               </div>
               <div className="flex justify-between">
                 <span className="text-slate-500 dark:text-slate-400">Propiedad:</span>
-                <span className="font-semibold text-slate-800 dark:text-slate-200">Modelo Águila Premier</span>
+                <span className="font-semibold text-slate-800 dark:text-slate-200">{createdLead.selectedPropertyTitle || 'Sin modelo asignado'}</span>
               </div>
               {createdLead.attributionStatus === 'pendiente_inmobiliaria' && (
                 <div className="pt-2 border-t border-slate-200 dark:border-slate-700 text-blue-800 dark:text-blue-300 font-semibold text-[11px]">
-                  ⚡ NSS capturado: Recuerda ingresarlo en el sistema de la constructora para iniciar tus 15 días de exclusividad.
+                  ⚡ {createdLead.curpLastFour ? 'CURP' : 'NSS'} capturado: Recuerda ingresarlo en el sistema de la constructora para iniciar tus {attributionDays} días de exclusividad.
                 </div>
               )}
             </div>
@@ -262,6 +276,26 @@ export function NewAppointmentModal({
               </div>
             </div>
 
+            {/* Modelo de interés */}
+            {properties.length > 0 && (
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                  Modelo de Interés
+                </label>
+                <select
+                  value={selectedPropertyId}
+                  onChange={(e) => setSelectedPropertyId(e.target.value)}
+                  className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-xs bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-[#0d233a] dark:focus:ring-amber-500 focus:outline-none"
+                >
+                  {properties.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.model} · {p.development || p.name} ({p.priceFormatted})
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+
             {/* Fecha y Horario */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-amber-50/60 dark:bg-amber-950/20 p-3 rounded-2xl border border-amber-200/60 dark:border-amber-900/40">
               <div>
@@ -288,14 +322,11 @@ export function NewAppointmentModal({
                   onChange={(e) => setTimeSlot(e.target.value)}
                   className="w-full px-3 py-2 rounded-xl border border-amber-300 dark:border-amber-800/80 text-xs bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-[#0d233a] dark:focus:ring-amber-500 focus:outline-none font-medium"
                 >
-                  <option value="10:00 AM">10:00 AM</option>
-                  <option value="11:00 AM">11:00 AM</option>
-                  <option value="12:00 PM">12:00 PM</option>
-                  <option value="01:00 PM">01:00 PM</option>
-                  <option value="04:00 PM">04:00 PM</option>
-                  <option value="05:00 PM">05:00 PM</option>
-                  <option value="06:00 PM">06:00 PM</option>
-                  <option value="07:00 PM">07:00 PM</option>
+                  {visitHours.map((hour) => (
+                    <option key={hour} value={hour}>
+                      {hour}
+                    </option>
+                  ))}
                 </select>
               </div>
             </div>
@@ -309,7 +340,10 @@ export function NewAppointmentModal({
                 </label>
                 <select
                   value={financingType}
-                  onChange={(e) => setFinancingType(e.target.value as Lead['financingType'])}
+                  onChange={(e) => {
+                    setFinancingType(e.target.value as Lead['financingType']);
+                    setRawNss('');
+                  }}
                   className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-xs bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-[#0d233a] dark:focus:ring-amber-500 focus:outline-none"
                 >
                   <option value="infonavit">Crédito Infonavit (Tradicional / Total)</option>
@@ -322,17 +356,18 @@ export function NewAppointmentModal({
 
               <div>
                 <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                  NSS (Opcional - 11 dígitos)
+                  {isCurp ? 'CURP (Opcional - 18 caracteres)' : 'NSS (Opcional - 11 dígitos)'}
                 </label>
                 <input
                   type="text"
                   value={rawNss}
-                  onChange={(e) => handleNssChange(e.target.value)}
+                  inputMode={isCurp ? 'text' : 'numeric'}
+                  onChange={(e) => handleIdentifierChange(e.target.value)}
                   placeholder="Si lo tiene en mano"
                   className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-xs font-mono bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-[#0d233a] dark:focus:ring-amber-500 focus:outline-none"
                 />
                 <span className="text-[10px] text-slate-400 mt-0.5 block">
-                  Permite apartar atribución de 15 días en la constructora
+                  Permite apartar atribución de {attributionDays} días en la constructora
                 </span>
               </div>
             </div>
@@ -364,10 +399,11 @@ export function NewAppointmentModal({
 
               <button
                 type="submit"
-                className="bg-[#0d233a] hover:bg-[#163b5c] dark:bg-amber-500 dark:hover:bg-amber-400 dark:text-slate-950 text-white font-bold px-5 py-2.5 rounded-xl text-xs transition flex items-center gap-2 shadow-md cursor-pointer"
+                disabled={isSaving}
+                className="disabled:opacity-60 disabled:cursor-wait bg-[#0d233a] hover:bg-[#163b5c] dark:bg-amber-500 dark:hover:bg-amber-400 dark:text-slate-950 text-white font-bold px-5 py-2.5 rounded-xl text-xs transition flex items-center gap-2 shadow-md cursor-pointer"
               >
                 <Calendar className="w-4 h-4 text-amber-400 dark:text-slate-950" />
-                <span>Agendar y Guardar Cita</span>
+                <span>{isSaving ? 'Guardando…' : 'Agendar y Guardar Cita'}</span>
               </button>
             </div>
           </form>

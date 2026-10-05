@@ -1,6 +1,6 @@
 -- ==============================================================================
 -- ESQUEMA DE BASE DE DATOS DEFINITIVA (SUPABASE / POSTGRESQL)
--- Plataforma Inmobiliaria Comercial - Fraccionamiento Valle de los Encinos
+-- Plataforma Inmobiliaria Comercial (landing personalizable + panel del asesor)
 -- ==============================================================================
 --
 -- INSTRUCCIONES DE INSTALACIÓN:
@@ -23,7 +23,7 @@ CREATE TABLE IF NOT EXISTS leads (
   email TEXT,
   preferred_channel TEXT DEFAULT 'whatsapp',
   preferred_contact_time TEXT DEFAULT 'tarde',
-  interested_zone TEXT DEFAULT 'Salinas Victoria, N.L. (Valle de los Encinos)',
+  interested_zone TEXT DEFAULT '',
   selected_property_id TEXT,
   selected_property_title TEXT,
   budget_range TEXT DEFAULT 'aun_no_lo_se',
@@ -38,6 +38,9 @@ CREATE TABLE IF NOT EXISTS leads (
   nss_status TEXT DEFAULT 'no_aplica',
   nss_value_encrypted_mock TEXT,
   nss_last_four TEXT,
+  curp_value TEXT,
+  curp_last_four TEXT,
+  lead_source JSONB,
   
   -- Seguimiento de atribución comercial interna (15 días)
   attribution_status TEXT DEFAULT 'no_aplica',
@@ -82,6 +85,7 @@ CREATE TABLE IF NOT EXISTS commercial_config (
   social_links JSONB NOT NULL,
   telegram_config JSONB,
   featured_price JSONB,
+  settings JSONB,
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
@@ -102,7 +106,7 @@ CREATE TABLE IF NOT EXISTS properties (
   code TEXT UNIQUE NOT NULL,
   name TEXT NOT NULL,
   model TEXT NOT NULL,
-  development TEXT DEFAULT 'Valle de los Encinos',
+  development TEXT DEFAULT '',
   address TEXT,
   zone TEXT,
   city TEXT,

@@ -31,17 +31,34 @@ import { NewAppointmentModal } from '@/components/panel/NewAppointmentModal';
 import { AppointmentAgendaView } from '@/components/panel/AppointmentAgendaView';
 import { CommercialSettingsModal } from '@/components/panel/CommercialSettingsModal';
 import { PropertyManagerView } from '@/components/panel/PropertyManagerView';
+import { todayLocalISO } from '@/lib/dateUtils';
 
 export default function AgentPanelPage() {
-  const { leads, commercialConfig, properties } = useApp();
+  const { leads, leadsLoaded, configSynced, commercialConfig, properties, syncError, clearSyncError } = useApp();
+  const [sessionEmail, setSessionEmail] = useState<string>('');
+
+  React.useEffect(() => {
+    fetch('/api/auth/me')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => setSessionEmail(data?.user?.email || ''))
+      .catch(() => {});
+  }, []);
 
   // Pestaña activa principal: Agenda, Cartera de Prospectos o Modelos de Casas
   const [activeTab, setActiveTab] = useState<'agenda' | 'prospectos' | 'propiedades'>('agenda');
 
   // Modales
-  const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
-  const [waLead, setWaLead] = useState<Lead | null>(null);
-  const [regLead, setRegLead] = useState<Lead | null>(null);
+  // Se guarda solo el id: así los modales siempre muestran la versión más reciente del prospecto
+  const [selectedLeadId, setSelectedLeadId] = useState<string | null>(null);
+  const [waLeadId, setWaLeadId] = useState<string | null>(null);
+  const [regLeadId, setRegLeadId] = useState<string | null>(null);
+  const findLead = (id: string | null) => (id ? leads.find((l) => l.id === id) || null : null);
+  const selectedLead = findLead(selectedLeadId);
+  const waLead = findLead(waLeadId);
+  const regLead = findLead(regLeadId);
+  const setSelectedLead = (lead: Lead | null) => setSelectedLeadId(lead?.id || null);
+  const setWaLead = (lead: Lead | null) => setWaLeadId(lead?.id || null);
+  const setRegLead = (lead: Lead | null) => setRegLeadId(lead?.id || null);
   const [isNewAppointmentOpen, setIsNewAppointmentOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
@@ -51,7 +68,7 @@ export default function AgentPanelPage() {
   const [attributionFilter, setAttributionFilter] = useState<string>('todos');
   const [priorityOrder, setPriorityOrder] = useState<'prioridad' | 'recientes'>('prioridad');
 
-  const todayStr = new Date().toISOString().split('T')[0];
+  const todayStr = todayLocalISO(commercialConfig.schedule.timezone);
 
   // Ordenamiento con Criterios de Prioridad del Negocio
   const sortedLeads = [...leads].sort((a, b) => {
@@ -144,7 +161,8 @@ export default function AgentPanelPage() {
 
             <button
               onClick={() => setIsSettingsOpen(true)}
-              className="bg-[#13344C] hover:bg-[#19405E] text-slate-200 hover:text-white font-medium px-3 py-1.5 rounded-xl transition flex items-center gap-1.5 shadow-xs cursor-pointer border border-[#204562]"
+              disabled={!configSynced}
+              className="disabled:opacity-50 disabled:cursor-wait bg-[#13344C] hover:bg-[#19405E] text-slate-200 hover:text-white font-medium px-3 py-1.5 rounded-xl transition flex items-center gap-1.5 shadow-xs cursor-pointer border border-[#204562]"
               title="Personalizar datos del asesor, teléfonos, redes y bot de Telegram"
             >
               <Settings className="w-3.5 h-3.5 text-[#C09B53]" />
@@ -161,10 +179,12 @@ export default function AgentPanelPage() {
 
             {/* Asesor Autenticado y Cerrar Sesión */}
             <div className="flex items-center gap-2 pl-2 border-l border-white/15">
-              <div className="hidden xl:flex items-center gap-1.5 text-[11px] text-slate-300 bg-[#0B1E30] px-2.5 py-1 rounded-xl border border-white/10">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
-                <span className="font-mono text-slate-200">master2130.isx@gmail.com</span>
-              </div>
+              {sessionEmail && (
+                <div className="hidden xl:flex items-center gap-1.5 text-[11px] text-slate-300 bg-[#0B1E30] px-2.5 py-1 rounded-xl border border-white/10">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                  <span className="font-mono text-slate-200">{sessionEmail}</span>
+                </div>
+              )}
 
               <button
                 onClick={async () => {
@@ -185,6 +205,26 @@ export default function AgentPanelPage() {
 
 
       <main className="max-w-7xl mx-auto p-4 sm:p-6 w-full flex-1 space-y-6">
+        {syncError && (
+          <div
+            role="alert"
+            className="flex items-start justify-between gap-3 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/60 text-rose-900 dark:text-rose-200 text-xs rounded-2xl px-4 py-3"
+          >
+            <span className="flex items-center gap-2">
+              <AlertTriangle className="w-4 h-4 flex-shrink-0" aria-hidden="true" />
+              {syncError}
+            </span>
+            <button onClick={clearSyncError} className="font-semibold underline cursor-pointer">
+              Cerrar
+            </button>
+          </div>
+        )}
+        {!leadsLoaded && (
+          <p className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-2">
+            <RefreshCw className="w-3.5 h-3.5 animate-spin" aria-hidden="true" />
+            Sincronizando prospectos con el servidor…
+          </p>
+        )}
         {/* Tira Ejecutiva de Métricas de Ventas */}
         <section aria-labelledby="metricas-panel-heading">
           <h2 id="metricas-panel-heading" className="sr-only">
@@ -266,7 +306,7 @@ export default function AgentPanelPage() {
               <p className="text-[11px] text-[#C09B53] dark:text-amber-400 font-medium mt-1">Prioridad constructora</p>
             </div>
 
-            {/* Card 4: 15 Días Activos */}
+            {/* Card 4: Atribución activa */}
             <div
               onClick={() => {
                 setActiveTab('prospectos');
@@ -452,7 +492,7 @@ export default function AgentPanelPage() {
               </div>
             </div>
 
-            {/* Tabla de Prospectos con Atribución Comercial de 15 Días */}
+            {/* Tabla de Prospectos con Atribución Comercial */}
             <div className="bg-white dark:bg-[#102033] rounded-2xl border border-slate-200/80 dark:border-[#1E354D] shadow-xs overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-xs border-collapse">
@@ -513,7 +553,7 @@ export default function AgentPanelPage() {
                               {((lead.financingType || 'infonavit') as string).replace(/_/g, ' ')}
                             </td>
 
-                            {/* Atribución Comercial (15 Días) */}
+                            {/* Atribución Comercial */}
                             <td className="p-3.5 whitespace-nowrap">
                               <div className="space-y-1">
                                 <span
@@ -609,19 +649,18 @@ export default function AgentPanelPage() {
       />
 
       {/* Modal de Detalle Completo de Prospecto */}
-      <LeadDetailModal lead={selectedLead} onClose={() => setSelectedLead(null)} />
+      {/* key por prospecto: el estado interno (p. ej. NSS revelado) no se arrastra a otro prospecto */}
+      {selectedLead && <LeadDetailModal key={selectedLead.id} lead={selectedLead} onClose={() => setSelectedLead(null)} />}
 
       {/* Modal de Respuestas Rápidas por WhatsApp */}
-      <WhatsAppDraftModal lead={waLead} onClose={() => setWaLead(null)} />
+      {waLead && <WhatsAppDraftModal key={waLead.id} lead={waLead} onClose={() => setWaLead(null)} />}
 
       {/* Modal de Gestión de Atribución */}
-      <ConfirmRegistrationModal lead={regLead} onClose={() => setRegLead(null)} />
+      {regLead && <ConfirmRegistrationModal key={regLead.id} lead={regLead} onClose={() => setRegLead(null)} />}
 
       {/* Modal de Configuración Comercial y Redes Sociales */}
-      <CommercialSettingsModal
-        isOpen={isSettingsOpen}
-        onClose={() => setIsSettingsOpen(false)}
-      />
+      {/* Se monta al abrir para partir siempre de la configuración más reciente del servidor */}
+      {isSettingsOpen && <CommercialSettingsModal isOpen onClose={() => setIsSettingsOpen(false)} />}
     </div>
   );
 }

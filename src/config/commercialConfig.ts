@@ -1,7 +1,10 @@
 /**
- * Configuración comercial centralizada para el prototipo (Fase 1.1)
- * Todo el contenido marcado como demostración debe identificarse claramente
- * hasta que el responsable del negocio confirme la información definitiva.
+ * Configuración comercial centralizada.
+ *
+ * COMMERCIAL_CONFIG contiene únicamente los valores por defecto. La configuración real
+ * se edita desde el panel (Configuración Comercial) y se guarda en Supabase; se combina
+ * con estos valores mediante `mergeCommercialConfig` para que los campos nuevos siempre
+ * tengan un valor.
  */
 
 export interface TelegramRecipient {
@@ -11,6 +14,37 @@ export interface TelegramRecipient {
   isActive: boolean;
   createdAt?: string;
   notes?: string;
+}
+
+export interface ConnectivityItem {
+  title: string;
+  description: string;
+}
+
+/** Textos editables de la landing (cambian con cada fraccionamiento o campaña). */
+export interface LandingContent {
+  topBarText: string; // Vacío = "VISITAS PRIVADAS · {coverageZone}"
+  heroEyebrow: string;
+  heroTitle: string;
+  heroTitleHighlight: string;
+  heroDescription: string;
+  heroCtaLabel: string;
+  heroBadge: string;
+  propertiesIntro: string;
+  whatsappDefaultMessage: string;
+  mapQuery: string; // Dirección para Google Maps / Waze (vacío = officeAddressNote)
+  accessBadge: string; // Ej. "Caseta 24/7" (vacío = se oculta)
+  meetingPoint: string; // Ej. "Caseta de acceso con control 24/7"
+  connectivity: ConnectivityItem[];
+  footerDescription: string;
+  footerDisclaimer: string;
+  seoTitle: string;
+  seoDescription: string;
+}
+
+export interface ScheduleConfig {
+  visitHours: string[];
+  timezone: string;
 }
 
 export interface CommercialConfig {
@@ -35,6 +69,7 @@ export interface CommercialConfig {
   };
   telegramConfig?: {
     botToken?: string;
+    botUsername?: string;
     advisorChatId?: string;
     activeChatId?: string;
     recipients?: TelegramRecipient[];
@@ -51,7 +86,21 @@ export interface CommercialConfig {
     requireNssForBancario: boolean;
     requireNssForContado: boolean;
   };
+  landing: LandingContent;
+  schedule: ScheduleConfig;
 }
+
+export const DEFAULT_VISIT_HOURS = [
+  '10:00 AM',
+  '11:00 AM',
+  '12:00 PM',
+  '01:00 PM',
+  '02:00 PM',
+  '03:00 PM',
+  '04:00 PM',
+  '05:00 PM',
+  '06:00 PM',
+];
 
 export const COMMERCIAL_CONFIG: CommercialConfig = {
   isDemoMode: false,
@@ -98,14 +147,97 @@ export const COMMERCIAL_CONFIG: CommercialConfig = {
     requireNssForBancario: false,
     requireNssForContado: false,
   },
+  landing: {
+    topBarText: '',
+    heroEyebrow: 'Colección residencial 2026',
+    heroTitle: 'Una casa que',
+    heroTitleHighlight: 'se siente tuya.',
+    heroDescription:
+      'Diseñamos una forma de empezar: casas luminosas, un entorno tranquilo y el acompañamiento que necesitas para dar el siguiente paso.',
+    heroCtaLabel: 'Conocer la casa muestra',
+    heroBadge: 'Casa Muestra en Exhibición',
+    propertiesIntro:
+      'Vivienda de dos plantas en fraccionamiento privado con acceso controlado en Salinas Victoria, N.L. Conoce las fotografías reales de la casa muestra y agenda tu visita personalizada.',
+    whatsappDefaultMessage:
+      '¡Hola! Me interesa conocer más sobre las viviendas en la Zona Norte de Nuevo León. ¿Me podrían brindar información?',
+    mapQuery: 'Calzada del Sol, Salinas Victoria, Nuevo León, México',
+    accessBadge: 'Caseta 24/7',
+    meetingPoint: 'Caseta de acceso con control 24/7',
+    connectivity: [
+      {
+        title: 'Vialidades principales',
+        description:
+          'Conexión fluida hacia Carretera a Colombia, Libramiento Noreste y salidas rápidas hacia Escobedo y San Nicolás.',
+      },
+      {
+        title: 'Transporte público',
+        description: 'Rutas de transporte colectivo urbano con paradas accesibles sobre Calzada del Sol y avenidas perimetrales.',
+      },
+      {
+        title: 'Escuelas y comercios locales',
+        description: 'Planteles educativos de nivel básico, tiendas de autoservicio, farmacias y comercios a pocos minutos.',
+      },
+      {
+        title: 'Centros de trabajo',
+        description:
+          'Ubicación estratégica próxima a los principales parques industriales y centros logísticos del norte metropolitano.',
+      },
+    ],
+    footerDescription:
+      'Asesoría inmobiliaria personalizada, catálogo de vivienda y acompañamiento integral para tu crédito Infonavit, FOVISSSTE o bancario.',
+    footerDisclaimer:
+      '* Los precios y especificaciones son de referencia y pueden cambiar sin previo aviso. Los gastos notariales y de escrituración varían según la legislación y el municipio aplicable.',
+    seoTitle: 'Residencial & Asesoría Inmobiliaria | Valle de los Encinos',
+    seoDescription:
+      'Portal comercial y precalificación transparente para compra de vivienda con Infonavit, FOVISSSTE, crédito bancario o contado en Valle de los Encinos, Salinas Victoria, N.L.',
+  },
+  schedule: {
+    visitHours: DEFAULT_VISIT_HOURS,
+    timezone: 'America/Monterrey',
+  },
 };
+
+function isPlainObject(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+/**
+ * Combina una configuración guardada (posiblemente parcial o de una versión anterior)
+ * con los valores por defecto. Los objetos se combinan en profundidad; los arreglos
+ * guardados reemplazan a los de por defecto.
+ */
+export function mergeCommercialConfig(base: CommercialConfig, override?: unknown): CommercialConfig {
+  if (!isPlainObject(override)) return base;
+  const merge = (a: unknown, b: unknown): unknown => {
+    if (b === undefined) return a;
+    if (isPlainObject(a) && isPlainObject(b)) {
+      const result: Record<string, unknown> = { ...a };
+      for (const [key, value] of Object.entries(b)) {
+        result[key] = merge(a[key], value);
+      }
+      return result;
+    }
+    return b;
+  };
+  return merge(base, override) as CommercialConfig;
+}
+
+/** Texto del cintillo superior de la landing. */
+export function getTopBarText(config: CommercialConfig): string {
+  return config.landing.topBarText.trim() || `Visitas privadas · ${config.coverageZone}`;
+}
+
+/** Dirección usada para Google Maps / Waze. */
+export function getMapQuery(config: CommercialConfig): string {
+  return config.landing.mapQuery.trim() || config.contactChannels.officeAddressNote;
+}
 
 /**
  * Función centralizada que determina si un prospecto requiere NSS (Infonavit)
  */
-export function shouldRequestNss(financingType: string): boolean {
+export function shouldRequestNss(financingType: string, config: CommercialConfig = COMMERCIAL_CONFIG): boolean {
   if (financingType === 'infonavit') {
-    return COMMERCIAL_CONFIG.attributionRules.requireNssForInfonavit;
+    return config.attributionRules.requireNssForInfonavit;
   }
   return false;
 }

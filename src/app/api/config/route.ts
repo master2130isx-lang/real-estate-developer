@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { getServerCommercialConfig, saveServerCommercialConfig } from '@/lib/commercialConfigStore';
 import { getSessionFromRequest } from '@/lib/auth';
 
@@ -32,6 +33,7 @@ export async function POST(req: NextRequest) {
       delete body.telegramConfig.botToken;
     }
     const updated = await saveServerCommercialConfig(body);
+    revalidatePath('/', 'layout');
     if (updated.telegramConfig) {
       delete (updated.telegramConfig as any).botToken;
     }

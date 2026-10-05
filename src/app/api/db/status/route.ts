@@ -68,10 +68,20 @@ export async function GET() {
       });
     }
 
+    // 3. Verificar migración 2026-10-05 (columna settings y columnas nuevas de leads)
+    const [{ error: settingsError }, { error: leadColumnsError }] = await Promise.all([
+      supabase.from('commercial_config').select('settings', { head: true }),
+      supabase.from('leads').select('curp_value, curp_last_four, lead_source', { head: true }),
+    ]);
+    const pendingMigration = Boolean(settingsError || leadColumnsError);
+
     return NextResponse.json({
       ok: true,
       provider: 'supabase',
       status: 'connected',
+      usesServiceRole: Boolean(process.env.SUPABASE_SERVICE_ROLE_KEY),
+      pendingMigration,
+      pendingMigrationFile: pendingMigration ? 'supabase/migrations/2026-10-05_curp_origen_configuracion.sql' : undefined,
       isConfigured: true,
       latencyMs,
       leadsCount: leadsCount ?? 0,

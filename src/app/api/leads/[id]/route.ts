@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { updateServerLeadAppointment, getServerLeadById } from '@/lib/leadsServerStore';
+import { updateServerLead, getServerLeadById, LeadPersistenceError } from '@/lib/leadsServerStore';
+import { getServerCommercialConfig } from '@/lib/commercialConfigStore';
+import { parseLeadAction } from '@/lib/leadActions';
 import { requireAuth } from '@/lib/auth';
 
 export async function GET(
@@ -21,6 +23,10 @@ export async function GET(
   }
 }
 
+/**
+ * Aplica una acción del panel sobre el prospecto.
+ * Cuerpo: { action: { type: 'note' | 'status' | 'appointment' | 'archive' | 'attribution_confirm' | ... } }
+ */
 export async function PATCH(
   req: NextRequest,
   context: { params: Promise<{ id: string }> }
@@ -30,19 +36,18 @@ export async function PATCH(
     if (authError) return authError;
 
     const { id } = await context.params;
-    const body = await req.json();
-    const { appointmentStatus, confirmedDate, confirmedTime } = body;
-
-    if (!appointmentStatus) {
-      return NextResponse.json({ ok: false, error: 'Se requiere appointmentStatus' }, { status: 400 });
+    const body = await req.json().catch(() => null);
+    const action = parseLeadAction(body?.action);
+    if (!action) {
+      return NextResponse.json({ ok: false, error: 'Acción inválida' }, { status: 400 });
     }
 
-    const updatedLead = await updateServerLeadAppointment(
-      id,
-      appointmentStatus,
-      confirmedDate,
-      confirmedTime
-    );
+    const config = await getServerCommercialConfig();
+    const updatedLead = await updateServerLead(id, action, {
+      actor: config.advisorName,
+      durationDays: config.attributionRules.durationDays,
+      timezone: config.schedule?.timezone,
+    });
 
     if (!updatedLead) {
       return NextResponse.json({ ok: false, error: 'Prospecto no encontrado' }, { status: 404 });
@@ -50,6 +55,7 @@ export async function PATCH(
 
     return NextResponse.json({ ok: true, lead: updatedLead });
   } catch (error: any) {
-    return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
+    const status = error instanceof LeadPersistenceError ? 503 : 500;
+    return NextResponse.json({ ok: false, error: error.message }, { status });
   }
 }

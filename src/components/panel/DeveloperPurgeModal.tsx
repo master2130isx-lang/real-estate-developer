@@ -189,7 +189,7 @@ export function DeveloperPurgeModal({
                   <ul className="list-disc list-inside space-y-1 text-slate-300 text-[11px] leading-relaxed">
                     <li>Se eliminarán <strong>todas las citas y prospectos de prueba</strong> de la base de datos de Supabase.</li>
                     <li>Se vaciará la memoria y el almacenamiento local de citas.</li>
-                    <li><strong>Tus modelos de casas (Águila Premier, Milán, etc.) NO se tocarán</strong> y quedarán 100% a salvo.</li>
+                    <li><strong>Tus modelos de casas NO se tocarán</strong> y quedarán 100% a salvo.</li>
                   </ul>
                 </div>
               </div>

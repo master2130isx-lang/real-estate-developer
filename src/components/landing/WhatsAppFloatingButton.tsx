@@ -2,18 +2,14 @@
 
 import React, { useState } from 'react';
 import { useApp } from '@/context/AppContext';
+import { buildWhatsAppLink } from '@/lib/phone';
 import { WhatsAppIcon } from '@/components/common/WhatsAppIcon';
 import { X } from 'lucide-react';
 
 export function WhatsAppFloatingButton() {
   const [isOpen, setIsOpen] = useState(false);
   const { commercialConfig } = useApp();
-  const cleanWa = commercialConfig.contactChannels.whatsapp.replace(/\D/g, '');
-
-  const defaultMessage = encodeURIComponent(
-    '¡Hola! Me interesa conocer más sobre las viviendas en la Zona Norte de Nuevo León, Por favor Me podrían brindar información.'
-  );
-  const waUrl = `https://wa.me/${cleanWa}?text=${defaultMessage}`;
+  const waUrl = buildWhatsAppLink(commercialConfig.contactChannels.whatsapp, commercialConfig.landing.whatsappDefaultMessage);
 
   return (
     <div className="fixed bottom-[calc(5.25rem+env(safe-area-inset-bottom,0px))] md:bottom-6 right-4 md:right-6 z-50 flex flex-col items-end gap-2 pointer-events-auto">

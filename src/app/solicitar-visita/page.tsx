@@ -35,6 +35,7 @@ export default function SolicitarVisitaPage() {
       {/* Formulario embebido */}
       <main className="max-w-2xl mx-auto w-full p-4 flex-1 flex items-center justify-center">
         <PrequalificationForm
+          sourceChannel="solicitar_visita"
           isOpen={true}
           onClose={() => {
             if (typeof window !== 'undefined') window.location.href = '/';

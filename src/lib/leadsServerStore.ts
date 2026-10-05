@@ -3,6 +3,7 @@ import path from 'path';
 import { Lead } from '@/types';
 import { INITIAL_LEADS } from '@/data/mockData';
 import { getSupabase } from './supabaseClient';
+import { applyLeadAction, type LeadAction, type LeadActionContext } from './leadActions';
 
 // Ruta del archivo local para persistencia de respaldo (fallback) en servidor
 const DATA_FILE_PATH = path.join(process.cwd(), 'src', 'data', 'leadsStore.json');
@@ -25,7 +26,7 @@ function leadToDbRow(lead: Lead): Record<string, any> {
     email: lead.email || null,
     preferred_channel: lead.preferredChannel || 'whatsapp',
     preferred_contact_time: lead.preferredContactTime || 'tarde',
-    interested_zone: lead.interestedZone || 'Salinas Victoria, N.L. (Valle de los Encinos)',
+    interested_zone: lead.interestedZone || '',
     selected_property_id: lead.selectedPropertyId || null,
     selected_property_title: lead.selectedPropertyTitle || null,
     budget_range: lead.budgetRange || 'aun_no_lo_se',
@@ -38,6 +39,9 @@ function leadToDbRow(lead: Lead): Record<string, any> {
     nss_status: lead.nssStatus || 'no_aplica',
     nss_value_encrypted_mock: lead.nssValueEncryptedMock || null,
     nss_last_four: lead.nssLastFour || null,
+    curp_value: lead.curpValue || null,
+    curp_last_four: lead.curpLastFour || null,
+    lead_source: lead.leadSource || null,
     attribution_status: lead.attributionStatus || 'no_aplica',
     attribution_advisor: lead.attributionAdvisor || null,
     attribution_confirmed_at: lead.attributionConfirmedAt || null,
@@ -67,7 +71,7 @@ function dbRowToLead(row: any): Lead {
     email: row.email || undefined,
     preferredChannel: row.preferred_channel || 'whatsapp',
     preferredContactTime: row.preferred_contact_time || 'tarde',
-    interestedZone: row.interested_zone || 'Salinas Victoria, N.L. (Valle de los Encinos)',
+    interestedZone: row.interested_zone || '',
     selectedPropertyId: row.selected_property_id || undefined,
     selectedPropertyTitle: row.selected_property_title || undefined,
     budgetRange: row.budget_range || 'aun_no_lo_se',
@@ -80,6 +84,9 @@ function dbRowToLead(row: any): Lead {
     nssStatus: row.nss_status || 'no_aplica',
     nssValueEncryptedMock: row.nss_value_encrypted_mock || undefined,
     nssLastFour: row.nss_last_four || undefined,
+    curpValue: row.curp_value || undefined,
+    curpLastFour: row.curp_last_four || undefined,
+    leadSource: row.lead_source || undefined,
     attributionStatus: row.attribution_status || 'no_aplica',
     attributionAdvisor: row.attribution_advisor || undefined,
     attributionConfirmedAt: row.attribution_confirmed_at || undefined,
@@ -215,8 +222,9 @@ export async function resetServerLeadsToDemo(): Promise<Lead[]> {
   if (supabase) {
     try {
       await supabase.from('leads').delete().neq('id', '00000000-0000-0000-0000-000000000000');
-      const rows = INITIAL_LEADS.map(leadToDbRow);
-      await supabase.from('leads').insert(rows);
+      for (const demoLead of INITIAL_LEADS) {
+        await upsertLeadRow(leadToDbRow(demoLead));
+      }
     } catch (err) {
       console.error('Error al resetear leads a demo en Supabase:', err);
     }
@@ -248,93 +256,90 @@ export async function getServerLeadById(id: string): Promise<Lead | null> {
   return localLeads.find((l) => l.id === id) || null;
 }
 
-export async function saveServerLead(lead: Lead): Promise<Lead> {
-  // 1. Guardar siempre en local/tmp como respaldo inmediato
-  const localLeads = readFromLocalStorage();
-  const existingIdx = localLeads.findIndex((l) => l.id === lead.id);
-  if (existingIdx >= 0) {
-    localLeads[existingIdx] = lead;
-  } else {
-    localLeads.unshift(lead);
-  }
-  writeToLocalStorage(localLeads);
+// Columnas agregadas en la migración 2026-10-05. Si aún no se ejecuta en Supabase,
+// se reintenta el guardado sin ellas para no perder el prospecto.
+const OPTIONAL_LEAD_COLUMNS = ['curp_value', 'curp_last_four', 'lead_source'];
 
-  // 2. Persistir en Supabase PostgreSQL si está configurado
+let warnedMissingColumns = false;
+
+function isMissingColumnError(error: { code?: string; message?: string } | null): boolean {
+  if (!error) return false;
+  return error.code === 'PGRST204' || error.code === '42703' || /column/i.test(error.message || '');
+}
+
+function isUniqueFolioError(error: { code?: string; message?: string } | null): boolean {
+  return !!error && error.code === '23505' && /folio/i.test(error.message || '');
+}
+
+async function upsertLeadRow(row: Record<string, unknown>): Promise<{ code?: string; message?: string } | null> {
   const supabase = getSupabase();
+  if (!supabase) return null;
+
+  let { error } = await supabase.from('leads').upsert(row, { onConflict: 'id' });
+  if (isMissingColumnError(error)) {
+    if (!warnedMissingColumns) {
+      console.warn(
+        'Supabase: faltan columnas nuevas en "leads" (curp_value, curp_last_four, lead_source). ' +
+          'Ejecuta supabase/migrations/2026-10-05_curp_origen_configuracion.sql. Guardando sin ellas.'
+      );
+      warnedMissingColumns = true;
+    }
+    const legacyRow = { ...row };
+    for (const col of OPTIONAL_LEAD_COLUMNS) delete legacyRow[col];
+    ({ error } = await supabase.from('leads').upsert(legacyRow, { onConflict: 'id' }));
+  }
+  return error;
+}
+
+export class LeadPersistenceError extends Error {}
+
+/**
+ * Guarda (inserta o actualiza) un prospecto en Supabase y en el respaldo local.
+ * Si Supabase está configurado y el guardado falla, lanza LeadPersistenceError para que
+ * la API pueda avisar en lugar de perder el registro en silencio.
+ *
+ * `regenerateFolio` se usa al crear: si el folio choca con uno existente se genera otro.
+ */
+export async function saveServerLead(lead: Lead, regenerateFolio?: () => string): Promise<Lead> {
+  let current = lead;
+  const supabase = getSupabase();
+
   if (supabase) {
-    try {
-      const row = leadToDbRow(lead);
-      const { error } = await supabase.from('leads').upsert(row, { onConflict: 'id' });
-      if (error) {
-        console.error('Error al hacer upsert en Supabase leads:', error.message);
-      }
-    } catch (err) {
-      console.error('Error al persistir lead en Supabase:', err);
+    let error = await upsertLeadRow(leadToDbRow(current));
+    for (let attempt = 0; attempt < 3 && regenerateFolio && isUniqueFolioError(error); attempt++) {
+      current = { ...current, folio: regenerateFolio() };
+      error = await upsertLeadRow(leadToDbRow(current));
+    }
+    if (error) {
+      console.error('Error al guardar prospecto en Supabase:', error.message);
+      throw new LeadPersistenceError(error.message || 'No se pudo guardar el prospecto');
     }
   }
 
-  return lead;
+  // Respaldo local / tmp (fuente principal cuando no hay Supabase)
+  const localLeads = readFromLocalStorage();
+  const existingIdx = localLeads.findIndex((l) => l.id === current.id);
+  if (existingIdx >= 0) {
+    localLeads[existingIdx] = current;
+  } else {
+    localLeads.unshift(current);
+  }
+  writeToLocalStorage(localLeads);
+
+  return current;
 }
 
-export async function updateServerLeadAppointment(
+/**
+ * Aplica una acción del panel (o de Telegram) sobre un prospecto y la persiste.
+ * Devuelve el prospecto actualizado o null si no existe.
+ */
+export async function updateServerLead(
   leadId: string,
-  appointmentStatus: 'confirmada' | 'cancelada' | 'reprogramada' | 'archivada',
-  confirmedDate?: string,
-  confirmedTime?: string
+  action: LeadAction,
+  ctx: LeadActionContext
 ): Promise<Lead | null> {
   const lead = await getServerLeadById(leadId);
   if (!lead) return null;
-
-  const existingReq = lead.appointmentRequest;
-  const newDate =
-    confirmedDate || existingReq?.confirmedDate || existingReq?.preferredDate || new Date().toISOString().split('T')[0];
-  const newTime =
-    confirmedTime || existingReq?.confirmedTime || existingReq?.timeSlot || '11:00 AM';
-
-  lead.appointmentRequest = {
-    modality: existingReq?.modality || 'presencial',
-    preferredDate: newDate,
-    timeSlot: newTime,
-    status: appointmentStatus,
-    confirmedDate: newDate,
-    confirmedTime: newTime,
-    cancelledAt: appointmentStatus === 'cancelada' ? new Date().toISOString() : existingReq?.cancelledAt,
-    archivedAt: appointmentStatus === 'archivada' ? new Date().toISOString() : existingReq?.archivedAt,
-    notes: existingReq?.notes || 'Actualizado vía Bot de Telegram o Panel Web',
-  };
-
-  if (appointmentStatus === 'confirmada') {
-    lead.commercialStatus = 'cita_confirmada';
-  } else if (appointmentStatus === 'cancelada' || appointmentStatus === 'archivada') {
-    lead.commercialStatus = 'en_seguimiento';
-  } else if (appointmentStatus === 'reprogramada') {
-    lead.commercialStatus = 'cita_solicitada';
-  }
-
-  if (appointmentStatus === 'archivada') {
-    lead.isArchived = true;
-  }
-
-  lead.internalNotes = [
-    {
-      id: `note-${Date.now()}`,
-      author: 'Bot de Telegram / Sistema',
-      createdAt: new Date().toISOString().replace('T', ' ').substring(0, 16),
-      content: `Visita ${appointmentStatus.toUpperCase()} para el ${newDate} (${newTime}) desde interacción del asesor.`,
-    },
-    ...lead.internalNotes,
-  ];
-
-  lead.auditHistory = [
-    {
-      id: `aud-${Date.now()}`,
-      timestamp: new Date().toISOString(),
-      actor: 'Bot de Telegram / Sistema',
-      action: `Visita marcada como ${appointmentStatus.toUpperCase()}`,
-    },
-    ...lead.auditHistory,
-  ];
-
-  await saveServerLead(lead);
-  return lead;
+  const updated = applyLeadAction(lead, action, ctx);
+  return saveServerLead(updated);
 }

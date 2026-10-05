@@ -23,6 +23,8 @@ import {
 import { Property, FinancingType } from '@/types';
 import { compressImageInBrowser } from '@/lib/imageCompressor';
 import { useApp } from '@/context/AppContext';
+import { resolveHeroProperty } from '@/lib/heroProperty';
+import { DEFAULT_CLOSING_COSTS } from '@/lib/propertyDefaults';
 
 interface PropertyEditorModalProps {
   property: Property | null; // null si es creación nueva
@@ -58,7 +60,10 @@ export function PropertyEditorModal({
   onSave,
 }: PropertyEditorModalProps) {
   const isEditing = !!property;
-  const { commercialConfig, setHeroProperty } = useApp();
+  const { commercialConfig, setHeroProperty, properties } = useApp();
+  // Al crear un modelo nuevo se reutilizan los datos del fraccionamiento del modelo de portada
+  // (desarrollo, dirección, amenidades); medidas, precio y descripción se capturan desde cero.
+  const template = property ? undefined : resolveHeroProperty(properties, commercialConfig);
 
   // Estados del Formulario
   const [activeTab, setActiveTab] = useState<'general' | 'medidas' | 'fotos' | 'amenidades'>('general');
@@ -72,31 +77,31 @@ export function PropertyEditorModal({
 
   // Campos
   const [model, setModel] = useState(property?.model || '');
-  const [name, setName] = useState(property?.name || 'Valle de los Encinos');
-  const [development, setDevelopment] = useState(property?.development || 'Valle de los Encinos');
+  const [name, setName] = useState(property?.name || template?.name || '');
+  const [development, setDevelopment] = useState(property?.development || template?.development || '');
   const [code, setCode] = useState(property?.code || '');
-  const [address, setAddress] = useState(property?.address || 'Calzada del Sol, Salinas Victoria, N.L.');
-  const [zone, setZone] = useState(property?.zone || 'Salinas Victoria, N.L. (Valle de los Encinos)');
-  const [city, setCity] = useState(property?.city || 'Salinas Victoria, N.L.');
-  const [price, setPrice] = useState<number>(property?.price || 1180000);
+  const [address, setAddress] = useState(property?.address || template?.address || '');
+  const [zone, setZone] = useState(property?.zone || template?.zone || '');
+  const [city, setCity] = useState(property?.city || template?.city || '');
+  const [price, setPrice] = useState<number>(property?.price || 0);
   const [availabilityStatus, setAvailabilityStatus] = useState<Property['availabilityStatus']>(
     property?.availabilityStatus || 'disponible'
   );
   const [estimatedClosingCosts, setEstimatedClosingCosts] = useState(
-    property?.estimatedClosingCosts || 'Aprox. 5% a 7% (Escrituración y aranceles notariales en N.L.)'
+    property?.estimatedClosingCosts || template?.estimatedClosingCosts || DEFAULT_CLOSING_COSTS
   );
 
   // Dimensiones
   const [bedrooms, setBedrooms] = useState<number>(property?.bedrooms || 2);
   const [bathrooms, setBathrooms] = useState<number>(property?.bathrooms || 1.5);
-  const [hasStayArea, setHasStayArea] = useState<boolean>(property?.hasStayArea ?? true);
-  const [constructionM2, setConstructionM2] = useState<number>(property?.constructionM2 || 74.39);
-  const [landM2, setLandM2] = useState<number>(property?.landM2 || 98);
-  const [parkingSpots, setParkingSpots] = useState<number>(property?.parkingSpots || 2);
+  const [hasStayArea, setHasStayArea] = useState<boolean>(property?.hasStayArea ?? false);
+  const [constructionM2, setConstructionM2] = useState<number>(property?.constructionM2 || 0);
+  const [landM2, setLandM2] = useState<number>(property?.landM2 || 0);
+  const [parkingSpots, setParkingSpots] = useState<number>(property?.parkingSpots || 1);
 
   // Financiamiento
   const [admittedFinancing, setAdmittedFinancing] = useState<FinancingType[]>(
-    property?.admittedFinancing || ['infonavit', 'bancario', 'contado']
+    property?.admittedFinancing || template?.admittedFinancing || ['infonavit', 'fovissste', 'bancario', 'contado']
   );
 
   // Fotos
@@ -111,28 +116,11 @@ export function PropertyEditorModal({
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Textos y Amenidades
-  const [description, setDescription] = useState(
-    property?.description ||
-      'Vivienda de dos plantas en fraccionamiento privado con caseta de vigilancia, parque infantil y áreas verdes.'
-  );
-  const [amenities, setAmenities] = useState<string[]>(
-    property?.amenities || [
-      'Pet Park para mascotas',
-      'Canchas deportivas con pasto sintético',
-      'Palapa familiar para eventos',
-      'Acceso controlado con caseta 24/7',
-    ]
-  );
+  const [description, setDescription] = useState(property?.description || '');
+  const [amenities, setAmenities] = useState<string[]>(property?.amenities || template?.amenities || []);
   const [newAmenityInput, setNewAmenityInput] = useState('');
 
-  const [keyFeatures, setKeyFeatures] = useState<string[]>(
-    property?.keyFeatures || [
-      '2 recámaras con espacio para clóset',
-      'Estancia familiar en planta alta',
-      'Vitropiso de alta resistencia instalado',
-      'Patio posterior y pasillo lateral independiente',
-    ]
-  );
+  const [keyFeatures, setKeyFeatures] = useState<string[]>(property?.keyFeatures || []);
   const [newFeatureInput, setNewFeatureInput] = useState('');
 
   if (!isOpen) return null;
@@ -248,7 +236,7 @@ export function PropertyEditorModal({
       return true;
     }
     if (step === 'medidas') {
-      if (constructionM2 <= 0 || landM2 <= 0) {
+      if (!constructionM2 || constructionM2 <= 0 || !landM2 || landM2 <= 0) {
         setErrorMessage('Los metros de construcción y terreno deben ser mayores a 0.');
         return false;
       }
@@ -316,9 +304,14 @@ export function PropertyEditorModal({
     try {
       const payload: Partial<Property> = {
         model: model.trim(),
-        name: name.trim() || 'Valle de los Encinos',
-        development: development.trim() || 'Valle de los Encinos',
-        code: code.trim() || `VDE-${model.substring(0, 3).toUpperCase()}-01`,
+        name: name.trim() || development.trim(),
+        development: development.trim(),
+        code:
+          code.trim() ||
+          `${(development.trim().match(/\b\p{L}/gu) || ['M']).join('').slice(0, 3).toUpperCase()}-${model
+            .trim()
+            .substring(0, 3)
+            .toUpperCase()}-${Date.now().toString().slice(-4)}`,
         address: address.trim(),
         zone: zone.trim(),
         city: city.trim(),
@@ -339,7 +332,7 @@ export function PropertyEditorModal({
         description: description.trim(),
         amenities,
         keyFeatures,
-        tags: [development.trim(), 'Casas en Venta', 'Nuevo León'],
+        tags: [development.trim(), 'Casas en Venta', city.trim()].filter(Boolean),
       };
 
       const endpoint = isEditing ? `/api/properties/${property.id}` : '/api/properties';
@@ -507,7 +500,7 @@ export function PropertyEditorModal({
                     required
                     value={development}
                     onChange={(e) => setDevelopment(e.target.value)}
-                    placeholder="Ej. Valle de los Encinos"
+                    placeholder="Ej. Residencial Los Robles"
                     className="w-full px-3.5 py-2.5 rounded-xl bg-[#102033] border border-[#1E354D] text-white text-xs focus:ring-2 focus:ring-[#C09B53] focus:outline-none"
                   />
                 </div>
@@ -525,7 +518,7 @@ export function PropertyEditorModal({
                       required
                       min={100000}
                       step="any"
-                      value={price}
+                      value={price || ''}
                       onChange={(e) => setPrice(Number(e.target.value))}
                       className="w-full pl-7 pr-3.5 py-2.5 rounded-xl bg-[#102033] border border-[#1E354D] text-white font-bold text-xs focus:ring-2 focus:ring-[#C09B53] focus:outline-none"
                     />
@@ -575,7 +568,7 @@ export function PropertyEditorModal({
                     type="text"
                     value={address}
                     onChange={(e) => setAddress(e.target.value)}
-                    placeholder="Ej. Calzada del Sol, Valle de los Encinos, Salinas Victoria, N.L."
+                    placeholder="Ej. Av. Principal 123, Col. Centro, Municipio, Estado"
                     className="w-full pl-9 pr-3.5 py-2.5 rounded-xl bg-[#102033] border border-[#1E354D] text-white text-xs focus:ring-2 focus:ring-[#C09B53] focus:outline-none"
                   />
                 </div>
@@ -590,7 +583,7 @@ export function PropertyEditorModal({
                     type="text"
                     value={zone}
                     onChange={(e) => setZone(e.target.value)}
-                    placeholder="Ej. Salinas Victoria, N.L."
+                    placeholder="Ej. Municipio, Estado"
                     className="w-full px-3.5 py-2.5 rounded-xl bg-[#102033] border border-[#1E354D] text-white text-xs focus:ring-2 focus:ring-[#C09B53] focus:outline-none"
                   />
                 </div>
@@ -603,7 +596,7 @@ export function PropertyEditorModal({
                     type="text"
                     value={estimatedClosingCosts}
                     onChange={(e) => setEstimatedClosingCosts(e.target.value)}
-                    placeholder="Ej. Aprox. 5% a 7% en N.L."
+                    placeholder="Ej. Aprox. 5% a 7% del valor"
                     className="w-full px-3.5 py-2.5 rounded-xl bg-[#102033] border border-[#1E354D] text-white text-xs focus:ring-2 focus:ring-[#C09B53] focus:outline-none"
                   />
                 </div>
@@ -718,7 +711,7 @@ export function PropertyEditorModal({
                     type="number"
                     step={0.01}
                     min={20}
-                    value={constructionM2}
+                    value={constructionM2 || ''}
                     onChange={(e) => setConstructionM2(Number(e.target.value))}
                     className="w-full px-3.5 py-2.5 rounded-xl bg-[#102033] border border-[#1E354D] text-white text-xs focus:ring-2 focus:ring-[#C09B53] focus:outline-none font-bold"
                   />
@@ -732,7 +725,7 @@ export function PropertyEditorModal({
                     type="number"
                     step={0.01}
                     min={20}
-                    value={landM2}
+                    value={landM2 || ''}
                     onChange={(e) => setLandM2(Number(e.target.value))}
                     className="w-full px-3.5 py-2.5 rounded-xl bg-[#102033] border border-[#1E354D] text-white text-xs focus:ring-2 focus:ring-[#C09B53] focus:outline-none font-bold"
                   />

@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import { Lead } from '@/types';
 import { useApp } from '@/context/AppContext';
+import { todayLocalISO } from '@/lib/dateUtils';
 import { WhatsAppIcon } from '@/components/common/WhatsAppIcon';
 
 interface AppointmentAgendaViewProps {
@@ -37,7 +38,7 @@ export function AppointmentAgendaView({
   onOpenWhatsApp,
   onOpenLeadDetail,
 }: AppointmentAgendaViewProps) {
-  const { updateAppointmentStatus, archiveLead } = useApp();
+  const { updateAppointmentStatus, archiveLead, commercialConfig, properties } = useApp();
 
   const [filterType, setFilterType] = useState<
     'todas' | 'hoy' | 'pendientes' | 'confirmadas' | 'canceladas' | 'archivadas'
@@ -48,7 +49,7 @@ export function AppointmentAgendaView({
   const [newTime, setNewTime] = useState('11:00 AM');
 
   // Fecha de hoy para comparar (YYYY-MM-DD)
-  const todayStr = new Date().toISOString().split('T')[0];
+  const todayStr = todayLocalISO(commercialConfig.schedule.timezone);
 
   // Helper para verificar auto-archivado (canceladas con más de 14 días o archivadas explícitamente)
   const isLeadArchived = (lead: Lead) => {
@@ -341,7 +342,9 @@ export function AppointmentAgendaView({
 
                   {/* Fila 2: Inmueble y Esquema de Compra */}
                   <div className="bg-slate-50 dark:bg-[#0B1522] border border-slate-100 dark:border-[#1A2E44] rounded-xl px-2.5 py-1.5 flex flex-wrap items-center justify-between gap-1.5 text-[11px] text-slate-600 dark:text-slate-300">
-                    <span className="font-medium text-slate-800 dark:text-slate-200">Modelo Águila Premier</span>
+                    <span className="font-medium text-slate-800 dark:text-slate-200">
+                      {properties.find((p) => p.id === lead.selectedPropertyId)?.model || lead.selectedPropertyTitle || 'Sin modelo'}
+                    </span>
                     <span className="text-slate-300 dark:text-slate-700">•</span>
                     <span className="capitalize font-medium text-slate-700 dark:text-slate-300 flex items-center gap-1">
                       <CreditCard className="w-3 h-3 text-slate-400" aria-hidden="true" />
@@ -361,7 +364,7 @@ export function AppointmentAgendaView({
                     </div>
                   )}
 
-                  {/* Protección 15 Días */}
+                  {/* Protección de atribución */}
                   {lead.attributionStatus === 'confirmado' && lead.attributionExpiresAt && (
                     <div className="flex items-center gap-1.5 text-[11px] text-emerald-800 dark:text-emerald-300 bg-emerald-50/60 dark:bg-emerald-950/30 px-2 py-0.5 rounded-lg font-medium border border-emerald-100 dark:border-emerald-900/40">
                       <ShieldCheck className="w-3 h-3 text-emerald-600 dark:text-emerald-400" aria-hidden="true" />
