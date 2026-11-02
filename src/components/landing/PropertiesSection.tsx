@@ -218,7 +218,7 @@ export function PropertiesSection({ onSelectPropertyForPrequalification }: Prope
                     Recámaras
                   </span>
                   <span className="font-semibold text-xs sm:text-sm text-[var(--color-navy)] block">
-                    2 + Estancia
+                    {property.bedrooms}{property.hasStayArea ? ' + Estancia' : ''}
                   </span>
                 </div>
                 <div className="space-y-1">
@@ -227,7 +227,7 @@ export function PropertiesSection({ onSelectPropertyForPrequalification }: Prope
                     Baños
                   </span>
                   <span className="font-semibold text-xs sm:text-sm text-[var(--color-navy)] block">
-                    1.5
+                    {property.bathrooms}
                   </span>
                 </div>
                 <div className="space-y-1">
@@ -256,46 +256,33 @@ export function PropertiesSection({ onSelectPropertyForPrequalification }: Prope
                   Distribución y Acabados
                 </span>
                 <ul className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 text-xs text-[var(--color-text-secondary)]">
-                  <li className="flex items-center gap-1.5">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-[var(--color-success)] flex-shrink-0" />
-                    <span>Vitropiso instalado</span>
-                  </li>
-                  <li className="flex items-center gap-1.5">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-[var(--color-success)] flex-shrink-0" />
-                    <span>Estancia en planta alta</span>
-                  </li>
-                  <li className="flex items-center gap-1.5">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-[var(--color-success)] flex-shrink-0" />
-                    <span>Patio y pasillo lateral</span>
-                  </li>
-                  <li className="flex items-center gap-1.5">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-[var(--color-success)] flex-shrink-0" />
-                    <span>Preparación minisplit</span>
-                  </li>
-                  <li className="flex items-center gap-1.5">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-[var(--color-success)] flex-shrink-0" />
-                    <span>Terreno: 98 m²</span>
-                  </li>
-                  <li className="flex items-center gap-1.5">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-[var(--color-success)] flex-shrink-0" />
-                    <span>Estacionamiento 2 autos</span>
-                  </li>
+                  {[...(property.keyFeatures || []), ...(property.landM2 ? [`Terreno: ${property.landM2} m²`] : [])].map(
+                    (feature, i) => (
+                      <li key={i} className="flex items-center gap-1.5">
+                        <CheckCircle2 className="w-3.5 h-3.5 text-[var(--color-success)] flex-shrink-0" />
+                        <span>{feature}</span>
+                      </li>
+                    )
+                  )}
                 </ul>
               </div>
 
               {/* Amenidades */}
-              <div className="bg-[var(--color-success-bg)] border border-[var(--color-border)] rounded-lg p-4 space-y-2">
-                <div className="flex items-center gap-1.5 text-xs font-semibold text-[var(--color-success)]">
-                  <Trees className="w-4 h-4" />
-                  <span>Amenidades del Fraccionamiento Privado</span>
+              {property.amenities && property.amenities.length > 0 && (
+                <div className="bg-[var(--color-success-bg)] border border-[var(--color-border)] rounded-lg p-4 space-y-2">
+                  <div className="flex items-center gap-1.5 text-xs font-semibold text-[var(--color-success)]">
+                    <Trees className="w-4 h-4" />
+                    <span>Amenidades del Fraccionamiento Privado</span>
+                  </div>
+                  <div className="flex flex-wrap gap-1.5 text-[11px] text-[var(--color-text-secondary)] font-medium">
+                    {property.amenities.map((amenity, i) => (
+                      <span key={i} className="bg-[var(--color-surface)] px-2.5 py-1 rounded border border-[var(--color-border)]">
+                        {amenity}
+                      </span>
+                    ))}
+                  </div>
                 </div>
-                <div className="flex flex-wrap gap-1.5 text-[11px] text-[var(--color-text-secondary)] font-medium">
-                  <span className="bg-[var(--color-surface)] px-2.5 py-1 rounded border border-[var(--color-border)]">🐾 Pet Park</span>
-                  <span className="bg-[var(--color-surface)] px-2.5 py-1 rounded border border-[var(--color-border)]">⚽ Canchas sintéticas</span>
-                  <span className="bg-[var(--color-surface)] px-2.5 py-1 rounded border border-[var(--color-border)]">🏡 Palapa familiar</span>
-                  <span className="bg-[var(--color-surface)] px-2.5 py-1 rounded border border-[var(--color-border)]">🔐 Acceso controlado 24/7</span>
-                </div>
-              </div>
+              )}
 
               {/* Esquemas de financiamiento */}
               <div className="space-y-1.5">
